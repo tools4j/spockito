@@ -1,14 +1,14 @@
 apply plugin: 'java'
 apply plugin: 'license'
 
-sourceCompatibility = 1.7
+sourceCompatibility = 1.8
 group = "org.tools4j"
 version = '1.0.0'
-archivesBaseName = "tools4j-meanvar"
+archivesBaseName = "tools4j-spockito"
 
 jar {
     manifest {
-        attributes 'Implementation-Title': 'tools4j-meanvar', 'Implementation-Version': version
+        attributes 'Implementation-Title': 'tools4j-spockito', 'Implementation-Version': version
     }
 }
 
@@ -28,7 +28,7 @@ buildscript {
 }
 
 dependencies {
-    testCompile 'junit:junit:4+'
+    compile 'junit:junit:4+'
 }
 
 uploadArchives {
@@ -52,8 +52,8 @@ javadoc {
 	options.showFromPackage()
 	options.linkSource()
 	options.links("http://docs.oracle.com/javase/8/docs/api/");
-	options.docTitle = "tools4j-meanvar API ${version}"
-	options.windowTitle = "tools4j-meanvar API ${version}"
+	options.docTitle = "tools4j-spockito API ${version}"
+	options.windowTitle = "tools4j-spockito API ${version}"
 	options.overview = "src/main/java/overview.html";
 }
 
