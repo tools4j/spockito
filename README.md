@@ -8,6 +8,7 @@ manner. The @Unroll annotation has been inspired the groovy framework Spock.
 ```java
 @RunWith(Spockito.class)
 public class SpockitoTest {
+
     @Test
     @Spockito.Unroll({
             "| TestName |",
@@ -15,8 +16,8 @@ public class SpockitoTest {
             "| Test 2   |"
     })
     public void testUnrollWithString(final String name) {
-        Assert.assertNotNull("should be the colum 1 value", name);
-        Assert.assertTrue("should start with Test", name.startsWith("Test "));
+        Assert.assertNotNull("name should be TestName", name);
+        Assert.assertTrue("name should start with Test", name.startsWith("Test "));
     }
 
     @Test
@@ -25,11 +26,29 @@ public class SpockitoTest {
             "| 1     | Test 1   |",
             "| 2     | Test 2   |"
     })
-    @Spockito.Name("[row]: index={0}, name={1}")
+    @Spockito.Name("[{row}]: index={0}, name={1}")
     public void testUnrollWithIndex(int index, String name) {
-        Assert.assertTrue("should be greated than 0", index > 0);
-        Assert.assertNotNull("should be the column 1 value", value);
-        Assert.assertTrue("should start with Test", name.startsWith("Test "));
+        Assert.assertTrue("index should be greater than 0", index > 0);
+        Assert.assertNotNull("name should be TestName", name);
+        Assert.assertTrue("name should start with Test", name.startsWith("Test "));
+    }
+
+    @Test
+    @Spockito.Unroll({
+            "| Index | TestName |",
+            "|-------|----------|",
+            "| 1     | Test 1   |",
+            "| 2     | Test 2   |",
+            "| 3     | Test 3   |",
+            "| 4     | Test 4   |",
+    })
+    @Spockito.Name("[{row}]: index={Index}, name={TestName}")
+    public void testUnrollWithSeparatorRowAndColumnRef(@Spockito.Ref("TestName") String name, @Spockito.Ref("Index") int index, @Spockito.Ref("row") int row) {
+        Assert.assertTrue("index should be greater than 0", index > 0);
+        Assert.assertTrue("row should be greated or equal to 0", row >= 0);
+        Assert.assertTrue("index should be row + 1", index == row + 1);
+        Assert.assertNotNull("name should be TestName", name);
+        Assert.assertTrue("name should start with Test", name.startsWith("Test "));
     }
 }
 ```

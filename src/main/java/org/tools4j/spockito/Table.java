@@ -73,6 +73,10 @@ public class Table {
         return data.get(rowIndex);
     }
 
+    public int getRowIndex(final TableRow row) {
+        return data.indexOf(row);
+    }
+
     public String getValue(final int rowIndex, final int columnIndex) {
         return data.get(rowIndex).get(columnIndex);
     }
@@ -86,9 +90,10 @@ public class Table {
         if (headerAndRows.length > 0) {
             final Table table = new Table(headerAndRows[0]);
             for (int i = 1; i < headerAndRows.length; i++) {
-                final List<String> row = new ArrayList<>();
                 final TableRow tableRow = parseRow(table, i, headerAndRows[i]);
-                table.data.add(tableRow);
+                if (!tableRow.isSeparatorRow()) {
+                    table.data.add(tableRow);
+                }
             }
             return table;
         }

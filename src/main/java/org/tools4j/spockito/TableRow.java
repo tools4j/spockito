@@ -33,6 +33,8 @@ import java.util.Objects;
 
 public class TableRow {
 
+    public static final String REF_ROW = "row";
+
     private final Table table;
     private final List<String> values = new ArrayList<>();
 
@@ -62,15 +64,16 @@ public class TableRow {
         return tableRow;
     }
 
+    public boolean isSeparatorRow() {
+        return values.stream().allMatch(s -> trim(s, '-').isEmpty() || trim(s, '=').isEmpty());
+    }
+
     public Object[] convertValues(final Executable executable, final ValueConverter valueConverter) {
         final Object[] converted = new Object[executable.getParameterCount()];
         final Parameter[] parameters = executable.getParameters();
         for (int i = 0; i < converted.length; i++) {
             final String refName = Spockito.parameterRefNameOrNull(parameters[i]);
-            final int columnIndex = refName == null ? i : table.getColumnIndexByName(refName);
-            final Class<?> type = parameters[i].getType();
-            final String value = get(columnIndex);
-            converted[i] = valueConverter.convert(type, value);
+            converted[i] = convertValue(refName, i, parameters[i].getType(), valueConverter);
         }
         return converted;
     }
@@ -79,12 +82,17 @@ public class TableRow {
         final Object[] converted = new Object[fields.size()];
         for (int i = 0; i < converted.length; i++) {
             final String refName = fields.get(i).getAnnotation(Spockito.Ref.class).value();
-            final int columnIndex = table.getColumnIndexByName(refName);
-            final Class<?> type = fields.get(i).getType();
-            final String value = get(columnIndex);
-            converted[i] = valueConverter.convert(type, value);
+            converted[i] = convertValue(refName, -1, fields.get(i).getType(), valueConverter);
         }
         return converted;
+    }
+
+    private Object convertValue(final String refNameOrNull, final int defaultColumnIndex, final Class<?> type, final ValueConverter valueConverter) {
+        if (REF_ROW.equals(refNameOrNull)) {
+            return valueConverter.convert(type, String.valueOf(getRowIndex()));
+        }
+        final int columnIndex = refNameOrNull == null ? defaultColumnIndex : table.getColumnIndexByName(refNameOrNull);
+        return valueConverter.convert(type, get(columnIndex));
     }
 
     public int size() {
@@ -101,6 +109,10 @@ public class TableRow {
 
     public int indexOf(final String value) {
         return values.indexOf(value);
+    }
+
+    public int getRowIndex() {
+        return table.getRowIndex(this);
     }
 
     @Override

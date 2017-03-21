@@ -156,7 +156,7 @@ public class SpockitoJUnitRunner extends BlockJUnit4ClassRunner {
             final List<FrameworkField> fields = getFieldsAnnotatedByRef();
             for (final FrameworkField field : fields) {
                 final String refName = field.getField().getAnnotation(Spockito.Ref.class).value();
-                if (!tableOrNull.hasColumn(refName)) {
+                if (!TableRow.REF_ROW.equals(refName) && !tableOrNull.hasColumn(refName)) {
                     errors.add(new Exception("Invalid @Ref value: " + refName +
                             " does not reference a column of the table defined by @Unroll"));
                 }
@@ -170,7 +170,7 @@ public class SpockitoJUnitRunner extends BlockJUnit4ClassRunner {
             final java.lang.reflect.Parameter[] parameters = constructor.getParameters();
             for (int i = 0; i < parameters.length; i++) {
                 final String refName = Spockito.parameterRefNameOrNull(parameters[i]);
-                if (refName != null && !tableOrNull.hasColumn(refName)) {
+                if (refName != null && !TableRow.REF_ROW.equals(refName) && !tableOrNull.hasColumn(refName)) {
                     errors.add(new Exception("Invalid @Ref value or parameter name for argument " + i +
                             " of type " + parameters[i].getType() + " in the constructor: " + refName +
                             " does not reference a column of the table defined by @Unroll"));
