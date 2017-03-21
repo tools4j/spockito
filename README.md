@@ -4,29 +4,34 @@ manner. The @Unroll annotation has been inspired the groovy framework Spock.
 
  
 #### Examples
-###### Bla
+###### Unroll at method level
 ```java
-final MeanVarianceSampler sampler = new MeanVarianceSampler();
+@RunWith(Spockito.class)
+public class SpockitoTest {
+    @Test
+    @Spockito.Unroll({
+            "| TestName |",
+            "| Test 1   |",
+            "| Test 2   |"
+    })
+    public void testUnrollWithString(final String name) {
+        Assert.assertNotNull("should be the colum 1 value", name);
+        Assert.assertTrue("should start with Test", name.startsWith("Test "));
+    }
 
-double mean, var, stdDev;
-
-sampler.add(1);
-sampler.add(2.5);
-sampler.add(3.22);
-sampler.add(-6.72);
-mean = sampler.getMean();
-var = sampler.getVariance();
-stdDev = sampler.getStdDev();
-
-sampler.remove(2.5);
-mean = sampler.getMean();
-var = sampler.getVariance();
-stdDev = sampler.getStdDev();
-
-sampler.replace(3.22, 4.22);
-mean = sampler.getMean();
-var = sampler.getVariance();
-stdDev = sampler.getStdDev();
+    @Test
+    @Spockito.Unroll({
+            "| Index | TestName |",
+            "| 1     | Test 1   |",
+            "| 2     | Test 2   |"
+    })
+    @Spockito.Name("[row]: index={0}, name={1}")
+    public void testUnrollWithIndex(int index, String name) {
+        Assert.assertTrue("should be greated than 0", index > 0);
+        Assert.assertNotNull("should be the column 1 value", value);
+        Assert.assertTrue("should start with Test", name.startsWith("Test "));
+    }
+}
 ```
 
 #### More Information

@@ -53,9 +53,9 @@ public class SpockitoTest {
             "| Test 1   |",
             "| Test 2   |"
     })
-    public void testUnrollWithString(final String value) {
-        Assert.assertNotNull("should be the row1 value", value);
-        Assert.assertTrue("should start with Test", value.startsWith("Test "));
+    public void testUnrollWithString(final String name) {
+        Assert.assertNotNull("should be the colum 1 value", name);
+        Assert.assertTrue("should start with Test", name.startsWith("Test "));
     }
 
     @Test
@@ -65,7 +65,9 @@ public class SpockitoTest {
             "| 2     | Test 2   |"
     })
     @Spockito.Name("[row]: index={0}, name={1}")
-    public void testUnrollWithIndex(final int index) {
+    public void testUnrollWithIndex(int index, String name) {
         Assert.assertTrue("should be greated than 0", index > 0);
+        Assert.assertNotNull("should be the column 1 value", name);
+        Assert.assertTrue("should start with Test", name.startsWith("Test "));
     }
 }
