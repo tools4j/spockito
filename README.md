@@ -3,7 +3,6 @@
 # tools4j-spockito
 Java JUnit runner for parameterized tests where the test cases are defined in a table-like
 manner. The @Unroll annotation has been inspired the groovy framework Spock.
-
  
 #### Examples
 ###### Unroll at method level
@@ -54,6 +53,9 @@ public class SpockitoTest {
     }
 }
 ```
+
+#### Run test in IDE (here: IntelliJ)
+![spockito-ide-test-run](https://github.com/tools4j/spockito/blob/master/ide-run-SpockitoTest.png)
 
 #### More Information
 * [MIT License](https://github.com/tools4j/spockito/blob/master/LICENSE)
