@@ -24,9 +24,11 @@
 package org.tools4j.spockito;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
-public class Table {
+public class Table implements Iterable<TableRow> {
 
     private static final Table EMPTY = new Table();
 
@@ -84,6 +86,11 @@ public class Table {
     public String getValue(final int rowIndex, final String columnName) {
         final int columnIndex = getColumnIndexByName(columnName);
         return data.get(rowIndex).get(columnIndex);
+    }
+
+    @Override
+    public Iterator<TableRow> iterator() {
+        return Collections.unmodifiableList(data).iterator();
     }
 
     public static Table parse(final String[] headerAndRows) {

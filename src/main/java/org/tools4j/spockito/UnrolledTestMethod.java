@@ -28,21 +28,14 @@ import org.junit.runners.model.FrameworkMethod;
 import java.lang.reflect.Method;
 import java.util.Objects;
 
-public class SpockitoTestMethod extends FrameworkMethod {
+public class UnrolledTestMethod extends FrameworkMethod {
 
-    private final Table table;
-    private final int row;
+    private final TableRow tableRow;
     private final ValueConverter valueConverter;
 
-    /**
-     * Returns a new {@code FrameworkMethod} for {@code method}
-     *
-     * @param method
-     */
-    public SpockitoTestMethod(final Method method, final Table table, final int row, final ValueConverter valueConverter) {
+    public UnrolledTestMethod(final Method method, final TableRow tableRow, final ValueConverter valueConverter) {
         super(method);
-        this.table = Objects.requireNonNull(table);
-        this.row = row;
+        this.tableRow = Objects.requireNonNull(tableRow);
         this.valueConverter = Objects.requireNonNull(valueConverter);
     }
 
@@ -52,20 +45,20 @@ public class SpockitoTestMethod extends FrameworkMethod {
     }
 
     protected Object[] getTestArgs() {
-        return table.getRow(row).convertValues(getMethod(), valueConverter);
+        return tableRow.convertValues(getMethod(), valueConverter);
     }
 
     @Override
     public String getName() {
-        return super.getName() + Spockito.getName(getMethod(), table, row);
+        return super.getName() + Spockito.getName(getMethod(), tableRow);
     }
 
     @Override
     public int hashCode() {
         int code = super.hashCode();
-        code = 31 * code + table.hashCode();
-        code = 31 * code + row;
-        return row;
+        code = 31 * code + tableRow.getTable().hashCode();
+        code = 31 * code + tableRow.getRowIndex();
+        return code;
     }
 
     @Override
@@ -76,12 +69,13 @@ public class SpockitoTestMethod extends FrameworkMethod {
         if (obj == null || obj.getClass() != getClass() || !super.equals(obj)) {
             return false;
         }
-        final SpockitoTestMethod other = (SpockitoTestMethod)obj;
-        return this.row == row && this.table.equals(table);
+        final UnrolledTestMethod other = (UnrolledTestMethod)obj;
+        return this.tableRow.getTable().equals(other.tableRow.getTable()) &&
+                this.tableRow.getRowIndex() == other.tableRow.getRowIndex();
     }
 
     @Override
     public String toString() {
-        return super.toString() + "[" + row + "]";
+        return super.toString() + "[" + tableRow.getRowIndex() + "]";
     }
 }

@@ -64,8 +64,16 @@ public class TableRow {
         return tableRow;
     }
 
+    public Table getTable() {
+        return table;
+    }
+
     public boolean isSeparatorRow() {
         return values.stream().allMatch(s -> trim(s, '-').isEmpty() || trim(s, '=').isEmpty());
+    }
+
+    public boolean isValidRefName(final String refName) {
+        return REF_ROW.equals(refName) || table.hasColumn(refName);
     }
 
     public Object[] convertValues(final Executable executable, final ValueConverter valueConverter) {

@@ -24,9 +24,15 @@
 package org.tools4j.spockito;
 
 import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.Description;
 import org.junit.runner.Runner;
+import org.junit.runner.manipulation.Filter;
+import org.junit.runner.manipulation.NoTestsRemainException;
 import org.junit.runners.Suite;
+import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
+import org.junit.runners.model.TestClass;
 
 import java.lang.annotation.*;
 import java.lang.reflect.Constructor;
@@ -34,7 +40,6 @@ import java.lang.reflect.Executable;
 import java.lang.reflect.Parameter;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -133,18 +138,57 @@ public class Spockito extends Suite {
         super(clazz, createRunners(clazz));
     }
 
-    private static List<Runner> createRunners(final Class<?> clazz) throws InitializationError {
+    @Override
+    public void filter(final Filter filter) throws NoTestsRemainException {
+        super.filter(new Filter() {
+            @Override
+            public boolean shouldRun(final Description description) {
+                if (description.isTest()) {
+                    return filter.shouldRun(description);
+                }
+
+                // explicitly check if any children want to run
+                for (Description child : description.getChildren()) {
+                    if (shouldRun(child)) {
+                        return true;
+                    }
+                    final Description relaxed = Description.createTestDescription(
+                            child.getTestClass(), description.getDisplayName()
+                    );
+                    if (shouldRun(relaxed)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            @Override
+            public String describe() {
+                return filter.describe();
+            }
+        });
+    }
+
+    private static Table classWideTableOrNull(final Class<?> clazz) {
         Unroll unroll = getOnlyConstructor(clazz).getAnnotation(Unroll.class);
         if (unroll == null) {
             unroll = clazz.getAnnotation(Unroll.class);
         }
-        if (unroll == null) {
-            return Collections.singletonList(new SpockitoJUnitRunner(clazz));
-        }
-        final Table table = Table.parse(unroll.value());
-        final List<Runner> runners = new ArrayList<>(table.getRowCount());
-        for (int row = 0; row < table.getRowCount(); row++) {
-            runners.add(new SpockitoJUnitRunner(clazz, table, row));
+        return unroll == null ? null : Table.parse(unroll.value());
+    }
+
+    private static List<Runner> createRunners(final Class<?> clazz) throws InitializationError {
+        final ValueConverter defaultValueConverter = getDefaultValueConverter(clazz);
+        final List<Runner> runners = new ArrayList<>();
+        final Table classWideTable = classWideTableOrNull(clazz);
+        if (classWideTable != null) {
+            for (final TableRow row : classWideTable) {
+                runners.add(new SingleRowMultiTestRunner(clazz, row, defaultValueConverter));
+            }
+        } else {
+            for (final FrameworkMethod testMethod : new TestClass(clazz).getAnnotatedMethods(Test.class)) {
+                runners.add(new SingleTestMultiRowRunner(clazz, testMethod, defaultValueConverter));
+            }
         }
         return runners;
     }
@@ -153,6 +197,11 @@ public class Spockito extends Suite {
         Constructor<?>[] constructors = clazz.getConstructors();
         Assert.assertEquals(1, constructors.length);
         return constructors[0];
+    }
+
+    private static ValueConverter getDefaultValueConverter(final Class<?> clazz) {
+        final Spockito.UseValueConverter useValueConverter = clazz.getAnnotation(Spockito.UseValueConverter.class);
+        return Spockito.getValueConverter(useValueConverter, SpockitoValueConverter.DEFAULT_INSTANCE);
     }
 
     static String parameterRefNameOrNull(final Parameter parameter) {
@@ -164,13 +213,14 @@ public class Spockito extends Suite {
         }
     }
 
-    static String getName(final Executable executable, final Table table, final int row) {
+    static String getName(final Executable executable, final TableRow tableRow) {
         final Name name = executable.getAnnotation(Name.class);
         final String unresolved = name != null ? name.value() : DEFAULT_NAME;
         String resolved = unresolved;
-        resolved = resolved.replaceAll("\\{row\\}", String.valueOf(row));
+        resolved = resolved.replaceAll("\\{row\\}", String.valueOf(tableRow.getRowIndex()));
+        final Table table = tableRow.getTable();
         for (int col = 0; col < table.getColumnCount(); col++) {
-            final String value = table.getValue(row, col);
+            final String value = tableRow.get(col);
             resolved = resolved.replaceAll("\\{" + col + "\\}", value);
             resolved = resolved.replaceAll("\\{" + table.getColumnName(col) + "\\}", value);
         }
@@ -187,4 +237,5 @@ public class Spockito extends Suite {
         }
         return defaultValueConverter;
     }
+
 }

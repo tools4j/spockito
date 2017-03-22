@@ -23,12 +23,32 @@
  */
 package org.tools4j.spockito;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.*;
+import org.junit.rules.TestName;
 import org.junit.runner.RunWith;
 
 @RunWith(Spockito.class)
 public class SpockitoTest {
+
+    @Rule
+    public final TestName testName = new TestName();
+
+    @BeforeClass
+    public static void beforeClass() {
+        System.out.println("before-class");
+    }
+    @AfterClass
+    public static void afterClass() {
+        System.out.println("after-class");
+    }
+    @Before
+    public void beforeEach() {
+        System.out.println("before-each: " + testName.getMethodName());
+    }
+    @After
+    public void afterEach() {
+        System.out.println("after-each: " + testName.getMethodName());
+    }
 
     @Test
     public void testNormal() {
