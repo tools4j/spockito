@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/tools4j/spockito.svg?branch=master)](https://travis-ci.org/tools4j/spockito)
+
 # tools4j-spockito
 Java JUnit runner for parameterized tests where the test cases are defined in a table-like
 manner. The @Unroll annotation has been inspired the groovy framework Spock.
