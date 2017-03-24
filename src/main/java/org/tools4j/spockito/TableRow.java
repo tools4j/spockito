@@ -26,14 +26,18 @@ package org.tools4j.spockito;
 import org.junit.runners.model.FrameworkField;
 
 import java.lang.reflect.Executable;
+import java.lang.reflect.Field;
 import java.lang.reflect.Parameter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.lang.reflect.Type;
+import java.util.*;
+import java.util.regex.Pattern;
 
 public class TableRow {
 
     public static final String REF_ROW = "row";
+    public static final String REF_ALL = "*";
+
+    private static final Pattern UNESCAPED_PIPE = Pattern.compile("(?<=[^\\\\])\\|");
 
     private final Table table;
     private final List<String> values = new ArrayList<>();
@@ -47,16 +51,11 @@ public class TableRow {
     }
 
     public static TableRow parse(final Table table, final String rowString) {
-        final String noBars = trim(rowString, '|');
-        final String[] parts = noBars.split("[^\\\\]\\|");
+        final String noBars = trimChar(rowString, '|');
+        final String[] parts = UNESCAPED_PIPE.split(noBars);
         final TableRow tableRow = new TableRow(table);
         for (final String part : parts) {
-            final String trimmedPart = trim(trim(part, ' '), '\t');
-            if (trimmedPart.length() >= 2 && trimmedPart.charAt(0) == '\'' && trimmedPart.charAt(trimmedPart.length() - 1) == '\'') {
-                tableRow.values.add(trimmedPart.substring(0, trimmedPart.length() - 1));
-            } else {
-                tableRow.values.add(trimmedPart);
-            }
+            tableRow.values.add(Converters.STRING_CONVERTER.apply(part.trim()));
         }
         for (int i = parts.length; i < table.getColumnCount(); i++) {
             tableRow.values.add(null);
@@ -69,11 +68,11 @@ public class TableRow {
     }
 
     public boolean isSeparatorRow() {
-        return values.stream().allMatch(s -> trim(s, '-').isEmpty() || trim(s, '=').isEmpty());
+        return values.stream().allMatch(s -> trimChar(s, '-').isEmpty() || trimChar(s, '=').isEmpty());
     }
 
     public boolean isValidRefName(final String refName) {
-        return REF_ROW.equals(refName) || table.hasColumn(refName);
+        return REF_ROW.equals(refName) || REF_ALL.equals(refName) || table.hasColumn(refName);
     }
 
     public Object[] convertValues(final Executable executable, final ValueConverter valueConverter) {
@@ -81,7 +80,7 @@ public class TableRow {
         final Parameter[] parameters = executable.getParameters();
         for (int i = 0; i < converted.length; i++) {
             final String refName = Spockito.parameterRefNameOrNull(parameters[i]);
-            converted[i] = convertValue(refName, i, parameters[i].getType(), valueConverter);
+            converted[i] = convertValue(refName, i, parameters[i].getType(), parameters[i].getParameterizedType(), valueConverter);
         }
         return converted;
     }
@@ -89,18 +88,23 @@ public class TableRow {
     public Object[] convertValues(final List<FrameworkField> fields, final ValueConverter valueConverter) {
         final Object[] converted = new Object[fields.size()];
         for (int i = 0; i < converted.length; i++) {
+            final Field field = fields.get(i).getField();
             final String refName = fields.get(i).getAnnotation(Spockito.Ref.class).value();
-            converted[i] = convertValue(refName, -1, fields.get(i).getType(), valueConverter);
+            converted[i] = convertValue(refName, -1, field.getType(), field.getGenericType(), valueConverter);
         }
         return converted;
     }
 
-    private Object convertValue(final String refNameOrNull, final int defaultColumnIndex, final Class<?> type, final ValueConverter valueConverter) {
+    private Object convertValue(final String refNameOrNull, final int defaultColumnIndex,
+                                final Class<?> type, final Type genericType, final ValueConverter valueConverter) {
         if (REF_ROW.equals(refNameOrNull)) {
-            return valueConverter.convert(type, String.valueOf(getRowIndex()));
+            return valueConverter.convert(type, genericType, String.valueOf(getRowIndex()));
+        }
+        if (REF_ALL.equals(refNameOrNull)) {
+            return valueConverter.convert(type, genericType, asMap().toString());
         }
         final int columnIndex = refNameOrNull == null ? defaultColumnIndex : table.getColumnIndexByName(refNameOrNull);
-        return valueConverter.convert(type, get(columnIndex));
+        return valueConverter.convert(type, genericType,get(columnIndex));
     }
 
     public int size() {
@@ -123,12 +127,20 @@ public class TableRow {
         return table.getRowIndex(this);
     }
 
+    public Map<String, String> asMap() {
+        final Map<String, String> map = new LinkedHashMap<>();
+        for (int i = 0; i < size(); i++) {
+            map.put(table.getColumnName(i), get(i));
+        }
+        return map;
+    }
+
     @Override
     public String toString() {
         return "TableRow" + values;
     }
 
-    private static String trim(final String s, final char trim) {
+    private static String trimChar(final String s, final char trim) {
         int start = 0;
         int end = s.length();
         while (start < end && s.charAt(start) == trim) {

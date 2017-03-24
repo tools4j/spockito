@@ -23,74 +23,55 @@
  */
 package org.tools4j.spockito;
 
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.text.DateFormat;
-import java.text.ParseException;
 import java.time.*;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.function.BiPredicate;
 import java.util.function.Function;
 
 public class SpockitoValueConverter implements ValueConverter {
 
     public static final SpockitoValueConverter DEFAULT_INSTANCE = new SpockitoValueConverter();
 
-    public static final Function<String, Character> CHAR_CONVERTER = s -> {
-        if (s.length() == 1) {
-            return s.charAt(0);
-        }
-        if (s.length() == 3 && s.charAt(0) == '\'' && s.charAt(2) == '\'') {
-            return s.charAt(1);
-        }
-        throw new IllegalArgumentException("Cannot convert string to char: " + s);
-    };
-
-    public static final Function<String, Date> DATE_CONVERTER = s -> {
-        try {
-            return DateFormat.getTimeInstance(DateFormat.SHORT).parse(s);
-        } catch (final ParseException e) {
-            throw new IllegalArgumentException("Cannot convert string to java.util.Date: " + s, e);
-        }
-    };
-
     private final Map<Class<?>, Function<? super String, ?>> convertersByType = new HashMap<>();
+    private final List<Map.Entry<BiPredicate<Class<?>, ? super Type>, ValueConverter>> convertersByPredicate = new ArrayList<>();
 
     public SpockitoValueConverter() {
         initConverterFunctions();
     }
 
     @Override
-    public <T> T convert(final Class<T> type, final String value) {
-        if (value == null || type.isInstance(value)) {
-            return type.cast(value);
+    public <T> T convert(final Class<T> type, final Type genericType, final String value) {
+        if (value == null || "null".equals(value)) {
+            return null;
         }
-        final Class<T> t = type.isPrimitive() ? (Class<T>)boxingTypeFor(type) : type;
-        Function<? super String, ?> converter = convertersByType.get(type);
-        if (converter == null && type.isPrimitive()) {
-            converter = convertersByType.get(t);
+        ValueConverter converter = converterByTypeOrNull(type);;
+        if (converter == null) {
+            converter = converterByPredicateOrNull(type, genericType);
+        }
+        if (converter == null) {
+            throw new IllegalArgumentException("No value converter is defined for type " + typeName(type, genericType));
         }
         try {
-            if (converter == null) {
-                throw new IllegalArgumentException("No value converter is defined for type " + type.getName());
-            }
-            final Object converted = converter.apply(value);
-            return t.cast(converted);
+            return converter.convert(type, genericType, value);
         } catch (final Exception e) {
-            throw new IllegalArgumentException("Conversion to " + type.getName() + " failed for value: " + value, e);
+            throw new IllegalArgumentException("Conversion to " + typeName(type, genericType) + " failed for value: " + value, e);
         }
     }
 
     protected void initConverterFunctions() {
-        addConverterFunction(Long.class, Long::valueOf);
-        addConverterFunction(Integer.class, Integer::valueOf);
-        addConverterFunction(Short.class, Short::valueOf);
-        addConverterFunction(Byte.class, Byte::valueOf);
-        addConverterFunction(Double.class, Double::valueOf);
-        addConverterFunction(Float.class, Float::valueOf);
-        addConverterFunction(Character.class, CHAR_CONVERTER);
-        addConverterFunction(Boolean.class, Boolean::valueOf);
+        addConverterFunction(Object.class, Function.identity());
+        addConverterFunction(String.class, Converters.STRING_CONVERTER);
+        addConverterFunction(long.class, Long::valueOf);
+        addConverterFunction(int.class, Integer::valueOf);
+        addConverterFunction(short.class, Short::valueOf);
+        addConverterFunction(byte.class, Byte::valueOf);
+        addConverterFunction(double.class, Double::valueOf);
+        addConverterFunction(float.class, Float::valueOf);
+        addConverterFunction(char.class, Converters.CHAR_CONVERTER);
+        addConverterFunction(boolean.class, Boolean::valueOf);
         addConverterFunction(BigInteger.class, BigInteger::new);
         addConverterFunction(BigDecimal.class, BigDecimal::new);
         addConverterFunction(LocalDate.class, LocalDate::parse);
@@ -98,44 +79,71 @@ public class SpockitoValueConverter implements ValueConverter {
         addConverterFunction(LocalDateTime.class, LocalDateTime::parse);
         addConverterFunction(ZonedDateTime.class, ZonedDateTime::parse);
         addConverterFunction(Instant.class, Instant::parse);
-        addConverterFunction(Date.class, DATE_CONVERTER);
+        addConverterFunction(Date.class, Converters.DATE_CONVERTER);
         addConverterFunction(java.sql.Date.class, java.sql.Date::valueOf);
         addConverterFunction(java.sql.Time.class, java.sql.Time::valueOf);
         addConverterFunction(java.sql.Timestamp.class, java.sql.Timestamp::valueOf);
+        addConverterFunction(StringBuilder.class, StringBuilder::new);
+        addConverterFunction(StringBuffer.class, StringBuffer::new);
+
+        addConverterFunction((t,g) -> t.isEnum(), converter((t, g, s) -> Enum.valueOf(t.asSubclass(Enum.class), s)));
+        addConverterFunction((t,g) -> Collection.class.isAssignableFrom(t), new Converters.CollectionConverter(this));
+        addConverterFunction((t,g) -> Map.class.isAssignableFrom(t), new Converters.MapConverter(this));
+        addConverterFunction((t,g) -> Class.class.isAssignableFrom(t), Converters.CLASS_CONVERTER);
+        addConverterFunction((t,g) -> Converters.BeanConverter.isBeanClass(t), new Converters.BeanConverter(this));
     }
 
     protected <T> void addConverterFunction(final Class<T> type, final Function<? super String, ? extends T> converter) {
         convertersByType.put(type, converter);
+        if (type.isPrimitive()) {
+            convertersByType.put(Primitives.boxingTypeFor(type), converter);
+        }
     }
 
-    private static <T> Class<T> boxingTypeFor(final Class<?> type) {
-        if (double.class.equals(type)) {
-            return (Class<T>)Double.class;
-        }
-        if (float.class.equals(type)) {
-            return (Class<T>)Float.class;
-        }
-        if (long.class.equals(type)) {
-            return (Class<T>)Long.class;
-        }
-        if (int.class.equals(type)) {
-            return (Class<T>)Integer.class;
-        }
-        if (short.class.equals(type)) {
-            return (Class<T>)Short.class;
-        }
-        if (byte.class.equals(type)) {
-            return (Class<T>)Byte.class;
-        }
-        if (boolean.class.equals(type)) {
-            return (Class<T>)Boolean.class;
-        }
-        if (char.class.equals(type)) {
-            return (Class<T>)Character.class;
-        }
-        if (void.class.equals(type)) {
-            return (Class<T>)Void.class;
-        }
-        throw new IllegalArgumentException("Not a primitive type: " + type.getName());
+    protected void addConverterFunction(final BiPredicate<Class<?>, ? super Type> applicable, final ValueConverter converter) {
+        convertersByPredicate.add(new AbstractMap.SimpleImmutableEntry<>(applicable, converter));
     }
+
+    private ValueConverter converterByTypeOrNull(final Class<?> type) {
+        Function<? super String, ?> function = convertersByType.get(type);
+        if (function == null && type.isPrimitive()) {
+            function = convertersByType.get(type);
+        }
+        if (function != null) {
+            final Function<? super String, ?> f = function;
+            return new ValueConverter() {
+                @Override
+                public <T> T convert(final Class<T> type, final Type genericType, final String value) {
+                    final Class<T> boxingType = type.isPrimitive() ? Primitives.boxingTypeFor(type) : type;
+                    return boxingType.cast(f.apply(value));
+                }
+            };
+        }
+        return null;
+    }
+
+    private ValueConverter converterByPredicateOrNull(final Class<?> type, final Type genericType) {
+        return convertersByPredicate.stream()
+                .filter(e -> e.getKey().test(type, genericType))
+                .findFirst()
+                .map(e -> e == null ? null : e.getValue())
+                .orElse(null);
+    }
+
+    private interface TriFunction<T, U, V, W> {
+        W apply(T t, U u, V v);
+    }
+    private static ValueConverter converter(final TriFunction<Class<?>, Type, String, Object> converter) {
+        return new ValueConverter() {
+            @Override
+            public <T> T convert(final Class<T> type, final Type genericType, final String value) {
+                return type.cast(converter.apply(type, genericType, value));
+            }
+        };
+    }
+
+    private static String typeName(final Class<?> type, final Type genericType) {
+        return type == genericType ? type.getName() : genericType.toString();
+    }
+
 }

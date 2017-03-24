@@ -27,8 +27,26 @@ import org.junit.*;
 import org.junit.rules.TestName;
 import org.junit.runner.RunWith;
 
+import java.util.List;
+import java.util.Map;
+
 @RunWith(Spockito.class)
 public class SpockitoTest {
+
+    private static class FieldBean {
+        int index;
+        String testName;
+    }
+    private static class SetterBean {
+        private int index;
+        private String testName;
+        void setIndex(int index) {
+            this.index = index;
+        }
+        void setTestName(String testName) {
+            this.testName = testName;
+        }
+    }
 
     @Rule
     public final TestName testName = new TestName();
@@ -72,8 +90,77 @@ public class SpockitoTest {
             "| Test 2   |"
     })
     public void testUnrollWithString(final String name) {
-        Assert.assertNotNull("name should be TestName", name);
+        Assert.assertNotNull("name should not be null", name);
         Assert.assertTrue("name should start with Test", name.startsWith("Test "));
+    }
+
+    @Test
+    @Spockito.Unroll({
+            "| List      | Count |",
+            "| 1,2,3,4,5 |   5   |",
+            "| 17,99,101 |   3   |"
+    })
+    public void testUnrollWithList(final List<Integer> list, final int count) {
+        Assert.assertNotNull("list should not be null", list);
+        Assert.assertEquals("list has wrong number of elements", count, list.size());
+    }
+
+    @Test
+    @Spockito.Unroll({
+            "| Map                        | Count |",
+            "| 1:blue, 2:green, 3: yellow | 3     |",
+            "| 1:sky, 2:hello world       | 2     |"
+    })
+    public void testUnrollWithMap(final Map<Integer, String> map, final int count) {
+        Assert.assertNotNull("map should not be null", map);
+        Assert.assertEquals("map has wrong number of elements", count, map.size());
+    }
+
+    @Test
+    @Spockito.Unroll({
+            "| FieldBean               | TestName |",
+            "| index:1,testName:Test 1 | Test 1   |",
+            "| index:2,testName:Test 2 | Test 2   |",
+    })
+    public void testUnrollWithBean(final FieldBean bean, final String testName) {
+        Assert.assertNotNull("bean should not be null", bean);
+        Assert.assertEquals("bean.testName not as expected", testName, bean.testName);
+    }
+
+    @Test
+    @Spockito.Unroll({
+            "| Index | TestName |",
+            "| 1     | Test 1   |",
+            "| 2     | Test 2   |"
+    })
+    public void testUnrollWithAllFieldBean(final @Spockito.Ref("*") FieldBean bean) {
+        Assert.assertNotNull("bean should not be null", bean);
+        Assert.assertTrue("bean.index should be greater than zero", bean.index > 0);
+        Assert.assertNotNull("bean.testName should not be null", bean.testName);
+    }
+
+    @Test
+    @Spockito.Unroll({
+            "| Index | Age |",
+            "| 1     | 44  |",
+            "| 2     | 55  |"
+    })
+    public void testUnrollWithAllMap(final @Spockito.Ref("*") Map<String, Integer> map) {
+        Assert.assertNotNull("map should not be null", map);
+        Assert.assertTrue("map.Index should be greater than zero", map.get("Index") > 0);
+        Assert.assertTrue("map.Age should be greater than zero", map.get("Age") > 40);
+    }
+
+    @Test
+    @Spockito.Unroll({
+            "| Index | TestName |",
+            "| 1     | Test 1   |",
+            "| 2     | Test 2   |"
+    })
+    public void testUnrollWithAllSetterBean(final @Spockito.Ref("*") SetterBean bean) {
+        Assert.assertNotNull("bean should not be null", bean);
+        Assert.assertTrue("bean.index should be greater than zero", bean.index > 0);
+        Assert.assertNotNull("bean.testName should not be null", bean.testName);
     }
 
     @Test

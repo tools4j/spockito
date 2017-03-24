@@ -23,8 +23,39 @@
  */
 package org.tools4j.spockito;
 
-import java.lang.reflect.Type;
+final class Primitives {
+    public static <T> Class<T> boxingTypeFor(final Class<T> type) {
+        if (double.class.equals(type)) {
+            return (Class<T>)Double.class;
+        }
+        if (float.class.equals(type)) {
+            return (Class<T>)Float.class;
+        }
+        if (long.class.equals(type)) {
+            return (Class<T>)Long.class;
+        }
+        if (int.class.equals(type)) {
+            return (Class<T>)Integer.class;
+        }
+        if (short.class.equals(type)) {
+            return (Class<T>)Short.class;
+        }
+        if (byte.class.equals(type)) {
+            return (Class<T>)Byte.class;
+        }
+        if (boolean.class.equals(type)) {
+            return (Class<T>)Boolean.class;
+        }
+        if (char.class.equals(type)) {
+            return (Class<T>)Character.class;
+        }
+        if (void.class.equals(type)) {
+            return (Class<T>)Void.class;
+        }
+        throw new IllegalArgumentException("Not a primitive type: " + type.getName());
+    }
 
-public interface ValueConverter {
-    <T> T convert(Class<T> type, Type genericType, String value);
+    private Primitives() {
+        throw new RuntimeException("No Primitives for you!");
+    }
 }
