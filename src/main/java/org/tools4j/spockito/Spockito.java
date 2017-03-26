@@ -25,7 +25,6 @@ package org.tools4j.spockito;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.Description;
 import org.junit.runner.Runner;
 import org.junit.runner.manipulation.Filter;
 import org.junit.runner.manipulation.NoTestsRemainException;
@@ -133,40 +132,16 @@ public class Spockito extends Suite {
 
     /**
      * Only called reflectively. Do not use programmatically.
+     * @param clazz the test class
+     * @throws InitializationError when a problem occurs during the initialisation of the runner
      */
-    public Spockito(final Class<?> clazz) throws Throwable {
+    public Spockito(final Class<?> clazz) throws InitializationError {
         super(clazz, createRunners(clazz));
     }
 
     @Override
     public void filter(final Filter filter) throws NoTestsRemainException {
-        super.filter(new Filter() {
-            @Override
-            public boolean shouldRun(final Description description) {
-                if (description.isTest()) {
-                    return filter.shouldRun(description);
-                }
-
-                // explicitly check if any children want to run
-                for (Description child : description.getChildren()) {
-                    if (shouldRun(child)) {
-                        return true;
-                    }
-                    final Description relaxed = Description.createTestDescription(
-                            child.getTestClass(), description.getDisplayName()
-                    );
-                    if (shouldRun(relaxed)) {
-                        return true;
-                    }
-                }
-                return false;
-            }
-
-            @Override
-            public String describe() {
-                return filter.describe();
-            }
-        });
+        super.filter(new MethodLevelFilter(filter));
     }
 
     private static Table classWideTableOrNull(final Class<?> clazz) {

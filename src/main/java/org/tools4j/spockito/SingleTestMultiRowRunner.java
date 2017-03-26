@@ -24,7 +24,6 @@
 package org.tools4j.spockito;
 
 import org.junit.Test;
-import org.junit.runner.Description;
 import org.junit.runner.manipulation.Filter;
 import org.junit.runner.manipulation.NoTestsRemainException;
 import org.junit.runner.notification.RunNotifier;
@@ -36,15 +35,12 @@ import org.junit.runners.model.Statement;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class SingleTestMultiRowRunner extends BlockJUnit4ClassRunner {
 
     private final FrameworkMethod testMethod;
     private final ValueConverter methodValueConverter;
-    private final Map<FrameworkMethod, Description> methodDescriptions = new ConcurrentHashMap<>();
 
     public SingleTestMultiRowRunner(final Class<?> clazz,
                                     final FrameworkMethod testMethod,
@@ -67,24 +63,17 @@ public class SingleTestMultiRowRunner extends BlockJUnit4ClassRunner {
 
     @Override
     public void filter(final Filter filter) throws NoTestsRemainException {
-        super.filter(Filter.ALL);//Spockito does the necessary filtering
+        if (filter instanceof MethodLevelFilter) {
+            //Spockito does the necessary filtering with MethodLevelFilter
+            super.filter(Filter.ALL);
+        } else {
+            super.filter(filter);
+        }
     }
 
     @Override
     protected String getName() {
         return testMethod.getName();
-    }
-
-    @Override
-    protected Description describeChild(final FrameworkMethod method) {
-        Description description = methodDescriptions.get(method);
-        if (description == null) {
-            description = Description.createTestDescription(getTestClass().getJavaClass(),
-                    testName(method), method.getAnnotations());
-            methodDescriptions.putIfAbsent(method, description);
-        }
-
-        return description;
     }
 
     @Override

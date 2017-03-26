@@ -24,8 +24,11 @@
 package org.tools4j.spockito;
 
 import java.lang.reflect.*;
-import java.text.DateFormat;
-import java.text.ParseException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.time.*;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Function;
@@ -34,10 +37,35 @@ import java.util.regex.Pattern;
 public final class Converters {
 
     private static final Pattern UNESCAPED_COMMA = Pattern.compile("(?<=[^\\\\]),");
+    private static final Pattern UNESCAPED_SEMICOLON = Pattern.compile("(?<=[^\\\\]);");
     private static final Pattern UNESCAPED_COLON = Pattern.compile("(?<=[^\\\\]):");
     private static final Pattern UNESCAPED_EQUAL = Pattern.compile("(?<=[^\\\\])=");
 
-    public static final Function<String, Character> CHAR_CONVERTER = s -> {
+    public static final Function<? super String, Object> OBJECT_CONVERTER = Function.identity();
+    public static final Function<? super String, Long> LONG_CONVERTER = Long::valueOf;
+    public static final Function<? super String, Integer> INTEGER_CONVERTER = Integer::valueOf;
+    public static final Function<? super String, Short> SHORT_CONVERTER = Short::valueOf;
+    public static final Function<? super String, Byte> BYTE_CONVERTER = Byte::valueOf;
+    public static final Function<? super String, Double> DOUBLE_CONVERTER = Double::valueOf;
+    public static final Function<? super String, Float> FLOAT_CONVERTER = Float::valueOf;
+    public static final Function<? super String, Boolean> BOOLEAN_CONVERTER = Boolean::valueOf;
+
+    public static final Function<? super String, BigInteger> BIG_INTEGER_CONVERTER = BigInteger::new;
+    public static final Function<? super String, BigDecimal> BIG_DECIMAL_CONVERTER = BigDecimal::new;
+    public static final Function<? super String, LocalDate> LOCAL_DATE_CONVERTER = LocalDate::parse;
+    public static final Function<? super String, LocalTime> LOCAL_TIME_CONVERTER = LocalTime::parse;
+    public static final Function<? super String, LocalDateTime> LOCAL_DATE_TIME_CONVERTER = LocalDateTime::parse;
+    public static final Function<? super String, ZonedDateTime> ZONED_DATE_TIME_CONVERTER = ZonedDateTime::parse;
+    public static final Function<? super String, OffsetDateTime> OFFSET_DATE_TIME_CONVERTER = OffsetDateTime::parse;
+    public static final Function<? super String, Instant> INSTANT_CONVERTER = Instant::parse;
+    public static final Function<? super String, Date> DATE_CONVERTER = s -> Date.from(Timestamp.valueOf(s).toInstant());
+    public static final Function<? super String, java.sql.Date> SQL_DATE_CONVERTER = java.sql.Date::valueOf;
+    public static final Function<? super String, Time> SQL_TIME_CONVERTER = Time::valueOf;
+    public static final Function<? super String, Timestamp> SQL_TIMESTAMP_CONVERTER = Timestamp::valueOf;
+    public static final Function<? super String, String> STRING_CONVERTER = s -> removeStartAndEndChars(s, '\'', '\'');
+    public static final Function<? super String, StringBuilder> STRING_BUILDER_CONVERTER = s -> new StringBuilder(STRING_CONVERTER.apply(s));
+    public static final Function<? super String, StringBuffer> STRING_BUFFER_CONVERTER = s -> new StringBuffer(STRING_CONVERTER.apply(s));
+    public static final Function<? super String, Character> CHAR_CONVERTER = s -> {
         if (s.length() == 1) {
             return s.charAt(0);
         }
@@ -46,17 +74,6 @@ public final class Converters {
         }
         throw new IllegalArgumentException("Cannot convert string to char: " + s);
     };
-
-    public static final Function<String, String> STRING_CONVERTER = s -> removeStartAndEndChars(s, '\'', '\'');
-
-    public static final Function<String, Date> DATE_CONVERTER = s -> {
-        try {
-            return DateFormat.getTimeInstance(DateFormat.SHORT).parse(s);
-        } catch (final ParseException e) {
-            throw new IllegalArgumentException("Cannot convert string to java.util.Date: " + s, e);
-        }
-    };
-
     public static final ValueConverter CLASS_CONVERTER = new ValueConverter() {
         @Override
         public <T> T convert(final Class<T> type, final Type genericType, final String value) {
@@ -66,6 +83,13 @@ public final class Converters {
             } catch (final Exception e) {
                 throw new IllegalArgumentException("Cannot convert string to " + type.getName() + ": " + value, e);
             }
+        }
+    };
+    public static final ValueConverter ENUM_CONVERTER = new ValueConverter() {
+        @Override
+        public <T> T convert(final Class<T> type, final Type genericType, final String value) {
+            final Enum<?> e = Enum.valueOf(type.asSubclass(Enum.class), value);
+            return type.cast(e);
         }
     };
 
@@ -80,13 +104,16 @@ public final class Converters {
             if (!Collection.class.isAssignableFrom(type)) {
                 throw new IllegalArgumentException("Type must be a collection: " + type.getName());
             }
-            final Class<?> elementType = actualTypeForTypeParam(genericType, 0, 1);
+            final ActualType elementType = actualTypeForTypeParam(genericType, 0, 1);
             final List<?> list = toList(elementType, value);
             if (type.isInstance(list)) {
                 return type.cast(list);
             }
             if (type.isAssignableFrom(ArrayList.class)) {
                 return type.cast(new ArrayList<>(list));
+            }
+            if (type.isAssignableFrom(Vector.class)) {
+                return type.cast(new Vector<>(list));
             }
             if (type.isAssignableFrom(LinkedList.class)) {
                 return type.cast(new LinkedList<>(list));
@@ -104,7 +131,8 @@ public final class Converters {
                 return type.cast(new HashSet<>(list));
             }
             if (type.isAssignableFrom(EnumSet.class)) {
-                return type.cast(enumSet(Enum.class.asSubclass(elementType), list));
+                final EnumSet<?> enumSet = enumSet(elementType.rawType.asSubclass(Enum.class), list);
+                return type.cast(enumSet);
             }
             if (type.isAssignableFrom(ConcurrentLinkedQueue.class)) {
                 return type.cast(new ConcurrentLinkedQueue<>(list));
@@ -119,12 +147,15 @@ public final class Converters {
             throw new IllegalArgumentException("Cannot convert value to " + type.getName() + ": " + value);
         }
 
-        private List<Object> toList(final Class<?> elementType, final String value) {
+        private List<Object> toList(final ActualType elementType, final String value) {
             final String plainValue = removeStartAndEndChars(value, '[', ']');
-            final String[] parts = UNESCAPED_COMMA.split(plainValue);
+            String[] parts = UNESCAPED_COMMA.split(plainValue);
+            if (parts.length == 1) {
+                parts = UNESCAPED_SEMICOLON.split(plainValue);
+            }
             final List<Object> list = new ArrayList<>(parts.length);
             for (int i = 0; i < parts.length; i++) {
-                list.add(elementConverter.convert(elementType, elementType, parts[i].trim()));
+                list.add(elementConverter.convert(elementType.rawType, elementType.genericType, parts[i].trim()));
             }
             return list;
         }
@@ -136,6 +167,37 @@ public final class Converters {
         }
     }
 
+    public static class ArrayConverter implements ValueConverter {
+        private final ValueConverter elementConverter;
+        private final CollectionConverter collectionConverter;
+        public ArrayConverter(final ValueConverter elementConverter) {
+            this.elementConverter = Objects.requireNonNull(elementConverter);
+            this.collectionConverter = new CollectionConverter(elementConverter);
+        }
+
+        @Override
+        public <T> T convert(final Class<T> type, final Type genericType, final String value) {
+            if (!type.isArray()) {
+                throw new IllegalArgumentException("Type must be an array: " + type.getName());
+            }
+            final Class<?> componentType = type.getComponentType();
+            final Type genericComponentType;
+            if (genericType instanceof GenericArrayType) {
+                genericComponentType = ((GenericArrayType)genericType).getGenericComponentType();
+            } else {
+                genericComponentType = componentType;
+            }
+            final Type genericListType = genericListType(genericComponentType);
+            final List<?> list = collectionConverter.convert(List.class, genericListType, value);
+            final Object array = Array.newInstance(componentType, list.size());
+            for (int i = 0; i < list.size(); i++) {
+                final Object val = list.get(i);
+                Array.set(array, i, val);
+            }
+            return type.cast(array);
+        }
+    }
+
     public static class MapConverter implements ValueConverter {
         private final ValueConverter elementConverter;
         public MapConverter(final ValueConverter elementConverter) {
@@ -144,8 +206,8 @@ public final class Converters {
 
         @Override
         public <T> T convert(final Class<T> type, final Type genericType, final String value) {
-            final Class<?> keyType = actualTypeForTypeParam(genericType, 0, 2);
-            final Class<?> valueType = actualTypeForTypeParam(genericType, 1, 2);
+            final ActualType keyType = actualTypeForTypeParam(genericType, 0, 2);
+            final ActualType valueType = actualTypeForTypeParam(genericType, 1, 2);
             final Map<?,?> map = toMap(keyType, valueType, value);
             if (type.isInstance(map)) {
                 return type.cast(map);
@@ -159,8 +221,12 @@ public final class Converters {
             if (type.isAssignableFrom(HashMap.class)) {
                 return type.cast(new HashMap<>(map));
             }
+            if (type.isAssignableFrom(Hashtable.class)) {
+                return type.cast(new Hashtable<>(map));
+            }
             if (type.isAssignableFrom(EnumMap.class)) {
-                return type.cast(enumMap(Enum.class.asSubclass(keyType), map));
+                final EnumMap<?,?> enumMap = enumMap(keyType.rawType.asSubclass(Enum.class), map);
+                return type.cast(enumMap);
             }
             if (type.isAssignableFrom(Properties.class)) {
                 final Properties props = new Properties();
@@ -177,9 +243,12 @@ public final class Converters {
             throw new IllegalArgumentException("Cannot convert value to " + type.getName() + ": " + value);
         }
 
-        private Map<Object, Object> toMap(final Class<?> keyType, final Class<?> valueType, final String value) {
+        private Map<Object, Object> toMap(final ActualType keyType, final ActualType valueType, final String value) {
             final String plainValue = removeStartAndEndChars(value, '{', '}');
-            final String[] parts = UNESCAPED_COMMA.split(plainValue);
+            String[] parts = UNESCAPED_COMMA.split(plainValue);
+            if (parts.length == 1) {
+                parts = UNESCAPED_SEMICOLON.split(plainValue);
+            }
             final Map<Object, Object> map = new LinkedHashMap<>();
             for (int i = 0; i < parts.length; i++) {
                 final String[] keyAndValue = parseKeyValue(parts[i].trim());
@@ -187,8 +256,8 @@ public final class Converters {
                     throw new IllegalArgumentException("Invalid map key/value pair: " + parts[i]);
                 }
                 try {
-                    final Object key = elementConverter.convert(keyType, keyType, keyAndValue[0].trim());
-                    final Object val = elementConverter.convert(valueType, valueType, keyAndValue[1].trim());
+                    final Object key = elementConverter.convert(keyType.rawType, keyType.genericType, keyAndValue[0].trim());
+                    final Object val = elementConverter.convert(valueType.rawType, valueType.genericType, keyAndValue[1].trim());
                     map.put(key, val);
                 } catch (final Exception e) {
                     throw new IllegalArgumentException("Conversion to map key/value failed: " + parts[i], e);
@@ -354,23 +423,61 @@ public final class Converters {
         return split;
     }
 
-    private static Class<?> actualTypeForTypeParam(final Type type, final int paramIndex, final int paramCount) {
+    private static class ActualType {
+        final Class<?> rawType;
+        final Type genericType;
+        public ActualType(final Class<?> rawType, final Type genericType) {
+            this.rawType = Objects.requireNonNull(rawType);
+            this.genericType = Objects.requireNonNull(genericType);
+        }
+    }
+    private static ActualType actualTypeForTypeParam(final Type type, final int paramIndex, final int paramCount) {
         if (type instanceof ParameterizedType) {
             final Type[] actualTypeArgs = ((ParameterizedType) type).getActualTypeArguments();
             if (actualTypeArgs.length == paramCount) {
                 Type actualType = actualTypeArgs[paramIndex];
                 if (actualType instanceof WildcardType) {
-                    final Type[] bounds = ((WildcardType) actualType).getLowerBounds();
+                    final Type[] bounds = ((WildcardType) actualType).getUpperBounds();
                     if (bounds.length == 1) {
                         actualType = bounds[0];
                     }
                 }
                 if (actualType instanceof Class) {
-                    return (Class<?>) actualType;
+                    return new ActualType((Class<?>) actualType, actualType);
+                }
+                if (actualType instanceof ParameterizedType) {
+                    final ParameterizedType parameterizedType = (ParameterizedType)actualType;
+                    if (parameterizedType.getRawType() instanceof Class) {
+                        return new ActualType((Class<?>)parameterizedType.getRawType(), parameterizedType);
+                    }
                 }
             }
         }
+        if (Properties.class.equals(type) && paramCount == 2) {
+            return new ActualType(String.class, String.class);
+        }
         throw new IllegalArgumentException("Could not derive actual generic type [" + paramIndex + "] for " + type);
+    }
+
+    private static Type genericListType(final Type listElementType) {
+        return new ParameterizedType() {
+            @Override
+            public Type[] getActualTypeArguments() {
+                return new Type[]{listElementType};
+            }
+            @Override
+            public Type getRawType() {
+                return List.class;
+            }
+            @Override
+            public Type getOwnerType() {
+                return null;
+            }
+            @Override
+            public String toString() {
+                return List.class.getName() + "<" + listElementType + ">";
+            }
+        };
     }
 
     private static String removeStartAndEndChars(final String s, final char startQuoteChar, final char endQuoteChar) {

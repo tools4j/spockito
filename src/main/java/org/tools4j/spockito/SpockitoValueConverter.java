@@ -62,53 +62,52 @@ public class SpockitoValueConverter implements ValueConverter {
     }
 
     protected void initConverterFunctions() {
-        addConverterFunction(Object.class, Function.identity());
-        addConverterFunction(String.class, Converters.STRING_CONVERTER);
-        addConverterFunction(long.class, Long::valueOf);
-        addConverterFunction(int.class, Integer::valueOf);
-        addConverterFunction(short.class, Short::valueOf);
-        addConverterFunction(byte.class, Byte::valueOf);
-        addConverterFunction(double.class, Double::valueOf);
-        addConverterFunction(float.class, Float::valueOf);
-        addConverterFunction(char.class, Converters.CHAR_CONVERTER);
-        addConverterFunction(boolean.class, Boolean::valueOf);
-        addConverterFunction(BigInteger.class, BigInteger::new);
-        addConverterFunction(BigDecimal.class, BigDecimal::new);
-        addConverterFunction(LocalDate.class, LocalDate::parse);
-        addConverterFunction(LocalTime.class, LocalTime::parse);
-        addConverterFunction(LocalDateTime.class, LocalDateTime::parse);
-        addConverterFunction(ZonedDateTime.class, ZonedDateTime::parse);
-        addConverterFunction(Instant.class, Instant::parse);
-        addConverterFunction(Date.class, Converters.DATE_CONVERTER);
-        addConverterFunction(java.sql.Date.class, java.sql.Date::valueOf);
-        addConverterFunction(java.sql.Time.class, java.sql.Time::valueOf);
-        addConverterFunction(java.sql.Timestamp.class, java.sql.Timestamp::valueOf);
-        addConverterFunction(StringBuilder.class, StringBuilder::new);
-        addConverterFunction(StringBuffer.class, StringBuffer::new);
+        registerConverterFunction(Object.class, Converters.OBJECT_CONVERTER);
+        registerConverterFunction(String.class, Converters.STRING_CONVERTER);
+        registerConverterFunction(long.class, Converters.LONG_CONVERTER);
+        registerConverterFunction(int.class, Converters.INTEGER_CONVERTER);
+        registerConverterFunction(short.class, Converters.SHORT_CONVERTER);
+        registerConverterFunction(byte.class, Converters.BYTE_CONVERTER);
+        registerConverterFunction(double.class, Converters.DOUBLE_CONVERTER);
+        registerConverterFunction(float.class, Converters.FLOAT_CONVERTER);
+        registerConverterFunction(char.class, Converters.CHAR_CONVERTER);
+        registerConverterFunction(boolean.class, Converters.BOOLEAN_CONVERTER);
+        registerConverterFunction(BigInteger.class, Converters.BIG_INTEGER_CONVERTER);
+        registerConverterFunction(BigDecimal.class, Converters.BIG_DECIMAL_CONVERTER);
+        registerConverterFunction(LocalDate.class, Converters.LOCAL_DATE_CONVERTER);
+        registerConverterFunction(LocalTime.class, Converters.LOCAL_TIME_CONVERTER);
+        registerConverterFunction(LocalDateTime.class, Converters.LOCAL_DATE_TIME_CONVERTER);
+        registerConverterFunction(ZonedDateTime.class, Converters.ZONED_DATE_TIME_CONVERTER);
+        registerConverterFunction(OffsetDateTime.class, Converters.OFFSET_DATE_TIME_CONVERTER);
+        registerConverterFunction(Instant.class, Converters.INSTANT_CONVERTER);
+        registerConverterFunction(Date.class, Converters.DATE_CONVERTER);
+        registerConverterFunction(java.sql.Date.class, Converters.SQL_DATE_CONVERTER);
+        registerConverterFunction(java.sql.Time.class, Converters.SQL_TIME_CONVERTER);
+        registerConverterFunction(java.sql.Timestamp.class, Converters.SQL_TIMESTAMP_CONVERTER);
+        registerConverterFunction(StringBuilder.class, Converters.STRING_BUILDER_CONVERTER);
+        registerConverterFunction(StringBuffer.class, Converters.STRING_BUFFER_CONVERTER);
 
-        addConverterFunction((t,g) -> t.isEnum(), converter((t, g, s) -> Enum.valueOf(t.asSubclass(Enum.class), s)));
-        addConverterFunction((t,g) -> Collection.class.isAssignableFrom(t), new Converters.CollectionConverter(this));
-        addConverterFunction((t,g) -> Map.class.isAssignableFrom(t), new Converters.MapConverter(this));
-        addConverterFunction((t,g) -> Class.class.isAssignableFrom(t), Converters.CLASS_CONVERTER);
-        addConverterFunction((t,g) -> Converters.BeanConverter.isBeanClass(t), new Converters.BeanConverter(this));
+        registerConverter((t, g) -> t.isEnum(), Converters.ENUM_CONVERTER);
+        registerConverter((t, g) -> t.isArray(), new Converters.ArrayConverter(this));
+        registerConverter((t, g) -> Class.class.isAssignableFrom(t), Converters.CLASS_CONVERTER);
+        registerConverter((t, g) -> Collection.class.isAssignableFrom(t), new Converters.CollectionConverter(this));
+        registerConverter((t, g) -> Map.class.isAssignableFrom(t), new Converters.MapConverter(this));
+        registerConverter((t, g) -> Converters.BeanConverter.isBeanClass(t), new Converters.BeanConverter(this));
     }
 
-    protected <T> void addConverterFunction(final Class<T> type, final Function<? super String, ? extends T> converter) {
+    protected <T> void registerConverterFunction(final Class<T> type, final Function<? super String, ? extends T> converter) {
         convertersByType.put(type, converter);
         if (type.isPrimitive()) {
             convertersByType.put(Primitives.boxingTypeFor(type), converter);
         }
     }
 
-    protected void addConverterFunction(final BiPredicate<Class<?>, ? super Type> applicable, final ValueConverter converter) {
+    protected void registerConverter(final BiPredicate<Class<?>, ? super Type> applicable, final ValueConverter converter) {
         convertersByPredicate.add(new AbstractMap.SimpleImmutableEntry<>(applicable, converter));
     }
 
     private ValueConverter converterByTypeOrNull(final Class<?> type) {
-        Function<? super String, ?> function = convertersByType.get(type);
-        if (function == null && type.isPrimitive()) {
-            function = convertersByType.get(type);
-        }
+        final Function<? super String, ?> function = convertersByType.get(type);
         if (function != null) {
             final Function<? super String, ?> f = function;
             return new ValueConverter() {
@@ -130,20 +129,8 @@ public class SpockitoValueConverter implements ValueConverter {
                 .orElse(null);
     }
 
-    private interface TriFunction<T, U, V, W> {
-        W apply(T t, U u, V v);
-    }
-    private static ValueConverter converter(final TriFunction<Class<?>, Type, String, Object> converter) {
-        return new ValueConverter() {
-            @Override
-            public <T> T convert(final Class<T> type, final Type genericType, final String value) {
-                return type.cast(converter.apply(type, genericType, value));
-            }
-        };
-    }
-
     private static String typeName(final Class<?> type, final Type genericType) {
-        return type == genericType ? type.getName() : genericType.toString();
+        return type == genericType || genericType == null ? type.getName() : genericType.toString();
     }
 
 }
