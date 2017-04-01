@@ -104,10 +104,14 @@ public class SingleTestMultiRowRunner extends BlockJUnit4ClassRunner {
     }
 
     protected void validate() throws InitializationError {
-        final List<Throwable> errors = new ArrayList<Throwable>();
-        super.collectInitializationErrors(errors);
+        final List<Throwable> errors = new ArrayList<>();
+        try {
+            super.collectInitializationErrors(errors);
+        } catch (final Exception e) {
+            errors.add(e);
+        }
         if (!errors.isEmpty()) {
-            throw new InitializationError(errors);
+            throw new InitializationError(testMethod + ": " + errors.get(0));
         }
     }
 

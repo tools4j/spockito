@@ -97,14 +97,29 @@ public class TableRow {
 
     private Object convertValue(final String refNameOrNull, final int defaultColumnIndex,
                                 final Class<?> type, final Type genericType, final ValueConverter valueConverter) {
+        final String value;
         if (REF_ROW.equals(refNameOrNull)) {
-            return valueConverter.convert(type, genericType, String.valueOf(getRowIndex()));
+            value = String.valueOf(getRowIndex());
+        } else if (REF_ALL.equals(refNameOrNull)) {
+            value = asMap().toString();
+        } else {
+            try {
+                final int columnIndex = refNameOrNull == null ? defaultColumnIndex : table.getColumnIndexByName(refNameOrNull);
+                value = get(columnIndex);
+            } catch (final Exception e) {
+                throw new IllegalArgumentException("Could not access column value " + refName(refNameOrNull, defaultColumnIndex), e);
+            }
         }
-        if (REF_ALL.equals(refNameOrNull)) {
-            return valueConverter.convert(type, genericType, asMap().toString());
+        try {
+            return valueConverter.convert(type, genericType, value);
+        } catch (final Exception e) {
+            throw new IllegalArgumentException("Conversion to " + genericType + " failed for column '" +
+                    refName(refNameOrNull, defaultColumnIndex) + "' value: " + value, e);
         }
-        final int columnIndex = refNameOrNull == null ? defaultColumnIndex : table.getColumnIndexByName(refNameOrNull);
-        return valueConverter.convert(type, genericType,get(columnIndex));
+    }
+
+    final Object refName(final String refNameOrNull, final int defaultColumnIndex) {
+        return refNameOrNull != null ? refNameOrNull : defaultColumnIndex;
     }
 
     public int size() {

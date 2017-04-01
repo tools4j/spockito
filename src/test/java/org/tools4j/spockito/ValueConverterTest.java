@@ -44,7 +44,7 @@ import static org.junit.Assert.*;
 /**
  * Unit test for {@link SpockitoValueConverter}.
  */
-public class SpockitoValueConverterTest {
+public class ValueConverterTest {
 
     private static final Random RND = new Random();
 
@@ -151,11 +151,11 @@ public class SpockitoValueConverterTest {
             }
             final Number min = (Number)bType.getField("MIN_VALUE").get(null);
             final Number max = (Number)bType.getField("MAX_VALUE").get(null);
-            assertEquals("Unexpected min value", min, converter.convert(pType, pType, min.toString()));
-            assertEquals("Unexpected max value", max, converter.convert(bType, bType, max.toString()));
+            assertEquals("Unexpected min intValue", min, converter.convert(pType, pType, min.toString()));
+            assertEquals("Unexpected max intValue", max, converter.convert(bType, bType, max.toString()));
             if (float.class.equals(pType) || double.class.equals(pType)) {
-                assertTrue("Expected NaN value", Double.isNaN(converter.convert(pType, pType, "NaN").doubleValue()));
-                assertTrue("Expected NaN value", Double.isNaN(converter.convert(bType, bType, "NaN").doubleValue()));
+                assertTrue("Expected NaN intValue", Double.isNaN(converter.convert(pType, pType, "NaN").doubleValue()));
+                assertTrue("Expected NaN intValue", Double.isNaN(converter.convert(bType, bType, "NaN").doubleValue()));
                 final int n = 10000;
                 for (int j = 0; j < n; j++) {
                     final double val = RND.nextBoolean() ? RND.nextDouble() : RND.nextGaussian();
@@ -213,7 +213,7 @@ public class SpockitoValueConverterTest {
 
     @Test
     public void convertLocalDate() {
-        assertEquals("Unexpected value", LocalDate.of(2017, 03, 22), converter.convert(LocalDate.class, null, "2017-03-22"));
+        assertEquals("Unexpected intValue", LocalDate.of(2017, 03, 22), converter.convert(LocalDate.class, null, "2017-03-22"));
         final LocalDate[] localDates = new LocalDate[] {
                 LocalDate.of(2010, 10, 4),
                 LocalDate.of(2017, 12, 31),
@@ -223,14 +223,14 @@ public class SpockitoValueConverterTest {
                 LocalDate.of(1970, 2, 28),
         };
         for (final LocalDate exp : localDates) {
-            assertEquals("Unexpected value", exp, converter.convert(LocalDate.class, null, exp.toString()));
+            assertEquals("Unexpected intValue", exp, converter.convert(LocalDate.class, null, exp.toString()));
         }
     }
 
     @Test
     public void convertLocalTime() {
-        assertEquals("Unexpected value", LocalTime.of(17, 15, 31), converter.convert(LocalTime.class, null, "17:15:31"));
-        assertEquals("Unexpected value", LocalTime.of(17, 15, 31, 111000000), converter.convert(LocalTime.class, null, "17:15:31.111"));
+        assertEquals("Unexpected intValue", LocalTime.of(17, 15, 31), converter.convert(LocalTime.class, null, "17:15:31"));
+        assertEquals("Unexpected intValue", LocalTime.of(17, 15, 31, 111000000), converter.convert(LocalTime.class, null, "17:15:31.111"));
         final LocalTime[] localTimes = new LocalTime[] {
                 LocalTime.of(17, 10, 4),
                 LocalTime.of(3, 12, 31),
@@ -240,14 +240,14 @@ public class SpockitoValueConverterTest {
                 LocalTime.of(00, 00, 00, 000000001),
         };
         for (final LocalTime exp : localTimes) {
-            assertEquals("Unexpected value", exp, converter.convert(LocalTime.class, null, exp.toString()));
+            assertEquals("Unexpected intValue", exp, converter.convert(LocalTime.class, null, exp.toString()));
         }
     }
 
     @Test
     public void convertLocalDateTime() {
-        assertEquals("Unexpected value", LocalDateTime.of(2017, 03, 22, 17, 15, 31), converter.convert(LocalDateTime.class, null, "2017-03-22T17:15:31"));
-        assertEquals("Unexpected value", LocalDateTime.of(2017, 03, 22, 17, 15, 31, 111000000), converter.convert(LocalDateTime.class, null, "2017-03-22T17:15:31.111"));
+        assertEquals("Unexpected intValue", LocalDateTime.of(2017, 03, 22, 17, 15, 31), converter.convert(LocalDateTime.class, null, "2017-03-22T17:15:31"));
+        assertEquals("Unexpected intValue", LocalDateTime.of(2017, 03, 22, 17, 15, 31, 111000000), converter.convert(LocalDateTime.class, null, "2017-03-22T17:15:31.111"));
         final LocalDateTime[] localDateTimes = new LocalDateTime[] {
                 LocalDateTime.of(2010, 10, 4, 17, 10, 4),
                 LocalDateTime.of(2017, 12, 31, 3, 12, 31),
@@ -257,14 +257,14 @@ public class SpockitoValueConverterTest {
                 LocalDateTime.of(1970, 2, 28, 00, 00, 00, 000000001),
         };
         for (final LocalDateTime exp : localDateTimes) {
-            assertEquals("Unexpected value", exp, converter.convert(LocalDateTime.class, null, exp.toString()));
+            assertEquals("Unexpected intValue", exp, converter.convert(LocalDateTime.class, null, exp.toString()));
         }
     }
 
     @Test
     public void convertZonedDateTime() {
-        assertEquals("Unexpected value", ZonedDateTime.of(2017, 03, 22, 17, 15, 31, 0, ZoneOffset.UTC), converter.convert(ZonedDateTime.class, null, "2017-03-22T17:15:31+00:00"));
-        assertEquals("Unexpected value", ZonedDateTime.of(2017, 03, 22, 17, 15, 31, 111000000, ZoneOffset.UTC), converter.convert(ZonedDateTime.class, null, "2017-03-22T17:15:31.111+00:00"));
+        assertEquals("Unexpected intValue", ZonedDateTime.of(2017, 03, 22, 17, 15, 31, 0, ZoneOffset.UTC), converter.convert(ZonedDateTime.class, null, "2017-03-22T17:15:31+00:00"));
+        assertEquals("Unexpected intValue", ZonedDateTime.of(2017, 03, 22, 17, 15, 31, 111000000, ZoneOffset.UTC), converter.convert(ZonedDateTime.class, null, "2017-03-22T17:15:31.111+00:00"));
         for (final String id : ZoneId.getAvailableZoneIds()) {
             final ZoneId zoneId = ZoneId.of(id);
             if ("GMT0".equals(zoneId.getId())) continue;//JDK bug, fixed in Java 9
@@ -277,15 +277,15 @@ public class SpockitoValueConverterTest {
                     ZonedDateTime.of(1970, 2, 28, 00, 00, 00, 000000001, zoneId),
             };
             for (final ZonedDateTime exp : zonedDateTimes) {
-                assertEquals("Unexpected value", exp, converter.convert(ZonedDateTime.class, null, exp.toString()));
+                assertEquals("Unexpected intValue", exp, converter.convert(ZonedDateTime.class, null, exp.toString()));
             }
         }
     }
 
     @Test
     public void convertOffsetDateTime() {
-        assertEquals("Unexpected value", OffsetDateTime.of(2017, 03, 22, 17, 15, 31, 0, ZoneOffset.UTC), converter.convert(OffsetDateTime.class, null, "2017-03-22T17:15:31+00:00"));
-        assertEquals("Unexpected value", OffsetDateTime.of(2017, 03, 22, 17, 15, 31, 111000000, ZoneOffset.UTC), converter.convert(OffsetDateTime.class, null, "2017-03-22T17:15:31.111+00:00"));
+        assertEquals("Unexpected intValue", OffsetDateTime.of(2017, 03, 22, 17, 15, 31, 0, ZoneOffset.UTC), converter.convert(OffsetDateTime.class, null, "2017-03-22T17:15:31+00:00"));
+        assertEquals("Unexpected intValue", OffsetDateTime.of(2017, 03, 22, 17, 15, 31, 111000000, ZoneOffset.UTC), converter.convert(OffsetDateTime.class, null, "2017-03-22T17:15:31.111+00:00"));
         final int halfHourInSeconds = 30 * 60;
         for (int offsetSeconds = ZoneOffset.MIN.getTotalSeconds(); offsetSeconds < ZoneOffset.MAX.getTotalSeconds(); offsetSeconds += halfHourInSeconds) {
             final ZoneOffset zoneOffset = ZoneOffset.ofTotalSeconds(offsetSeconds);
@@ -298,15 +298,15 @@ public class SpockitoValueConverterTest {
                     OffsetDateTime.of(1970, 2, 28, 00, 00, 00, 000000001, zoneOffset),
             };
             for (final OffsetDateTime exp : offsetDateTimes) {
-                assertEquals("Unexpected value", exp, converter.convert(OffsetDateTime.class, null, exp.toString()));
+                assertEquals("Unexpected intValue", exp, converter.convert(OffsetDateTime.class, null, exp.toString()));
             }
         }
     }
 
     @Test
     public void convertInstant() {
-        assertEquals("Unexpected value", LocalDateTime.of(2017, 03, 22, 17, 15, 31, 0).toInstant(ZoneOffset.UTC), converter.convert(Instant.class, null, "2017-03-22T17:15:31Z"));
-        assertEquals("Unexpected value", LocalDateTime.of(2017, 03, 22, 17, 15, 31, 111000000).toInstant(ZoneOffset.UTC), converter.convert(Instant.class, null, "2017-03-22T17:15:31.111Z"));
+        assertEquals("Unexpected intValue", LocalDateTime.of(2017, 03, 22, 17, 15, 31, 0).toInstant(ZoneOffset.UTC), converter.convert(Instant.class, null, "2017-03-22T17:15:31Z"));
+        assertEquals("Unexpected intValue", LocalDateTime.of(2017, 03, 22, 17, 15, 31, 111000000).toInstant(ZoneOffset.UTC), converter.convert(Instant.class, null, "2017-03-22T17:15:31.111Z"));
         final int halfHourInSeconds = 30 * 60;
         for (int offsetSeconds = ZoneOffset.MIN.getTotalSeconds(); offsetSeconds < ZoneOffset.MAX.getTotalSeconds(); offsetSeconds += halfHourInSeconds) {
             final ZoneOffset zoneOffset = ZoneOffset.ofTotalSeconds(offsetSeconds);
@@ -319,7 +319,7 @@ public class SpockitoValueConverterTest {
                     LocalDateTime.of(1970, 2, 28, 00, 00, 00, 000000001).toInstant(zoneOffset),
             };
             for (final Instant exp : instants) {
-                assertEquals("Unexpected value", exp, converter.convert(Instant.class, null, exp.toString()));
+                assertEquals("Unexpected intValue", exp, converter.convert(Instant.class, null, exp.toString()));
             }
         }
     }
@@ -327,9 +327,9 @@ public class SpockitoValueConverterTest {
     @Test
     public void convertDate() {
         final DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-        assertEquals("Unexpected value", Date.from(LocalDateTime.of(2017, 03, 22, 17, 15, 31, 0).atZone(ZoneId.systemDefault()).toInstant()),
+        assertEquals("Unexpected intValue", Date.from(LocalDateTime.of(2017, 03, 22, 17, 15, 31, 0).atZone(ZoneId.systemDefault()).toInstant()),
                 converter.convert(Date.class, null, "2017-03-22 17:15:31"));
-        assertEquals("Unexpected value", Date.from(LocalDateTime.of(2017, 03, 22, 17, 15, 31, 111000000).atZone(ZoneId.systemDefault()).toInstant()),
+        assertEquals("Unexpected intValue", Date.from(LocalDateTime.of(2017, 03, 22, 17, 15, 31, 111000000).atZone(ZoneId.systemDefault()).toInstant()),
                 converter.convert(Date.class, null, "2017-03-22 17:15:31.111"));
         final int halfHourInSeconds = 30 * 60;
         for (int offsetSeconds = ZoneOffset.MIN.getTotalSeconds(); offsetSeconds < ZoneOffset.MAX.getTotalSeconds(); offsetSeconds += halfHourInSeconds) {
@@ -343,14 +343,14 @@ public class SpockitoValueConverterTest {
                     Date.from(LocalDateTime.of(1970, 2, 28, 00, 00, 00, 000000001).toInstant(zoneOffset)),
             };
             for (final Date exp : dates) {
-                assertEquals("Unexpected value", exp, converter.convert(Date.class, null, format.format(exp)));
+                assertEquals("Unexpected intValue", exp, converter.convert(Date.class, null, format.format(exp)));
             }
         }
     }
 
     @Test
     public void convertSqlDate() {
-        assertEquals("Unexpected value", java.sql.Date.valueOf(LocalDate.of(2017, 03, 22)),
+        assertEquals("Unexpected intValue", java.sql.Date.valueOf(LocalDate.of(2017, 03, 22)),
                 converter.convert(java.sql.Date.class, null, "2017-03-22"));
         final java.sql.Date[] dates = new java.sql.Date[]{
                 java.sql.Date.valueOf(LocalDate.of(2010, 10, 4)),
@@ -361,14 +361,14 @@ public class SpockitoValueConverterTest {
                 java.sql.Date.valueOf(LocalDate.of(1970, 2, 28)),
         };
         for (final java.sql.Date exp : dates) {
-            assertEquals("Unexpected value", exp, converter.convert(java.sql.Date.class, null, exp.toString()));
+            assertEquals("Unexpected intValue", exp, converter.convert(java.sql.Date.class, null, exp.toString()));
         }
     }
 
     @Test
     public void convertSqlTime() {
         //NOTE: no millisecond support!
-        assertEquals("Unexpected value", Time.valueOf(LocalTime.of(17, 15, 31, 0)), converter.convert(Time.class, null, "17:15:31"));
+        assertEquals("Unexpected intValue", Time.valueOf(LocalTime.of(17, 15, 31, 0)), converter.convert(Time.class, null, "17:15:31"));
         final Time[] times = new Time[]{
                 Time.valueOf(LocalTime.of(17, 10, 4, 0)),
                 Time.valueOf(LocalTime.of(3, 12, 31, 0)),
@@ -378,15 +378,15 @@ public class SpockitoValueConverterTest {
                 Time.valueOf(LocalTime.of(00, 00, 00, 0)),
         };
         for (final Time exp : times) {
-            assertEquals("Unexpected value", exp, converter.convert(Time.class, null, exp.toString()));
+            assertEquals("Unexpected intValue", exp, converter.convert(Time.class, null, exp.toString()));
         }
     }
 
     @Test
     public void convertSqlTimestamp() {
-        assertEquals("Unexpected value", Timestamp.valueOf(LocalDateTime.of(2017, 03, 22, 17, 15, 31, 0)),
+        assertEquals("Unexpected intValue", Timestamp.valueOf(LocalDateTime.of(2017, 03, 22, 17, 15, 31, 0)),
                 converter.convert(Timestamp.class, null, "2017-03-22 17:15:31"));
-        assertEquals("Unexpected value", Timestamp.valueOf(LocalDateTime.of(2017, 03, 22, 17, 15, 31, 111000000)),
+        assertEquals("Unexpected intValue", Timestamp.valueOf(LocalDateTime.of(2017, 03, 22, 17, 15, 31, 111000000)),
                 converter.convert(Timestamp.class, null, "2017-03-22 17:15:31.111"));
         final Timestamp[] timestamps = new Timestamp[]{
                 Timestamp.valueOf(LocalDateTime.of(2010, 10, 4, 17, 10, 4, 0)),
@@ -397,14 +397,14 @@ public class SpockitoValueConverterTest {
                 Timestamp.valueOf(LocalDateTime.of(1970, 2, 28, 00, 00, 00, 000000001)),
         };
         for (final Timestamp exp : timestamps) {
-            assertEquals("Unexpected value", exp, converter.convert(Timestamp.class, null, exp.toString()));
+            assertEquals("Unexpected intValue", exp, converter.convert(Timestamp.class, null, exp.toString()));
         }
     }
 
     @Test
     public void convertEnum() {
         for (final TestEnum testEnum : TestEnum.values()) {
-            assertEquals("Unexpected value", testEnum, converter.convert(TestEnum.class, null, testEnum.name()));
+            assertEquals("Unexpected intValue", testEnum, converter.convert(TestEnum.class, null, testEnum.name()));
         }
     }
 
@@ -419,7 +419,7 @@ public class SpockitoValueConverterTest {
                 TestEnum.CONST_A.getClass()
         };
         for (final Class<?> exp : classes) {
-            assertEquals("Unexpected value", exp, converter.convert(Class.class, null, exp.getName()));
+            assertEquals("Unexpected intValue", exp, converter.convert(Class.class, null, exp.getName()));
         }
     }
 

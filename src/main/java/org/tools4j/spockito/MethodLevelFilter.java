@@ -49,13 +49,28 @@ public final class MethodLevelFilter extends Filter {
             }
             //Intellij bug, we get the wrong description, let us test with a slightly modified one now
             final Description relaxed = Description.createTestDescription(
-                    child.getTestClass(), description.getDisplayName()
+                    child.getTestClass(), getMethodName(child.getDisplayName())
             );
             if (shouldRun(relaxed)) {
                 return true;
             }
         }
         return false;
+    }
+
+    private static String getMethodName(final String name) {
+        return name.substring(0, findFirstNonNameChar(name));
+    }
+
+    private static int findFirstNonNameChar(final String name) {
+        int index = 0;
+        if (index < name.length() && Character.isJavaIdentifierStart(name.charAt(index))) {
+            index++;
+            while (index < name.length() && Character.isJavaIdentifierPart(name.charAt(index))) {
+                index++;
+            }
+        }
+        return index;
     }
 
     @Override

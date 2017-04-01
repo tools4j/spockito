@@ -24,6 +24,8 @@
 package org.tools4j.spockito;
 
 import org.junit.Test;
+import org.junit.runner.manipulation.Filter;
+import org.junit.runner.manipulation.NoTestsRemainException;
 import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.model.FrameworkField;
@@ -34,6 +36,7 @@ import org.junit.runners.model.Statement;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -48,6 +51,7 @@ public class SingleRowMultiTestRunner extends BlockJUnit4ClassRunner {
         super(clazz);
         this.tableRow = Objects.requireNonNull(tableRow);
         this.defaultValueConverter = Objects.requireNonNull(defaultValueConverter);
+        validate();
     }
 
     @Override
@@ -58,6 +62,16 @@ public class SingleRowMultiTestRunner extends BlockJUnit4ClassRunner {
     @Override
     protected Annotation[] getRunnerAnnotations() {
         return new Annotation[0];
+    }
+
+    @Override
+    public void filter(final Filter filter) throws NoTestsRemainException {
+        if (filter instanceof MethodLevelFilter) {
+            //Spockito does the necessary filtering with MethodLevelFilter
+            super.filter(Filter.ALL);
+        } else {
+            super.filter(filter);
+        }
     }
 
     @Override
@@ -95,6 +109,31 @@ public class SingleRowMultiTestRunner extends BlockJUnit4ClassRunner {
     }
 
     @Override
+    protected List<FrameworkMethod> computeTestMethods() {
+        final List<FrameworkMethod> testMethods = super.computeTestMethods();
+        final List<FrameworkMethod> spockitoMethods = new ArrayList<>(testMethods.size());
+        for (final FrameworkMethod testMethod : testMethods) {
+            if (testMethod.getMethod().getParameterCount() == 0) {
+                spockitoMethods.add(testMethod);
+            } else {
+                final Spockito.UseValueConverter useValueConverter = testMethod.getAnnotation(Spockito.UseValueConverter.class);
+                final ValueConverter methodValueConverter = Spockito.getValueConverter(useValueConverter, defaultValueConverter);
+                final UnrolledTestMethod spockitoTestMethod = new UnrolledTestMethod(testMethod.getMethod(), tableRow, methodValueConverter);
+                spockitoMethods.add(spockitoTestMethod);
+            }
+        }
+        return spockitoMethods;
+    }
+
+
+        @Override
+    protected String testName(final FrameworkMethod method) {
+        final String testName = super.testName(method);
+        final Spockito.Name name = method.getAnnotation(Spockito.Name.class);
+        return name == null ? testName : testName + Spockito.getName(name, tableRow, "");
+    }
+
+    @Override
     protected void validateConstructor(List<Throwable> errors) {
         validateOnlyOneConstructor(errors);
         validateConstructorArgs(errors);
@@ -129,16 +168,21 @@ public class SingleRowMultiTestRunner extends BlockJUnit4ClassRunner {
     }
 
     @Override
+    protected void collectInitializationErrors(final List<Throwable> errors) {
+        //don't do here, do validation in our own constructor
+    }
+
+    protected void validate() throws InitializationError {
+        final List<Throwable> errors = new ArrayList<>();
+        super.collectInitializationErrors(errors);
+    }
+
+    @Override
     protected void validateTestMethods(final List<Throwable> errors) {
         final List<FrameworkMethod> methods = getTestClass().getAnnotatedMethods(Test.class);
         for (final FrameworkMethod method : methods) {
-            final Spockito.Unroll unroll = method.getAnnotation(Spockito.Unroll.class);
-            if (unroll == null) {
-                method.validatePublicVoidNoArg(false, errors);
-            } else {
-                method.validatePublicVoid(false, errors);
-                method.validateNoTypeParametersOnArgs(errors);
-            }
+            method.validatePublicVoid(false, errors);
+            method.validateNoTypeParametersOnArgs(errors);
         }
     }
 

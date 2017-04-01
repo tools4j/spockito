@@ -75,7 +75,7 @@ public class Spockito extends Suite {
 
     /**
      * Annotation for a test or a test method to indicate an alternative name for the parameterized
-     * test. Default name is "{row}[{0}]".
+     * test. Default name is "[{row}]: {0}".
      */
     @Retention(RetentionPolicy.RUNTIME)
     @Target(value = {ElementType.TYPE, ElementType.METHOD})
@@ -162,7 +162,9 @@ public class Spockito extends Suite {
             }
         } else {
             for (final FrameworkMethod testMethod : new TestClass(clazz).getAnnotatedMethods(Test.class)) {
-                runners.add(new SingleTestMultiRowRunner(clazz, testMethod, defaultValueConverter));
+                final Spockito.UseValueConverter useValueConverter = testMethod.getAnnotation(Spockito.UseValueConverter.class);
+                final ValueConverter methodValueConverter = Spockito.getValueConverter(useValueConverter, defaultValueConverter);
+                runners.add(new SingleTestMultiRowRunner(clazz, testMethod, methodValueConverter));
             }
         }
         return runners;
@@ -189,8 +191,14 @@ public class Spockito extends Suite {
     }
 
     static String getName(final Executable executable, final TableRow tableRow) {
-        final Name name = executable.getAnnotation(Name.class);
-        final String unresolved = name != null ? name.value() : DEFAULT_NAME;
+        Name name = executable.getAnnotation(Name.class);
+        if (name == null) {
+            name = executable.getDeclaringClass().getAnnotation(Name.class);
+        }
+        return getName(name, tableRow, DEFAULT_NAME);
+    }
+    static String getName(final Name name, final TableRow tableRow, final String defaultName) {
+        final String unresolved = name != null ? name.value() : defaultName;
         String resolved = unresolved;
         resolved = resolved.replaceAll("\\{row\\}", String.valueOf(tableRow.getRowIndex()));
         final Table table = tableRow.getTable();
