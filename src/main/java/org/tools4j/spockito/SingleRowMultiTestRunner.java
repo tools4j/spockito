@@ -126,7 +126,7 @@ public class SingleRowMultiTestRunner extends BlockJUnit4ClassRunner {
     }
 
 
-        @Override
+    @Override
     protected String testName(final FrameworkMethod method) {
         final String testName = super.testName(method);
         final Spockito.Name name = method.getAnnotation(Spockito.Name.class);
