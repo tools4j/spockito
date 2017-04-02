@@ -101,6 +101,22 @@ public class Spockito extends Suite {
          * @return A pattern string a bit similar to {@link MessageFormat}
          */
         String value() default DEFAULT_NAME;
+
+        /**
+         * Returns true if the SHORT name format shall be used instead of the default LONG name format.
+         * <p>
+         * LONG and SHORT name formats are defined as follows:
+         * <pre>
+         * false (LONG format): {@literal "<TestClass>.<TestMethod><Name>"}
+         * true (SHORT format): {@literal "<Name>"} for method level unrolling and
+         *                      {@literal "<TestMethod>"} or {@literal "<TestMethod><Name>"} for class level unrolling
+         * </pre>
+         * SHORT format is much nicer to look at but unfortunately it prevents individual test from being re-run in
+         * Intellij.
+         *
+         * @return true if SHORT format shall be used, false by default indicating LONG format
+         */
+        boolean shortFormat() default false;
     }
 
     /**
@@ -204,12 +220,12 @@ public class Spockito extends Suite {
         }
     }
 
+    static Name nameAnnotationOrNull(final Executable executable) {
+        final Name name = executable.getAnnotation(Name.class);
+        return name != null ? name : executable.getDeclaringClass().getAnnotation(Name.class);
+    }
     static String getName(final Executable executable, final TableRow tableRow) {
-        Name name = executable.getAnnotation(Name.class);
-        if (name == null) {
-            name = executable.getDeclaringClass().getAnnotation(Name.class);
-        }
-        return getName(name, tableRow, DEFAULT_NAME);
+        return getName(nameAnnotationOrNull(executable), tableRow, DEFAULT_NAME);
     }
     static String getName(final Name name, final TableRow tableRow, final String defaultName) {
         final String unresolved = name != null ? name.value() : defaultName;

@@ -35,7 +35,6 @@ import org.junit.runner.RunWith;
         "| Multiply  |   *  |       24 |        5 |    120 |               1 |",
         "| Divide    |   /  |       24 |        3 |      8 |               1 |"
 })
-@Spockito.Name("[{row}]: {Operation}")
 @RunWith(Spockito.class)
 public class UnrollClassDataToMethodTest {
 
@@ -81,7 +80,7 @@ public class UnrollClassDataToMethodTest {
     }
 
     @Test
-    @Spockito.Name("[{row}]: {Operand1} {Sign} {Operand2} = {Result}")
+    @Spockito.Name(value = ": {Operand1} {Sign} {Operand2} = {Result}", shortFormat = true)
     public void testOperation(@Spockito.Ref("Operation") final Operation operation,
                               @Spockito.Ref("Operand1") final int operand1,
                               @Spockito.Ref("Operand2") final int operand2,
@@ -90,7 +89,7 @@ public class UnrollClassDataToMethodTest {
     }
 
     @Test
-    @Spockito.Name("[{row}]: {Operand1} {Sign} {NeutralOperand2} = {Operand1}")
+    @Spockito.Name(value = ": {Operand1} {Sign} {NeutralOperand2} = {Operand1}", shortFormat = true)
     public void testNeutralOperand(@Spockito.Ref("Operation") final Operation operation,
                                    @Spockito.Ref("Operand1") final int operand1,
                                    @Spockito.Ref("NeutralOperand2") final int neutralOperand2) {

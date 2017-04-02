@@ -23,12 +23,9 @@
  */
 package org.tools4j.spockito;
 
-import org.junit.*;
-import org.junit.rules.TestName;
+import org.junit.Assert;
+import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import java.util.List;
-import java.util.Map;
 
 @RunWith(Spockito.class)
 public class UnrollMethodDataTest {

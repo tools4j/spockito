@@ -49,8 +49,9 @@ public class SpockitoBeforeAfterTest extends UnrollMethodDataTest {
     public final TestName testName = new TestName();
 
     private String testMethodNameWithIndex() {
-        final int index = testName.getMethodName().indexOf(']');
-        return index < 0 ? testName.getMethodName() : testName.getMethodName().substring(0, index + 1);
+        final String methodName = testName.getMethodName();
+        final int index = methodName == null ? -1 : methodName.indexOf(']');
+        return index < 0 ? methodName : methodName.substring(0, index + 1);
     }
 
     @BeforeClass

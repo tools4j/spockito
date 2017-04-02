@@ -24,24 +24,18 @@
 package org.tools4j.spockito;
 
 import org.junit.Test;
-import org.junit.runner.manipulation.Filter;
-import org.junit.runner.manipulation.NoTestsRemainException;
-import org.junit.runner.notification.RunNotifier;
-import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
-import org.junit.runners.model.Statement;
 
-import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 /**
- * A runner for the the situation where a test method is to be run multiple times with all the rows of an unroll table.
+ * A runner for the situation where a test method is to be run multiple times with all the rows of an unroll table.
  * This case applies if the {@link org.tools4j.spockito.Spockito.Unroll} annotation is present at test method level.
  */
-public class SingleTestMultiRowRunner extends BlockJUnit4ClassRunner {
+public class SingleTestMultiRowRunner extends AbstractSpockitoTestRunner {
 
     private final FrameworkMethod testMethod;
     private final ValueConverter methodValueConverter;
@@ -56,28 +50,16 @@ public class SingleTestMultiRowRunner extends BlockJUnit4ClassRunner {
     }
 
     @Override
-    protected Statement classBlock(RunNotifier notifier) {
-        return childrenInvoker(notifier);
-    }
-
-    @Override
-    protected Annotation[] getRunnerAnnotations() {
-        return new Annotation[0];
-    }
-
-    @Override
-    public void filter(final Filter filter) throws NoTestsRemainException {
-        if (filter instanceof MethodLevelFilter) {
-            //Spockito does the necessary filtering with MethodLevelFilter
-            super.filter(Filter.ALL);
-        } else {
-            super.filter(filter);
-        }
-    }
-
-    @Override
     protected String getName() {
         return testMethod.getName();
+    }
+
+    @Override
+    protected String testName(final FrameworkMethod method) {
+        if (method instanceof UnrolledTestMethod) {
+            return method.getName() + Spockito.getName(method.getMethod(), ((UnrolledTestMethod)method).getTableRow());
+        }
+        return super.testName(method);
     }
 
     @Override
@@ -100,11 +82,6 @@ public class SingleTestMultiRowRunner extends BlockJUnit4ClassRunner {
             unrolled.add(unrolledTestMethod);
         }
         return unrolled;
-    }
-
-    @Override
-    protected void collectInitializationErrors(final List<Throwable> errors) {
-        //don't do here, do validation in our own constructor
     }
 
     protected void validate() throws InitializationError {

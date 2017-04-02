@@ -47,13 +47,17 @@ public class UnrolledTestMethod extends FrameworkMethod {
         return super.invokeExplosively(target, getTestArgs());
     }
 
+    protected TableRow getTableRow() {
+        return tableRow;
+    }
+
     protected Object[] getTestArgs() {
         return tableRow.convertValues(getMethod(), valueConverter);
     }
 
     @Override
     public String getName() {
-        return super.getName() + Spockito.getName(getMethod(), tableRow);
+        return super.getName();
     }
 
     @Override

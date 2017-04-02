@@ -28,6 +28,10 @@ import org.junit.runner.manipulation.Filter;
 
 import java.util.Objects;
 
+/**
+ * Method filter wrapped around an original filter in {@link Spockito#filter(Filter)} to work around an Intellij problem
+ * when re-running individual tests.
+ */
 public final class MethodLevelFilter extends Filter {
 
     private Filter delegate;
