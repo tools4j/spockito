@@ -3,7 +3,7 @@ apply plugin: 'license'
 
 sourceCompatibility = 1.8
 group = "org.tools4j"
-version = '1.0.0'
+version = '1.0.0-SNAPSHOT'
 archivesBaseName = "tools4j-spockito"
 
 jar {
@@ -24,11 +24,12 @@ buildscript {
 	
 	dependencies {
 		classpath 'nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0'
+        classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.5.3"
 	}
 }
 
 dependencies {
-    compile 'junit:junit:4+'
+    compile 'junit:junit:4.12'
 }
 
 uploadArchives {
@@ -72,7 +73,7 @@ artifacts {
 }
 
 //snapshot first, then release:
-//gradle clean uploadArchives -Pupload -DossrhUsername=xxx -DossrhPassword=xxx
+//gradle clean uploadArchives -Pupload -PossrhUsername=xxx -PossrhPassword=xxx
 if (project.hasProperty('upload')) {
 
     allprojects {
