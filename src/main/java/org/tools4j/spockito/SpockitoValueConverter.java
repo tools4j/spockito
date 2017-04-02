@@ -31,6 +31,15 @@ import java.util.*;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 
+/**
+ * Default value converter implementation for Spockito. All supported conversions are defined as a constant in
+ * {@link Converters}.
+ * <p>
+ * Constom value converter implementations may want to extend this class and add additional converters by overriding
+ * {@link #initConverterFunctions()}. Converters for single types can be registered via
+ * {@link #registerConverterFunction(Class, Function)} and the more generic
+ * {@link #registerConverter(BiPredicate, ValueConverter)}.
+ */
 public class SpockitoValueConverter implements ValueConverter {
 
     public static final SpockitoValueConverter DEFAULT_INSTANCE = new SpockitoValueConverter();
@@ -61,6 +70,12 @@ public class SpockitoValueConverter implements ValueConverter {
         }
     }
 
+    /**
+     * Registers converters for individual types via calls to
+     * {@link #registerConverterFunction(Class, Function)} and the more generic
+     * {@link #registerConverter(BiPredicate, ValueConverter)}. All converters registered by this method are defined by
+     * {@link Converters}.
+     */
     protected void initConverterFunctions() {
         registerConverterFunction(Object.class, Converters.OBJECT_CONVERTER);
         registerConverterFunction(String.class, Converters.STRING_CONVERTER);
@@ -95,6 +110,14 @@ public class SpockitoValueConverter implements ValueConverter {
         registerConverter((t, g) -> Converters.BeanConverter.isBeanClass(t), new Converters.BeanConverter(this));
     }
 
+    /**
+     * Register a conversion fuction for the specified type. The function is applied for types exactly matching the
+     * given type only (but not to supertypes of this type).
+     *
+     * @param type          the target type
+     * @param converter     a function converting from string to target type
+     * @param <T>           the targe parameter
+     */
     protected <T> void registerConverterFunction(final Class<T> type, final Function<? super String, ? extends T> converter) {
         convertersByType.put(type, converter);
         if (type.isPrimitive()) {
@@ -102,6 +125,18 @@ public class SpockitoValueConverter implements ValueConverter {
         }
     }
 
+    /**
+     * Register a value converter for some subgroup of types selected for by the given predicate. The two arguments
+     * passed to the applicable predicate are type and generic type of the target value. The predicate returns true if
+     * the specified value converter is applicable for such a value.
+     * <p>
+     * Value converters registered via this method will be queried in registration order. If two converters are
+     * applicable to some value, the first whose predicate returns true will be used.
+     *
+     * @param applicable    a predicate returning true if the specified converter can be applied for a value of the
+     *                      type/generic-type passed to the predicate, and false otherwise
+     * @param converter     a value converter from string to target type
+     */
     protected void registerConverter(final BiPredicate<Class<?>, ? super Type> applicable, final ValueConverter converter) {
         convertersByPredicate.add(new AbstractMap.SimpleImmutableEntry<>(applicable, converter));
     }

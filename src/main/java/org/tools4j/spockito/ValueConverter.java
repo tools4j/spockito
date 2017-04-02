@@ -25,6 +25,21 @@ package org.tools4j.spockito;
 
 import java.lang.reflect.Type;
 
+/**
+ * Handles the conversion of string values to arbitrary target types. Value conversion takes part when the
+ * {@link org.tools4j.spockito.Spockito.Unroll} table data defined in string form is assigned to test class fields or
+ * parameters of a test method.
+ */
 public interface ValueConverter {
+    /**
+     * Converts the given string value into the target type specified by raw and generic type.
+     *
+     * @param type          the target type in raw form, for instance {@code int.class}, {@code List.class} etc.
+     * @param genericType   the generic target type, same as type for non-generic types; generic type examples are
+     *                      {@code List<String>}, {@code Map<String, Integer>} etc.
+     * @param value         the value to convert, may be null
+     * @param <T> the target type parameter
+     * @return the converted value
+     */
     <T> T convert(Class<T> type, Type genericType, String value);
 }

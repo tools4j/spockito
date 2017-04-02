@@ -37,6 +37,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * A runner for the the situation where a test method is to be run multiple times with all the rows of an unroll table.
+ * This case applies if the {@link org.tools4j.spockito.Spockito.Unroll} annotation is present at test method level.
+ */
 public class SingleTestMultiRowRunner extends BlockJUnit4ClassRunner {
 
     private final FrameworkMethod testMethod;

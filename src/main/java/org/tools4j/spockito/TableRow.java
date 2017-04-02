@@ -32,6 +32,9 @@ import java.lang.reflect.Type;
 import java.util.*;
 import java.util.regex.Pattern;
 
+/**
+ * Represents a single row of a {@link Table} defined via {@link org.tools4j.spockito.Spockito.Unroll} annotaiton.
+ */
 public class TableRow {
 
     public static final String REF_ROW = "row";

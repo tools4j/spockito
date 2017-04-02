@@ -40,6 +40,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * A runner for the case of a single data row applied to a set of test methods. This case applies if the
+ * {@link org.tools4j.spockito.Spockito.Unroll} annotation is present at test class level.
+ */
 public class SingleRowMultiTestRunner extends BlockJUnit4ClassRunner {
 
     private final TableRow tableRow;

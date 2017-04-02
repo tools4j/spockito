@@ -28,6 +28,10 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * Prepresents a table with header row and data rows as defined via the {@link org.tools4j.spockito.Spockito.Unroll}
+ * annotation.
+ */
 public class Table implements Iterable<TableRow> {
 
     private static final Table EMPTY = new Table();

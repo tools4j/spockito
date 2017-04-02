@@ -51,20 +51,23 @@ public class Spockito extends Suite {
 
     /**
      * Annotation for a test or a test method which provides test data for the tests. If the
-     * annotation made at the test class level, then the test data is applied to all tests
-     * methods. Test data on method level is applied for this method only.
+     * annotation made at the test class level, then the test data is applied to all test
+     * methods. Test data on method level is applied for that method only.
      */
     @Retention(RetentionPolicy.RUNTIME)
-    @Target(value = {ElementType.TYPE, ElementType.METHOD, ElementType.CONSTRUCTOR})
+    @Target(value = {ElementType.TYPE, ElementType.METHOD})
     public @interface Unroll {
         /**
          * Annotation with test case values declared in a table like structure as follows:
          * <pre>
-         * | colA      | colB      | colC      |
+         * | ColumnA   | ColumnB   | ColumnC   |
+         * |-----------|-----------|-----------|
          * | value_1_A | value_1_B | value_1_C |
          * | value_2_A | value_2_B | value_2_C |
          * etc...
          * </pre>
+         * The separator row after the column headers is optional and = instead of - can be used. Separator rows can be
+         * placed anywhere in the table and are ignored when the table is parsed.
          *
          * @return  An array of strings represented as table data; string[0] contains the header
          *          row with column names
@@ -85,17 +88,17 @@ public class Spockito extends Suite {
          * numbers in braces to refer to the parameters or the additional data
          * as follows:
          * <pre>
-         * {row} - the current row index
+         * {row} - the current row index (zero based)
          * {0} - the row's value in the first column
          * {1} - the row's value in the second column
-         * {colA} - the row's value in the "colA" column
-         * {colB} - the row's value in the "colB" column
+         * {ColumnA} - the row's value in the "ColumnA" column
+         * {ColumnB} - the row's value in the "ColumnB" column
          * etc...
          * </pre>
          * <p>
          * Default value is "[{row}]: {0}".
          *
-         * @return A patter n string similar to {@link MessageFormat}
+         * @return A pattern string a bit similar to {@link MessageFormat}
          */
         String value() default DEFAULT_NAME;
     }
@@ -103,22 +106,33 @@ public class Spockito extends Suite {
     /**
      * Annotation for fields or parameters of a test method or of the test constructor. Fields
      * need only be annotated if the field name differs from the column name of the test data.
-     * Constructor or test method parameters need to be anotated if they are not in the same
+     * Constructor or test method parameters need to be annotated if they are not in the same
      * order as the columns in the test data.
+     * <p>
+     * The following reference types are supported:
+     * <pre>
+     * {row} - the current row index (zero based), assignable to an integer type
+     * {*} - indicating that all rows are to be used, assignable to a collection type, a map or a Bean
+     * {ColumnA} - the value in the "ColumnA" column
+     * {ColumnB} - the value in the "ColumnB" column
+     * </pre>
      */
     @Retention(RetentionPolicy.RUNTIME)
     @Target(value = {ElementType.FIELD, ElementType.PARAMETER})
     public @interface Ref {
         /**
-         * @return the column name
+         * Returns the column name, or {row} for row index and {*} to map all column values to the annotated variable.
+         * Can be omitted when annotating fields and the field name is identical to the column name.
+         *
+         * @return the column name, or "{row}" for the row index, or "{*}" to indicate that all all column values should
+         *         be mapped to the annotated variable (for list, map and bean types)
          */
         String value() default "";
     }
 
     /**
-     * Add this annotation to your test class or method if you want to specify custom value
-     * converters from string to typed parameters. The converter must have a public zero-arg
-     * constructor.
+     * Add this annotation to your test class or method if you want to specify custom value converters from string to
+     * typed parameters. The converter must have a public zero-arg constructor.
      */
     @Retention(RetentionPolicy.RUNTIME)
     @Inherited

@@ -23,7 +23,17 @@
  */
 package org.tools4j.spockito;
 
+/**
+ * Contains static helper methods related to primitive types.
+ */
 final class Primitives {
+    /**
+     * Returns the boxing type given a primitive type.
+     *
+     * @param type a primitive type such as {@code int.class}
+     * @param <T> the type parameter
+     * @return the boxing type such as {@code Integer.class}
+     */
     public static <T> Class<T> boxingTypeFor(final Class<T> type) {
         if (double.class.equals(type)) {
             return (Class<T>)Double.class;

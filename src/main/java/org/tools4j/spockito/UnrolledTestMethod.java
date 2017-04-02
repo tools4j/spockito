@@ -28,6 +28,9 @@ import org.junit.runners.model.FrameworkMethod;
 import java.lang.reflect.Method;
 import java.util.Objects;
 
+/**
+ * Extension of framwork method representing a test method with a data row.
+ */
 public class UnrolledTestMethod extends FrameworkMethod {
 
     private final TableRow tableRow;

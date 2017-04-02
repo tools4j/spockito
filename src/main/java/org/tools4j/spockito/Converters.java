@@ -34,6 +34,9 @@ import java.util.concurrent.*;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
+/**
+ * Contains conversion functions and value converters used by {@link SpockitoValueConverter}.
+ */
 public final class Converters {
 
     private static final Pattern UNESCAPED_COMMA = Pattern.compile("(?<=[^\\\\]),");
@@ -93,6 +96,9 @@ public final class Converters {
         }
     };
 
+    /**
+     * Value converter for target type {@link Collection} or sub-interfaces and implementations of it.
+     */
     public static class CollectionConverter implements ValueConverter {
         private final ValueConverter elementConverter;
         public CollectionConverter(final ValueConverter elementConverter) {
@@ -167,6 +173,9 @@ public final class Converters {
         }
     }
 
+    /**
+     * Value converter for array target types including primitive arrays.
+     */
     public static class ArrayConverter implements ValueConverter {
         private final ValueConverter elementConverter;
         private final CollectionConverter collectionConverter;
@@ -198,6 +207,9 @@ public final class Converters {
         }
     }
 
+    /**
+     * Value converter for target type {@link Map} or sub-interfaces and implementations of it.
+     */
     public static class MapConverter implements ValueConverter {
         private final ValueConverter elementConverter;
         public MapConverter(final ValueConverter elementConverter) {
@@ -273,6 +285,10 @@ public final class Converters {
         }
     }
 
+    /**
+     * Value converter for Java beans as target type. The beans either have getters and setters to access the fields
+     * or otherwise fields are accessed directly.
+     */
     public static class BeanConverter implements ValueConverter {
 
         private final ValueConverter elementConverter;
