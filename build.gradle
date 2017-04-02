@@ -70,3 +70,68 @@ task sourcesJar(type: Jar) {
 artifacts {
     archives javadocJar, sourcesJar
 }
+
+//snapshot first, then release:
+//gradle clean uploadArchives -Pupload -DossrhUsername=xxx -DossrhPassword=xxx
+if (project.hasProperty('upload')) {
+
+    allprojects {
+        apply plugin: 'signing'
+        apply plugin: 'maven'
+        apply plugin: 'io.codearte.nexus-staging'
+
+        // Signature of artifacts
+        signing {
+            sign configurations.archives
+        }
+
+        // OSSRH publication
+        uploadArchives {
+            repositories {
+                mavenDeployer {
+                    beforeDeployment {
+                        MavenDeployment deployment -> signing.signPom(deployment)
+                    }
+                    repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                        authentication(userName: ossrhUsername, password: ossrhPassword)
+                    }
+                    snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+                        authentication(userName: ossrhUsername, password: ossrhPassword)
+                    }
+
+                    pom.project {
+                        name 'spockito'
+                        packaging 'jar'
+                        // optionally artifactId can be defined here
+                        description 'Java JUnit runner for parameterized tests where the test cases are defined in a table-like manner.'
+                        url 'http://spockito.tools4j.org'
+
+                        scm {
+                            connection 'scm:git:https://github.com/tools4j/spockito.git'
+                            developerConnection 'scm:git:https://github.com/tools4j/spockito.git'
+                            url 'https://github.com/tools4j/spockito.git'
+                        }
+                        licenses {
+                            license {
+                                name 'MIT License'
+                                url 'http://opensource.org/licenses/MIT'
+                            }
+                        }
+
+                        developers {
+                            developer {
+                                id 'terzerm'
+                                name 'Marco Terzer'
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        nexusStaging {
+            username = ossrhUsername
+            password = ossrhPassword
+        }
+    }
+}
