@@ -5,7 +5,17 @@
 Java JUnit runner for parameterized tests where the test cases are defined in a table-like
 manner. The @Unroll annotation has been inspired the Groovy framework Spock.
  
-### Unroll at method level
+## Maven
+```xml
+<dependency>
+    <groupId>org.tools4j</groupId>
+    <artifactId>tools4j-spockito</artifactId>
+    <version>1.1</version>
+    <scope>test</scope>
+</dependency>
+```
+
+## Unroll at method level
 
 Test cases are defined via ``@Spockito.Unroll`` annotation directly on the test method. The best explanation are
 probably a few simple examples:
@@ -62,7 +72,7 @@ This and other examples can be found [here](https://github.com/tools4j/spockito/
 ##### Run above test in IDE (here: IntelliJ)
 ![spockito-ide-test-run](https://github.com/tools4j/spockito/blob/master/ide-run-SpockitoTest.png)
 
-### Unroll at class level
+## Unroll at class level
 
 Alternatively, the test data can be defined at class level. All methods can then use the same test cases. The values
 are either
@@ -114,12 +124,12 @@ public class UnrollClassDataToFieldsTest {
 ```
 This and other examples can be found [here](https://github.com/tools4j/spockito/blob/master/src/test/java/org/tools4j/spockito/).
 
-### More examples
+## More examples
 * [UnrollMethodDataTest.java](https://github.com/tools4j/spockito/blob/master/src/test/java/org/tools4j/spockito/UnrollMethodDataTest.java)
 * [UnrollClassDataToFieldsTest.java](https://github.com/tools4j/spockito/blob/master/src/test/java/org/tools4j/spockito/UnrollClassDataToFieldsTest.java)
 * [UnrollClassDataToConstructorTest.java](https://github.com/tools4j/spockito/blob/master/src/test/java/org/tools4j/spockito/UnrollClassDataToConstructorTest.java)
 * [UnrollClassDataToMethodTest.java](https://github.com/tools4j/spockito/blob/master/src/test/java/org/tools4j/spockito/UnrollClassDataToMethodTest.java)
 * [all tests](https://github.com/tools4j/spockito/blob/master/src/test/java/org/tools4j/spockito/)
 
-### More Information
+## More Information
 * [MIT License](https://github.com/tools4j/spockito/blob/master/LICENSE)
