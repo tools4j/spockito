@@ -116,7 +116,7 @@ public class Table implements Iterable<TableRow> {
         if (trimmed.length() < 2 || trimmed.charAt(0) != '|' || trimmed.charAt(trimmed.length() - 1) != '|') {
             throw new IllegalArgumentException("Invalid table data: row " + row + " must start and end with '|'");
         }
-        final TableRow tableRow = TableRow.parse(table, rowString);
+        final TableRow tableRow = TableRow.parse(table, trimmed);
         if (row != 0) {
             if (tableRow.size() > table.getColumnCount()) {
                 throw new IllegalArgumentException("Invalid table data: row " + row + " has more columns than header row: " + tableRow.size() + " > " + table.getColumnCount());

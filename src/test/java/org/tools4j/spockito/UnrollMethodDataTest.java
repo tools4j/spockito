@@ -27,55 +27,50 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.time.LocalDate;
+
 @RunWith(Spockito.class)
 public class UnrollMethodDataTest {
 
     @Test
     @Spockito.Unroll({
-            "| Name     |",
-            "| Test 1   |",
-            "| Test 2   |"
+            "| Last Name | First Name |",
+            "| Jones     | David      |",
+            "| Jensen    | Astrid     |"
     })
-    public void testUnrollSimple(final String name) {
-        Assert.assertNotNull("name should not be null", name);
-        Assert.assertTrue("name should start with Test", name.startsWith("Test "));
+    public void testUnrollNames(String lastName, String firstName) {
+        Assert.assertTrue("Last Name should start with J", lastName.startsWith("J"));
+        Assert.assertTrue("First Name should end with id", firstName.endsWith("id"));
     }
 
     @Test
     @Spockito.Unroll({
-            "| Index | Name     |",
-            "|-------|----------|",
-            "| 1     | Test 1   |",
-            "| 2     | Test 2   |"
+            "| Name  | Year | Birthday   |",
+            "|-------|------|------------|",
+            "| Henry | 1981 | 1981-11-28 |",
+            "| Jessy | 1965 | 1965-03-28 |"
     })
-    @Spockito.Name("[{row}]: index={0}, name={1}")
-    public void testUnrollTwoColumns(int index, String name) {
-        Assert.assertTrue("index should be greater than 0", index > 0);
-        Assert.assertNotNull("name should be TestName", name);
-        Assert.assertTrue("name should start with Test", name.startsWith("Test "));
+    @Spockito.Name("[{row}]: Name={0}")
+    public void testUnrollBirthdays(String name, int year, LocalDate birthday) {
+        Assert.assertEquals("Name should have 5 characters", 5, name.length());
+        Assert.assertTrue("Year is before 1990", 1990 > year);
+        Assert.assertEquals("Day is 28th", 28, birthday.getDayOfMonth());
     }
 
     @Test
     @Spockito.Unroll({
-            "| Index | TestName |",
-            "|=======|==========|",
-            "| 1     | Test 1   |",
-            "|------ |----------|",
-            "| 2     | Test 2   |",
-            "|------ |----------|",
-            "| 3     | Test 3   |",
-            "|------ |----------|",
-            "| 4     | Test 4   |",
-            "|------ |----------|",
+            "| Object   | Vertices | Angle sum |",
+            "|==========|==========|===========|",
+            "| Triangle |     3    |    180    |",
+            "| Square   |     4    |    360    |",
+            "| Pentagon |     5    |    540    |",
+            "|----------|----------|-----------|",
     })
-    @Spockito.Name("[{row}]: index={Index}, name={TestName}")
-    public void testUnrollWithColumnRefs(@Spockito.Ref("TestName") String name,
-                                         @Spockito.Ref("Index") int index,
-                                         @Spockito.Ref("row") int row) {
-        Assert.assertTrue("index should be greater than 0", index > 0);
-        Assert.assertTrue("row should be greated or equal to 0", row >= 0);
-        Assert.assertTrue("index should be row + 1", index == row + 1);
-        Assert.assertNotNull("name should be TestName", name);
-        Assert.assertTrue("name should start with Test", name.startsWith("Test "));
+    @Spockito.Name("[{Object}]: ({Vertices}-2)*180 = {Angle sum}")
+    public void testUnrollAngularSums(@Spockito.Ref("Vertices") int n,
+                                      @Spockito.Ref("Angle sum") int degrees,
+                                      @Spockito.Ref("Object") String name) {
+        Assert.assertTrue("There should be 3 or more vertices", 3 <= n);
+        Assert.assertEquals("Angular sum of is wrong for: " + name, degrees, (n-2)*180);
     }
 }

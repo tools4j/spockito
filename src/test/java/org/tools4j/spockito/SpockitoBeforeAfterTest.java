@@ -40,9 +40,9 @@ public class SpockitoBeforeAfterTest extends UnrollMethodDataTest {
     private static final List<String> EXPECTED_TESTS = Arrays.asList(
             "oneMore",
             "oneMoreUnroll[0]", "oneMoreUnroll[1]",
-            "testUnrollSimple[0]", "testUnrollSimple[1]",
-            "testUnrollTwoColumns[0]", "testUnrollTwoColumns[1]",
-            "testUnrollWithColumnRefs[0]", "testUnrollWithColumnRefs[1]", "testUnrollWithColumnRefs[2]", "testUnrollWithColumnRefs[3]"
+            "testUnrollAngularSums[Pentagon]", "testUnrollAngularSums[Square]", "testUnrollAngularSums[Triangle]",
+            "testUnrollBirthdays[0]", "testUnrollBirthdays[1]",
+            "testUnrollNames[0]", "testUnrollNames[1]"
     );
 
     @Rule
