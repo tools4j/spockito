@@ -5,7 +5,7 @@
 Java JUnit runner for parameterized tests where the test cases are defined in a table-like
 manner. The @Unroll annotation has been inspired the Groovy framework Spock.
  
-#### Unroll at method level
+### Unroll at method level
 
 Test cases are defined via ``@Spockito.Unroll`` annotation directly on the test method. The best explanation are
 probably a few simple examples:
@@ -57,8 +57,12 @@ public class UnrollMethodDataTest {
     }
 }
 ```
+This and other examples can be found [here](https://github.com/tools4j/spockito/blob/master/src/test/java/org/tools4j/spockito/).
 
-#### Unroll at class level
+##### Run above test in IDE (here: IntelliJ)
+![spockito-ide-test-run](https://github.com/tools4j/spockito/blob/master/ide-run-SpockitoTest.png)
+
+### Unroll at class level
 
 Alternatively, the test data can be defined at class level. All methods can then use the same test cases. The values
 are either
@@ -66,8 +70,56 @@ are either
 * passed to the single test constructor where they are usually assigned to a member variable
 * directly assigned to a field annotated with ``@Spockito.Ref``
 
-#### Run test in IDE (here: IntelliJ)
-![spockito-ide-test-run](https://github.com/tools4j/spockito/blob/master/ide-run-SpockitoTest.png)
+An example with field injection is shown next:
 
-#### More Information
+```java
+@Spockito.Unroll({
+        "| Operation | Sign | Operand1 | Operand2 | Result | NeutralOperand2 |",
+        "|-----------|------|----------|----------|--------|-----------------|",
+        "| Add       |   +  |        4 |        7 |     11 |               0 |",
+        "| Subtract  |   -  |      111 |       12 |     99 |               0 |",
+        "| Multiply  |   *  |       24 |        5 |    120 |               1 |",
+        "| Divide    |   /  |       24 |        3 |      8 |               1 |"
+})
+@Spockito.Name("[{row}]: {Operation}")
+@RunWith(Spockito.class)
+public class UnrollClassDataToFieldsTest {
+
+    @Spockito.Ref
+    private Operation operation;
+    @Spockito.Ref
+    private char sign;
+    @Spockito.Ref
+    private int operand1;
+    @Spockito.Ref
+    private int operand2;
+    @Spockito.Ref
+    private int result;
+    @Spockito.Ref
+    private int neutralOperand2;
+
+    @Test
+    @Spockito.Name("[{row}]: {Operand1} {Sign} {Operand2} = {Result}")
+    public void testOperation() {
+        Assert.assertEquals("Result is wrong!", result, operation.evaluate(operand1, operand2));
+    }
+
+    @Test
+    @Spockito.Name("[{row}]: {Operand1} {Sign} {NeutralOperand2} = {Operand1}")
+    public void testNeutralOperand() {
+        Assert.assertEquals("Result with neutral operand is wrong!",
+                operand1, operation.evaluate(operand1, neutralOperand2));
+    }
+}
+```
+This and other examples can be found [here](https://github.com/tools4j/spockito/blob/master/src/test/java/org/tools4j/spockito/).
+
+### More examples
+* [UnrollMethodDataTest.java](https://github.com/tools4j/spockito/blob/master/src/test/java/org/tools4j/spockito/UnrollMethodDataTest.java)
+* [UnrollClassDataToFieldsTest.java](https://github.com/tools4j/spockito/blob/master/src/test/java/org/tools4j/spockito/UnrollClassDataToFieldsTest.java)
+* [UnrollClassDataToConstructorTest.java](https://github.com/tools4j/spockito/blob/master/src/test/java/org/tools4j/spockito/UnrollClassDataToConstructorTest.java)
+* [UnrollClassDataToMethodTest.java](https://github.com/tools4j/spockito/blob/master/src/test/java/org/tools4j/spockito/UnrollClassDataToMethodTest.java)
+* [all tests](https://github.com/tools4j/spockito/blob/master/src/test/java/org/tools4j/spockito/)
+
+### More Information
 * [MIT License](https://github.com/tools4j/spockito/blob/master/LICENSE)
