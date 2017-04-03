@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/tools4j/spockito.svg?branch=master)](https://travis-ci.org/tools4j/spockito)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.tools4j/tools4j-spockito/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.tools4j/tools4j-spockito)
 
 # tools4j-spockito
 Java JUnit runner for parameterized tests where the test cases are defined in a table-like
