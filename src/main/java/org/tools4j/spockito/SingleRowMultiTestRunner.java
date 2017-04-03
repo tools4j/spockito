@@ -71,6 +71,7 @@ public class SingleRowMultiTestRunner extends AbstractSpockitoTestRunner {
         for (int i = 0; i < fields.size(); i++) {
             final Field field = fields.get(i).getField();
             try {
+                field.setAccessible(true);
                 field.set(testInstance, fieldValues[i]);
             } catch (final Exception e) {
                 throw new Exception(getTestClass().getName()

@@ -41,9 +41,14 @@ uploadArchives {
 }
 
 license {
-    header rootProject.file('src/main/resources/LICENSE.template')
+    header rootProject.file('src/main/templates/LICENSE.template')
     strictCheck true
-	include "**/*.java"
+    sourceSets {
+        main {
+            java { include "**/*.java" }
+            resources { include "LICENSE.txt" }
+        }
+    }
 	ext.year = Calendar.getInstance().get(Calendar.YEAR)
 }
 

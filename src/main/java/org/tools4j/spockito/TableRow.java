@@ -92,7 +92,8 @@ public class TableRow {
         final Object[] converted = new Object[fields.size()];
         for (int i = 0; i < converted.length; i++) {
             final Field field = fields.get(i).getField();
-            final String refName = fields.get(i).getAnnotation(Spockito.Ref.class).value();
+            final String refValue = fields.get(i).getAnnotation(Spockito.Ref.class).value();
+            final String refName = refValue.isEmpty() ? field.getName() : refValue;
             converted[i] = convertValue(refName, -1, field.getType(), field.getGenericType(), valueConverter);
         }
         return converted;

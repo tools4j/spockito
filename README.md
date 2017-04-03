@@ -1,12 +1,15 @@
 [![Build Status](https://travis-ci.org/tools4j/spockito.svg?branch=master)](https://travis-ci.org/tools4j/spockito)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.tools4j/tools4j-spockito/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.tools4j/tools4j-spockito)
 
-# tools4j-spockito
+# spockito
 Java JUnit runner for parameterized tests where the test cases are defined in a table-like
-manner. The @Unroll annotation has been inspired the groovy framework Spock.
+manner. The @Unroll annotation has been inspired the Groovy framework Spock.
  
-#### Examples
-###### Unroll at method level
+#### Unroll at method level
+
+Test cases are defined via ``@Spockito.Unroll`` annotation directly on the test method. The best explanation are
+probably a few simple examples:
+
 ```java
 @RunWith(Spockito.class)
 public class UnrollMethodDataTest {
@@ -54,6 +57,14 @@ public class UnrollMethodDataTest {
     }
 }
 ```
+
+#### Unroll at class level
+
+Alternatively, the test data can be defined at class level. All methods can then use the same test cases. The values
+are either
+* directly injected to the method as method parameters
+* passed to the single test constructor where they are usually assigned to a member variable
+* directly assigned to a field annotated with ``@Spockito.Ref``
 
 #### Run test in IDE (here: IntelliJ)
 ![spockito-ide-test-run](https://github.com/tools4j/spockito/blob/master/ide-run-SpockitoTest.png)

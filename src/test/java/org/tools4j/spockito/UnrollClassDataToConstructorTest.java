@@ -39,47 +39,6 @@ import org.junit.runner.RunWith;
 @RunWith(Spockito.class)
 public class UnrollClassDataToConstructorTest {
 
-    private enum Operation {
-        Add {
-            public int evaluate(final int operand1, final int operand2) {
-                return operand1 + operand2;
-            }
-            @Override
-            public int neutralSecondOperand() {
-                return 0;
-            }
-        },
-        Subtract {
-            public int evaluate(final int operand1, final int operand2) {
-                return operand1 - operand2;
-            }
-            @Override
-            public int neutralSecondOperand() {
-                return 0;
-            }
-        },
-        Multiply {
-            public int evaluate(final int operand1, final int operand2) {
-                return operand1 * operand2;
-            }
-            @Override
-            public int neutralSecondOperand() {
-                return 1;
-            }
-        },
-        Divide {
-            public int evaluate(final int operand1, final int operand2) {
-                return operand1 / operand2;
-            }
-            @Override
-            public int neutralSecondOperand() {
-                return 1;
-            }
-        };
-        abstract public int evaluate(int operand1, int operand2);
-        abstract public int neutralSecondOperand();
-    }
-
     private final Operation operation;
     private final char sign;
     private final int operand1;

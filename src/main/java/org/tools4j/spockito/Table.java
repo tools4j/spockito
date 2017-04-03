@@ -56,7 +56,12 @@ public class Table implements Iterable<TableRow> {
     }
 
     public int getColumnIndexByName(final String columnName) {
-        final int columnIndex = headers.indexOf(columnName);
+        int columnIndex = headers.indexOf(columnName);
+        if (columnIndex < 0) {
+            if (columnName.length() > 0 && Character.isLowerCase(columnName.charAt(0))) {
+                columnIndex = headers.indexOf(firstCharToUpperCase(columnName));
+            }
+        }
         if (columnIndex < 0) {
             throw new IllegalArgumentException("No such column: " + columnName);
         }
@@ -123,5 +128,9 @@ public class Table implements Iterable<TableRow> {
             }
         }
         return tableRow;
+    }
+
+    private final String firstCharToUpperCase(final String value) {
+        return value.length() > 0 ? Character.toUpperCase(value.charAt(0)) + value.substring(1) : value;
     }
 }

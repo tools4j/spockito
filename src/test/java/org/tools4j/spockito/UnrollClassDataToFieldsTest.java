@@ -35,23 +35,32 @@ import org.junit.runner.RunWith;
         "| Multiply  |   *  |       24 |        5 |    120 |               1 |",
         "| Divide    |   /  |       24 |        3 |      8 |               1 |"
 })
+@Spockito.Name("[{row}]: {Operation}")
 @RunWith(Spockito.class)
-public class UnrollClassDataToMethodTest {
+public class UnrollClassDataToFieldsTest {
+
+    @Spockito.Ref
+    private Operation operation;
+    @Spockito.Ref
+    private char sign;
+    @Spockito.Ref
+    private int operand1;
+    @Spockito.Ref
+    private int operand2;
+    @Spockito.Ref
+    private int result;
+    @Spockito.Ref
+    private int neutralOperand2;
 
     @Test
-    @Spockito.Name(value = ": {Operand1} {Sign} {Operand2} = {Result}", shortFormat = true)
-    public void testOperation(@Spockito.Ref("Operation") final Operation operation,
-                              @Spockito.Ref("Operand1") final int operand1,
-                              @Spockito.Ref("Operand2") final int operand2,
-                              @Spockito.Ref("Result") final int result) {
+    @Spockito.Name("[{row}]: {Operand1} {Sign} {Operand2} = {Result}")
+    public void testOperation() {
         Assert.assertEquals("Result is wrong!", result, operation.evaluate(operand1, operand2));
     }
 
     @Test
-    @Spockito.Name(value = ": {Operand1} {Sign} {NeutralOperand2} = {Operand1}", shortFormat = true)
-    public void testNeutralOperand(@Spockito.Ref("Operation") final Operation operation,
-                                   @Spockito.Ref("Operand1") final int operand1,
-                                   @Spockito.Ref("NeutralOperand2") final int neutralOperand2) {
+    @Spockito.Name("[{row}]: {Operand1} {Sign} {NeutralOperand2} = {Operand1}")
+    public void testNeutralOperand() {
         Assert.assertEquals("Result with neutral operand is wrong!",
                 operand1, operation.evaluate(operand1, neutralOperand2));
     }
