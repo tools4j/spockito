@@ -53,7 +53,7 @@ public class UnrollMethodDataTest {
                                       @Spockito.Ref("Angle sum") int degrees,
                                       @Spockito.Ref("Object") String name) {
         Assert.assertTrue("There should be 3 or more vertices", 3 <= n);
-        Assert.assertEquals("Angular sum of is wrong for: " + name, degrees, (n-2)*180);
+        Assert.assertEquals("Angular sum is wrong for: " + name, degrees, (n-2)*180);
     }
 }
 ```
