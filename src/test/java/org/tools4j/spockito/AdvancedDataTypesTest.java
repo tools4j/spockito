@@ -131,4 +131,15 @@ public class AdvancedDataTypesTest {
         Assert.assertTrue("map.Index should be greater than zero", map.get("Index") > 0);
         Assert.assertTrue("map.Age should be greater than zero", map.get("Age") > 40);
     }
+
+    @Test
+    @Spockito.Unroll({
+            "| List |",
+            "| [ { index=1 ; name=cherry }, { index=2 ; name=apple } ] |",
+            "| [ { index=10 ; name=rose }, { index=20 ; name=tulip } , { index=30 ; name=erika } ] |"
+    })
+    public void testUnrollListOfBeans(final @Spockito.Ref("List") List<FieldBean> list) {
+        Assert.assertNotNull("list should not be null", list);
+        Assert.assertTrue("list size should be at least 2", 2 <= list.size());
+    }
 }

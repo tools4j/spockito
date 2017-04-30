@@ -97,6 +97,34 @@ public final class Converters {
     };
 
     /**
+     * Value converter for target type {@link Optional}.
+     */
+    public static class OptionalConverter implements ValueConverter {
+        private final ValueConverter elementConverter;
+
+        public OptionalConverter(final ValueConverter elementConverter) {
+            this.elementConverter = Objects.requireNonNull(elementConverter);
+        }
+
+        @Override
+        public <T> T convert(final Class<T> type, final Type genericType, final String value) {
+            if (!Optional.class.equals(type)) {
+                throw new IllegalArgumentException("Type must be Optional: " + type.getName());
+            }
+            final String trimmed = value.trim();
+            final Object elementValue;
+            if ("empty".equals(trimmed) || trimmed.isEmpty()) {
+                elementValue = null;
+            } else {
+                final ActualType elementType = actualTypeForTypeParam(genericType, 0, 1);
+                elementValue = elementConverter.convert(elementType.rawType, elementType.genericType, trimmed);
+            }
+            return type.cast(Optional.ofNullable(elementValue));
+        }
+
+    }
+
+    /**
      * Value converter for target type {@link Collection} or sub-interfaces and implementations of it.
      */
     public static class CollectionConverter implements ValueConverter {
@@ -324,7 +352,10 @@ public final class Converters {
 
         private void injectValues(final Object instance, final Map<String, Accessor> accessorByName, final String value) {
             final String plainValue = removeStartAndEndChars(value, '{', '}');
-            final String[] parts = UNESCAPED_COMMA.split(plainValue);
+            String[] parts = UNESCAPED_COMMA.split(plainValue);
+            if (parts.length == 1) {
+                parts = UNESCAPED_SEMICOLON.split(plainValue);
+            }
             final Map<String, String> valueByName = new LinkedHashMap<>();
             for (int i = 0; i < parts.length; i++) {
                 final String[] nameAndValue = parseKeyValue(parts[i].trim());

@@ -103,6 +103,7 @@ public class SpockitoValueConverter implements ValueConverter {
         registerConverterFunction(StringBuffer.class, Converters.STRING_BUFFER_CONVERTER);
 
         registerConverter((t, g) -> t.isEnum(), Converters.ENUM_CONVERTER);
+        registerConverter((t, g) -> t == Optional.class, new Converters.OptionalConverter(this));
         registerConverter((t, g) -> t.isArray(), new Converters.ArrayConverter(this));
         registerConverter((t, g) -> Class.class.isAssignableFrom(t), Converters.CLASS_CONVERTER);
         registerConverter((t, g) -> Collection.class.isAssignableFrom(t), new Converters.CollectionConverter(this));

@@ -409,6 +409,42 @@ public class ValueConverterTest {
     }
 
     @Test
+    public void convertOptional() throws Exception {
+        final class Optionals {
+            Optional<String> emptyString = Optional.empty();
+            Optional<String> nonEmptyString = Optional.of("trumpet");
+            Optional<String> nonEmptyString2 = Optional.of("empty");
+            Optional<Integer> emptyInteger = Optional.empty();
+            Optional<Integer> nonEmptyInteger = Optional.of(42);
+        }
+        final Optionals optionals = new Optionals();
+
+        //empty string
+        assertEquals("Unexpected empty string value", optionals.emptyString, converter.convert(
+                Optional.class, Optionals.class.getDeclaredField("emptyString").getGenericType(), "empty"));
+        assertEquals("Unexpected empty string value", optionals.emptyString, converter.convert(
+                Optional.class, Optionals.class.getDeclaredField("emptyString").getGenericType(), ""));
+
+        //empty integer
+        assertEquals("Unexpected empty integer value", optionals.emptyInteger, converter.convert(
+                Optional.class, Optionals.class.getDeclaredField("emptyInteger").getGenericType(), "empty"));
+        assertEquals("Unexpected empty integer value", optionals.emptyInteger, converter.convert(
+                Optional.class, Optionals.class.getDeclaredField("emptyInteger").getGenericType(), ""));
+
+        //non-empty string value
+        assertEquals("Unexpected optional string value", optionals.nonEmptyString, converter.convert(
+                Optional.class, Optionals.class.getDeclaredField("nonEmptyString").getGenericType(), "trumpet"));
+        assertEquals("Unexpected optional string value", optionals.nonEmptyString, converter.convert(
+                Optional.class, Optionals.class.getDeclaredField("nonEmptyString").getGenericType(), "'trumpet'"));
+        assertEquals("Unexpected optional string value 2", optionals.nonEmptyString2, converter.convert(
+                Optional.class, Optionals.class.getDeclaredField("nonEmptyString2").getGenericType(), "'empty'"));
+
+        //non-empty integer value
+        assertEquals("Unexpected optional integer value", optionals.nonEmptyInteger, converter.convert(
+                Optional.class, Optionals.class.getDeclaredField("nonEmptyInteger").getGenericType(), "42"));
+    }
+
+    @Test
     public void convertClass() {
         final Class<?>[] classes = new Class<?>[] {
                 getClass(),
