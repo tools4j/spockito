@@ -73,7 +73,10 @@ public class FaqTest {
             "|123%7c321|123|321|"
     })
     public void testWithPipe(String input, BigInteger locationId, BigInteger eventId) {
-        Assert.assertTrue(input.contains("|") || input.startsWith("123") && input.endsWith("321"));
+      Assert.assertTrue("Should start with 123", input.startsWith("123"));
+      Assert.assertTrue("Should end with 321", input.endsWith("321"));
+      Assert.assertTrue("Should contain a | or %7c", input.contains("|") || input.contains("%7c"));
+      Assert.assertFalse("Should not have a \\", input.contains("\\"));
     }
 
 }
