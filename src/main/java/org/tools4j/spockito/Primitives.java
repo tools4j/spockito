@@ -34,7 +34,7 @@ final class Primitives {
      * @param <T> the type parameter
      * @return the boxing type such as {@code Integer.class}
      */
-    public static <T> Class<T> boxingTypeFor(final Class<T> type) {
+    static <T> Class<T> boxingTypeFor(final Class<T> type) {
         if (double.class.equals(type)) {
             return (Class<T>)Double.class;
         }

@@ -54,7 +54,7 @@ public class TableRow {
     }
 
     public static TableRow parse(final Table table, final String rowString) {
-        final String noBars = trimChar(rowString, '|');
+        final String noBars = removeSurroundingPipes(rowString);
         final String[] parts = UNESCAPED_PIPE.split(noBars);
         final TableRow tableRow = new TableRow(table);
         for (final String part : parts) {
@@ -71,7 +71,8 @@ public class TableRow {
     }
 
     public boolean isSeparatorRow() {
-        return values.stream().allMatch(s -> trimChar(s, '-').isEmpty() || trimChar(s, '=').isEmpty());
+        return values.stream().anyMatch(s -> s.contains("-") || s.contains("=")) &&
+                values.stream().allMatch(s -> allCharsMatchingAnyOf(s, '-', '='));
     }
 
     public boolean isValidRefName(final String refName) {
@@ -131,7 +132,7 @@ public class TableRow {
     }
 
     public int distinctCount() {
-        return (int)values.stream().distinct().count();
+        return (int) values.stream().distinct().count();
     }
 
     public String get(final int index) {
@@ -159,14 +160,21 @@ public class TableRow {
         return "TableRow" + values;
     }
 
-    private static String trimChar(final String s, final char trim) {
-        int start = 0;
-        int end = s.length();
-        while (start < end && s.charAt(start) == trim) {
-            start++;
+    private static String removeSurroundingPipes(final String s) {
+        final int len = s.length();
+        if (len >= 2 && s.charAt(0) == '|' && s.charAt(len - 1) == '|') {
+            return s.substring(1, len - 1);
         }
-        while (end > start && s.charAt(end - 1) == trim) {
-            end--;
+        return s;
+    }
+
+    private static boolean allCharsMatchingAnyOf(final String s, final char ch1, final char ch2) {
+        final int len = s.length();
+        for (int i = 0; i < len; i++) {
+            if (s.charAt(i) != ch1 && s.charAt(i) != ch2) {
+                return false;
+            }
         }
-        return s.substring(start, end);
-    }}
+        return true;
+    }
+}
