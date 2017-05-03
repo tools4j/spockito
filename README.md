@@ -137,5 +137,8 @@ Add the following dependency to your maven pom.xml file:
 Sources and binaries can be downloaded from maven central:
 * [tools4j-spockito](http://search.maven.org/#search%7Cga%7C1%7Ctools4j-spockito) in Maven Central
 
+### FAQ
+* [Frequently asked Questions](https://github.com/tools4j/spockito/issues?q=is:question)
+
 ### More Information
 * [MIT License](https://github.com/tools4j/spockito/blob/master/LICENSE)
