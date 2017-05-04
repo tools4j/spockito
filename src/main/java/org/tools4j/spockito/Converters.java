@@ -32,17 +32,11 @@ import java.time.*;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Function;
-import java.util.regex.Pattern;
 
 /**
  * Contains conversion functions and value converters used by {@link SpockitoValueConverter}.
  */
 public final class Converters {
-
-    private static final Pattern UNESCAPED_COMMA = Pattern.compile("(?<=[^\\\\]),");
-    private static final Pattern UNESCAPED_SEMICOLON = Pattern.compile("(?<=[^\\\\]);");
-    private static final Pattern UNESCAPED_COLON = Pattern.compile("(?<=[^\\\\]):");
-    private static final Pattern UNESCAPED_EQUAL = Pattern.compile("(?<=[^\\\\])=");
 
     public static final Function<? super String, Object> OBJECT_CONVERTER = Function.identity();
     public static final Function<? super String, Long> LONG_CONVERTER = Long::valueOf;
@@ -65,7 +59,7 @@ public final class Converters {
     public static final Function<? super String, java.sql.Date> SQL_DATE_CONVERTER = java.sql.Date::valueOf;
     public static final Function<? super String, Time> SQL_TIME_CONVERTER = Time::valueOf;
     public static final Function<? super String, Timestamp> SQL_TIMESTAMP_CONVERTER = Timestamp::valueOf;
-    public static final Function<? super String, String> STRING_CONVERTER = s -> removeStartAndEndChars(s, '\'', '\'');
+    public static final Function<? super String, String> STRING_CONVERTER = s -> Strings.removeStartAndEndChars(s, '\'', '\'');
     public static final Function<? super String, StringBuilder> STRING_BUILDER_CONVERTER = s -> new StringBuilder(STRING_CONVERTER.apply(s));
     public static final Function<? super String, StringBuffer> STRING_BUFFER_CONVERTER = s -> new StringBuffer(STRING_CONVERTER.apply(s));
     public static final Function<? super String, Character> CHAR_CONVERTER = s -> {
@@ -182,10 +176,10 @@ public final class Converters {
         }
 
         private List<Object> toList(final ActualType elementType, final String value) {
-            final String plainValue = removeStartAndEndChars(value, '[', ']');
-            String[] parts = UNESCAPED_COMMA.split(plainValue);
+            final String plainValue = Strings.removeStartAndEndChars(value, '[', ']');
+            String[] parts = Strings.UNESCAPED_COMMA.split(plainValue);
             if (parts.length == 1) {
-                parts = UNESCAPED_SEMICOLON.split(plainValue);
+                parts = Strings.UNESCAPED_SEMICOLON.split(plainValue);
             }
             final List<Object> list = new ArrayList<>(parts.length);
             for (int i = 0; i < parts.length; i++) {
@@ -284,10 +278,10 @@ public final class Converters {
         }
 
         private Map<Object, Object> toMap(final ActualType keyType, final ActualType valueType, final String value) {
-            final String plainValue = removeStartAndEndChars(value, '{', '}');
-            String[] parts = UNESCAPED_COMMA.split(plainValue);
+            final String plainValue = Strings.removeStartAndEndChars(value, '{', '}');
+            String[] parts = Strings.UNESCAPED_COMMA.split(plainValue);
             if (parts.length == 1) {
-                parts = UNESCAPED_SEMICOLON.split(plainValue);
+                parts = Strings.UNESCAPED_SEMICOLON.split(plainValue);
             }
             final Map<Object, Object> map = new LinkedHashMap<>();
             for (int i = 0; i < parts.length; i++) {
@@ -351,10 +345,10 @@ public final class Converters {
         }
 
         private void injectValues(final Object instance, final Map<String, Accessor> accessorByName, final String value) {
-            final String plainValue = removeStartAndEndChars(value, '{', '}');
-            String[] parts = UNESCAPED_COMMA.split(plainValue);
+            final String plainValue = Strings.removeStartAndEndChars(value, '{', '}');
+            String[] parts = Strings.UNESCAPED_COMMA.split(plainValue);
             if (parts.length == 1) {
-                parts = UNESCAPED_SEMICOLON.split(plainValue);
+                parts = Strings.UNESCAPED_SEMICOLON.split(plainValue);
             }
             final Map<String, String> valueByName = new LinkedHashMap<>();
             for (int i = 0; i < parts.length; i++) {
@@ -463,9 +457,9 @@ public final class Converters {
     }
 
     private static final String[] parseKeyValue(final String pair) {
-        final String[] split = UNESCAPED_EQUAL.split(pair);
+        final String[] split = Strings.UNESCAPED_EQUAL.split(pair);
         if (split.length == 1) {
-            return UNESCAPED_COLON.split(pair);
+            return Strings.UNESCAPED_COLON.split(pair);
         }
         return split;
     }
@@ -525,14 +519,6 @@ public final class Converters {
                 return List.class.getName() + "<" + listElementType + ">";
             }
         };
-    }
-
-    private static String removeStartAndEndChars(final String s, final char startQuoteChar, final char endQuoteChar) {
-        final int len = s.length();
-        if (len >= 2 && s.charAt(0) == startQuoteChar && s.charAt(len - 1) == endQuoteChar) {
-            return s.substring(1, len - 1);
-        }
-        return s;
     }
 
     private Converters() {

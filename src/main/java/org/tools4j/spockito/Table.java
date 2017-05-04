@@ -59,7 +59,7 @@ public class Table implements Iterable<TableRow> {
         int columnIndex = headers.indexOf(columnName);
         if (columnIndex < 0) {
             if (columnName.length() > 0 && Character.isLowerCase(columnName.charAt(0))) {
-                columnIndex = headers.indexOf(firstCharToUpperCase(columnName));
+                columnIndex = headers.indexOf(Strings.firstCharToUpperCase(columnName));
             }
         }
         if (columnIndex < 0) {
@@ -130,7 +130,4 @@ public class Table implements Iterable<TableRow> {
         return tableRow;
     }
 
-    private final String firstCharToUpperCase(final String value) {
-        return value.length() > 0 ? Character.toUpperCase(value.charAt(0)) + value.substring(1) : value;
-    }
 }
