@@ -128,7 +128,7 @@ Add the following dependency to your maven pom.xml file:
  <dependency>
      <groupId>org.tools4j</groupId>
      <artifactId>tools4j-spockito</artifactId>
-     <version>1.2</version>
+     <version>1.3</version>
      <scope>test</scope>
  </dependency>
  ```
@@ -138,7 +138,7 @@ Sources and binaries can be downloaded from maven central:
 * [tools4j-spockito](http://search.maven.org/#search%7Cga%7C1%7Ctools4j-spockito) in Maven Central
 
 ### FAQ
-* [Frequently asked Questions](https://github.com/tools4j/spockito/issues?q=is:question)
+* [Frequently asked Questions](https://github.com/tools4j/spockito/issues?q=label:question)
 
 ### More Information
 * [MIT License](https://github.com/tools4j/spockito/blob/master/LICENSE)
