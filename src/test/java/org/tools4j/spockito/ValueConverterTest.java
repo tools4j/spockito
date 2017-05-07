@@ -486,6 +486,7 @@ public class ValueConverterTest {
         final class CollectionHolder {
             final Collection<Integer> collection = Arrays.asList(1, 2, 3, 4);
             final List<Integer> list= Arrays.asList(1, 2, 3, 4);
+            final List<Integer> emptyList = Arrays.asList();
             final ArrayList<Integer> arrayList = new ArrayList(Arrays.asList(1, 2, 3, 4));
             final Vector<Integer> vector = new Vector(Arrays.asList(1, 2, 3, 4));
             final Set<Integer> set = new LinkedHashSet<>(Arrays.asList(1, 2, 3, 4));
@@ -499,7 +500,9 @@ public class ValueConverterTest {
             final ConcurrentLinkedDeque<Integer> concurrentLinkedDeque = new ConcurrentLinkedDeque<>(Arrays.asList(1, 2, 3, 4));
             final ConcurrentSkipListSet<Integer> concurrentSkipListSet = new ConcurrentSkipListSet<>(Arrays.asList(1, 2, 3, 4));
             final EnumSet<TestEnum> enumSet = EnumSet.of(TestEnum.CONST_A, TestEnum.CONST_B);
+            final EnumSet<TestEnum> emptyEnumSet = EnumSet.noneOf(TestEnum.class);
             final List<Map<Integer, String>> listOfMaps = Arrays.asList(map(1, "one", 2, "two", 3, "three"), Collections.singletonMap(4, "four"), map(5, "five", 6, "six", 7, "seven"));
+            final List<Map<Integer, String>> listOfEmptyMaps = Arrays.asList(Collections.emptyMap(), Collections.emptyMap());
             final TestCollection<Integer> testCollection = new TestCollection<>(Arrays.asList(1, 2, 3, 4));
         }
         final CollectionHolder exp = new CollectionHolder();
@@ -511,6 +514,10 @@ public class ValueConverterTest {
                 List.class,
                 CollectionHolder.class.getDeclaredField("list").getGenericType(),
                 "[1,2,3,4]"));
+        assertEquals("Unexpected emptyList", exp.emptyList, converter.convert(
+                List.class,
+                CollectionHolder.class.getDeclaredField("emptyList").getGenericType(),
+                "[]"));
         assertEquals("Unexpected arrayList", exp.arrayList, converter.convert(
                 ArrayList.class,
                 CollectionHolder.class.getDeclaredField("arrayList").getGenericType(),
@@ -563,10 +570,18 @@ public class ValueConverterTest {
                 EnumSet.class,
                 CollectionHolder.class.getDeclaredField("enumSet").getGenericType(),
                 "[CONST_A, CONST_B]"));
+        assertEquals("Unexpected emptyEnumSet", exp.emptyEnumSet, converter.convert(
+                EnumSet.class,
+                CollectionHolder.class.getDeclaredField("emptyEnumSet").getGenericType(),
+                "[]"));
         assertEquals("Unexpected listOfMaps", exp.listOfMaps, converter.convert(
                 List.class,
                 CollectionHolder.class.getDeclaredField("listOfMaps").getGenericType(),
                 "[{1:one;2:two;3:three},{4:four},{5:five;6:six;7:seven}]"));
+        assertEquals("Unexpected listOfEmptyMaps", exp.listOfEmptyMaps, converter.convert(
+                List.class,
+                CollectionHolder.class.getDeclaredField("listOfEmptyMaps").getGenericType(),
+                "[{}, { } ]"));
 
         //expect not supported exception
         try {
@@ -585,6 +600,7 @@ public class ValueConverterTest {
     public void convertMap() throws Exception {
         final class MapHolder {
             final Map<Integer, String> map = map(1, "one", 2, "two", 3, "three");
+            final Map<Integer, String> emptyMap = Collections.emptyMap();
             final SortedMap<Integer, String> sortedMap = new TreeMap<>(map(1, "one", 2, "two", 3, "three"));
             final NavigableMap<Integer, String> navigableMap = new TreeMap<>(map(1, "one", 2, "two", 3, "three"));
             final HashMap<Integer, String> hashMap = new HashMap<>(map(1, "one", 2, "two", 3, "three"));
@@ -593,6 +609,7 @@ public class ValueConverterTest {
             final ConcurrentMap<Integer, String> concurrentMap = new ConcurrentHashMap<>(map(1, "one", 2, "two", 3, "three"));
             final ConcurrentNavigableMap<Integer, String> concurrentNavigableMap = new ConcurrentSkipListMap<>(map(1, "one", 2, "two", 3, "three"));
             final EnumMap<TestEnum, String> enumMap = new EnumMap<>(map(TestEnum.CONST_A, "a", TestEnum.CONST_B, "b", TestEnum.CONST_C, "c"));
+            final EnumMap<TestEnum, String> emptyEnumMap = new EnumMap<>(TestEnum.class);
             final Map<Integer, List<String>> listMap = map(1, Arrays.asList("one", "two"), 3, Arrays.asList("three"), 4, Arrays.asList("four"));
             final Properties properties = new Properties();{
                 properties.putAll(map("propA", "a", "propB", "b", "propC", "c"));
@@ -600,6 +617,10 @@ public class ValueConverterTest {
             final TestMap<Integer, String> testMap = new TestMap<>(map(1, "one", 2, "two", 3, "three"));
         }
         final MapHolder exp = new MapHolder ();
+        assertEquals("Unexpected emptyMap", exp.emptyMap, converter.convert(
+                Map.class,
+                MapHolder.class.getDeclaredField("emptyMap").getGenericType(),
+                "{ }"));
         assertEquals("Unexpected map", exp.map, converter.convert(
                 Map.class,
                 MapHolder.class.getDeclaredField("map").getGenericType(),
@@ -632,6 +653,10 @@ public class ValueConverterTest {
                 ConcurrentNavigableMap.class,
                 MapHolder.class.getDeclaredField("concurrentNavigableMap").getGenericType(),
                 "{1:one,2:two,3:three}"));
+        assertEquals("Unexpected emptyEnumMap", exp.emptyEnumMap, converter.convert(
+                EnumMap.class,
+                MapHolder.class.getDeclaredField("emptyEnumMap").getGenericType(),
+                "{}"));
         assertEquals("Unexpected enumMap", exp.enumMap, converter.convert(
                 EnumMap.class,
                 MapHolder.class.getDeclaredField("enumMap").getGenericType(),

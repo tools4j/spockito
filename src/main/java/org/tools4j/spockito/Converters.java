@@ -177,6 +177,9 @@ public final class Converters {
 
         private List<Object> toList(final ActualType elementType, final String value) {
             final String plainValue = Strings.removeStartAndEndChars(value, '[', ']');
+            if (plainValue.trim().isEmpty()) {
+                return Collections.emptyList();
+            }
             String[] parts = Strings.UNESCAPED_COMMA.split(plainValue);
             if (parts.length == 1) {
                 parts = Strings.UNESCAPED_SEMICOLON.split(plainValue);
@@ -279,6 +282,9 @@ public final class Converters {
 
         private Map<Object, Object> toMap(final ActualType keyType, final ActualType valueType, final String value) {
             final String plainValue = Strings.removeStartAndEndChars(value, '{', '}');
+            if (plainValue.trim().isEmpty()) {
+                return Collections.emptyMap();
+            }
             String[] parts = Strings.UNESCAPED_COMMA.split(plainValue);
             if (parts.length == 1) {
                 parts = Strings.UNESCAPED_SEMICOLON.split(plainValue);
