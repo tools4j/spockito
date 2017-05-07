@@ -23,10 +23,7 @@
  */
 package org.tools4j.spockito;
 
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 
 import java.math.BigInteger;
@@ -44,7 +41,8 @@ public class FaqTest {
 
     @AfterClass
     public static void assertSpecialStringTestCount() {
-        Assert.assertEquals("Expected 4 special string test runs", 4, SPECIAL_STRING_COUNT.get());
+        Assume.assumeTrue("Assume that testSpecialStrings() has been run at least once", SPECIAL_STRING_COUNT.get() > 0);
+        Assert.assertEquals("Expected 4 runs of testSpecialStrings()", 4, SPECIAL_STRING_COUNT.get());
     }
 
     /** Question related to issue #1 */

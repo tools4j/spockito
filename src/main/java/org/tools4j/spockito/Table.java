@@ -23,6 +23,7 @@
  */
 package org.tools4j.spockito;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -100,6 +101,20 @@ public class Table implements Iterable<TableRow> {
     @Override
     public Iterator<TableRow> iterator() {
         return Collections.unmodifiableList(data).iterator();
+    }
+
+    public static <T> T[] parse(final Class<T> rowType, final String[] headerAndRows) {
+        return parse(rowType, headerAndRows, new SpockitoValueConverter());
+    }
+
+    public static <T> T[] parse(final Class<T> rowType, final String[] headerAndRows, final ValueConverter valueConverter) {
+        final Table table = parse(headerAndRows);
+        final int rows = table.getRowCount();
+        final T[] result = (T[])Array.newInstance(rowType, rows);
+        for (int row = 0; row < rows; row++) {
+            result[row] = valueConverter.convert(rowType, rowType, table.getRow(row).asMap().toString());
+        }
+        return result;
     }
 
     public static Table parse(final String[] headerAndRows) {

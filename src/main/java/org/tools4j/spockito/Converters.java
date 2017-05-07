@@ -367,7 +367,8 @@ public final class Converters {
                 }
                 try {
                     final Class<?> type = e.getValue().type();
-                    final Object convertedVal = elementConverter.convert(type, type, val);
+                    final Type genericType = e.getValue().genericType();
+                    final Object convertedVal = elementConverter.convert(type, genericType, val);
                     e.getValue().set(instance, convertedVal);
                 } catch (final Exception ex) {
                     throw new IllegalArgumentException("Could not set bean property " + instance.getClass().getName() + "." + e.getKey() +
@@ -398,7 +399,10 @@ public final class Converters {
             default Class<?> type() {
                 return Object.class;
             }
-            static Accessor forType(final Class<?> type, final Accessor accessor) {
+            default Type genericType() {
+                return Object.class;
+            }
+            static Accessor forType(final Class<?> type, final Type genericType, final Accessor accessor) {
                 return new Accessor() {
                     @Override
                     public void set(final Object instance, final Object value) throws Exception {
@@ -408,6 +412,11 @@ public final class Converters {
                     @Override
                     public Class<?> type() {
                         return type;
+                    }
+
+                    @Override
+                    public Type genericType() {
+                        return genericType;
                     }
                 };
             }
@@ -426,7 +435,7 @@ public final class Converters {
                 if (name.length() > 3 && name.startsWith("set") && method.getParameterCount() == 1 &&
                         !method.isSynthetic() && !Modifier.isStatic(mod) && !Modifier.isPrivate(mod) && !Modifier.isProtected(mod)) {
                     final String propertyName = normalizeFieldName(name.substring(3));
-                    accessorByName.put(propertyName, Accessor.forType(method.getParameterTypes()[0], method::invoke));
+                    accessorByName.put(propertyName, Accessor.forType(method.getParameterTypes()[0], method.getGenericParameterTypes()[0], method::invoke));
                 }
             }
             return inspectSetters(clazz.getSuperclass(), accessorByName);
@@ -442,7 +451,7 @@ public final class Converters {
             for (final Field field : clazz.getDeclaredFields()) {
                 final int mod = field.getModifiers();
                 if (!field.isSynthetic() && !Modifier.isFinal(mod) && !Modifier.isStatic(mod) && !Modifier.isPrivate(mod) && !Modifier.isProtected(mod)) {
-                    accessorByName.put(field.getName(), Accessor.forType(field.getType(), field::set));
+                    accessorByName.put(field.getName(), Accessor.forType(field.getType(), field.getGenericType(), field::set));
                 }
             }
             return inspectFields(clazz.getSuperclass(), accessorByName);
