@@ -85,7 +85,7 @@ public class FaqTest {
         Assert.assertTrue(input.contains("|") || input.startsWith("123") && input.endsWith("321"));
     }
 
-    /** Question related to issue # */
+    /** Question related to issue #6 */
     @Test
     @Spockito.Unroll({
       "|Character|",
@@ -130,6 +130,7 @@ public class FaqTest {
       }
     }
 
+    /** Question related to issue #6 */
     @Test
     @Spockito.Unroll({
       "|Character|",
