@@ -3,7 +3,7 @@ apply plugin: 'license'
 
 sourceCompatibility = 1.8
 group = "org.tools4j"
-version = '1.5'
+version = '1.6-SNAPSHOT'
 archivesBaseName = "tools4j-spockito"
 
 jar {
