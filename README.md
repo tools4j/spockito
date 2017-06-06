@@ -128,7 +128,7 @@ Add the following dependency to your maven pom.xml file:
  <dependency>
      <groupId>org.tools4j</groupId>
      <artifactId>tools4j-spockito</artifactId>
-     <version>1.5</version>
+     <version>1.6</version>
      <scope>test</scope>
  </dependency>
  ```
