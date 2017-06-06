@@ -23,6 +23,7 @@
  */
 package org.tools4j.spockito;
 
+import java.util.Arrays;
 import java.util.regex.Pattern;
 
 /**
@@ -90,6 +91,31 @@ final class Strings {
             }
         }
         return false;
+    }
+
+    static String[] split(final String s, final Pattern delimRegex1, final Pattern delimRegex2) {
+        String[] parts = delimRegex1.split(s);
+        if (parts.length == 1 && s.equals(parts[0])) {
+            //delimiter was not contained in string, try second delimiter
+            parts = delimRegex2.split(s);
+            if (parts.length == 1 && s.equals(parts[0])) {
+                //delimiter was not contained in string, we're done
+                return parts;
+            }
+        }
+        if (!s.startsWith(parts[0])) {
+            //must be delimiter at the start of the string, meaning we have an empty string at the start
+            final String[] newParts = new String[parts.length + 1];
+            System.arraycopy(parts, 0, newParts, 1, parts.length);
+            newParts[0] = "";
+            parts = newParts;
+        }
+        if (!s.endsWith(parts[parts.length - 1])) {
+            //must be delimiter at the end of the string, meaning we have an empty string at the end
+            parts = Arrays.copyOf(parts, parts.length + 1);
+            parts[parts.length - 1] = "";
+        }
+        return parts;
     }
 
     private Strings() {

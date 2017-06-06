@@ -180,10 +180,7 @@ public final class Converters {
             if (plainValue.trim().isEmpty()) {
                 return Collections.emptyList();
             }
-            String[] parts = Strings.UNESCAPED_COMMA.split(plainValue);
-            if (parts.length == 1) {
-                parts = Strings.UNESCAPED_SEMICOLON.split(plainValue);
-            }
+            final String[] parts = parseListValues(plainValue);
             final List<Object> list = new ArrayList<>(parts.length);
             for (int i = 0; i < parts.length; i++) {
                 list.add(elementConverter.convert(elementType.rawType, elementType.genericType, parts[i].trim()));
@@ -285,10 +282,7 @@ public final class Converters {
             if (plainValue.trim().isEmpty()) {
                 return Collections.emptyMap();
             }
-            String[] parts = Strings.UNESCAPED_COMMA.split(plainValue);
-            if (parts.length == 1) {
-                parts = Strings.UNESCAPED_SEMICOLON.split(plainValue);
-            }
+            final String[] parts = parseListValues(plainValue);
             final Map<Object, Object> map = new LinkedHashMap<>();
             for (int i = 0; i < parts.length; i++) {
                 final String[] keyAndValue = parseKeyValue(parts[i].trim());
@@ -352,10 +346,7 @@ public final class Converters {
 
         private void injectValues(final Object instance, final Map<String, Accessor> accessorByName, final String value) {
             final String plainValue = Strings.removeStartAndEndChars(value, '{', '}');
-            String[] parts = Strings.UNESCAPED_COMMA.split(plainValue);
-            if (parts.length == 1) {
-                parts = Strings.UNESCAPED_SEMICOLON.split(plainValue);
-            }
+            final String[] parts = parseListValues(plainValue);
             final Map<String, String> valueByName = new LinkedHashMap<>();
             for (int i = 0; i < parts.length; i++) {
                 final String[] nameAndValue = parseKeyValue(parts[i].trim());
@@ -472,11 +463,11 @@ public final class Converters {
     }
 
     private static final String[] parseKeyValue(final String pair) {
-        final String[] split = Strings.UNESCAPED_EQUAL.split(pair);
-        if (split.length == 1) {
-            return Strings.UNESCAPED_COLON.split(pair);
-        }
-        return split;
+        return Strings.split(pair, Strings.UNESCAPED_EQUAL, Strings.UNESCAPED_COLON);
+    }
+
+    private static final String[] parseListValues(final String pair) {
+        return Strings.split(pair, Strings.UNESCAPED_COMMA, Strings.UNESCAPED_SEMICOLON);
     }
 
     private static class ActualType {

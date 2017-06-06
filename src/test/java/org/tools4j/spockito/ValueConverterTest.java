@@ -92,6 +92,8 @@ public class ValueConverterTest {
         assertEquals("Expected string with quotes", "'hello world'", converter.convert(String.class, String.class, "''hello world''"));
         assertEquals("Expected string with left quotes", "'hello world", converter.convert(String.class, String.class, "'hello world"));
         assertEquals("Expected string with right quotes", "hello world'", converter.convert(String.class, String.class, "hello world'"));
+        assertEquals("Expected empty string", "", converter.convert(String.class, String.class, ""));
+        assertEquals("Expected empty string", "", converter.convert(String.class, String.class, "''"));
     }
 
     @Test
@@ -103,6 +105,8 @@ public class ValueConverterTest {
         assertEquals("Expected string with quotes", "'hello world'", converter.convert(StringBuilder.class, StringBuilder.class, "''hello world''").toString());
         assertEquals("Expected string with left quotes", "'hello world", converter.convert(StringBuilder.class, StringBuilder.class, "'hello world").toString());
         assertEquals("Expected string with right quotes", "hello world'", converter.convert(StringBuilder.class, StringBuilder.class, "hello world'").toString());
+        assertEquals("Expected empty string", "", converter.convert(StringBuilder.class, StringBuilder.class, "").toString());
+        assertEquals("Expected empty string", "", converter.convert(StringBuilder.class, StringBuilder.class, "''").toString());
     }
 
     @Test
@@ -114,6 +118,8 @@ public class ValueConverterTest {
         assertEquals("Expected string with quotes", "'hello world'", converter.convert(StringBuffer.class, StringBuffer.class, "''hello world''").toString());
         assertEquals("Expected string with left quotes", "'hello world", converter.convert(StringBuffer.class, StringBuffer.class, "'hello world").toString());
         assertEquals("Expected string with right quotes", "hello world'", converter.convert(StringBuffer.class, StringBuffer.class, "hello world'").toString());
+        assertEquals("Expected empty string", "", converter.convert(StringBuffer.class, StringBuffer.class, "").toString());
+        assertEquals("Expected empty string", "", converter.convert(StringBuffer.class, StringBuffer.class, "''").toString());
     }
 
     @Test

@@ -36,6 +36,7 @@ public class TableTest {
     static final class Row {
         int index;
         List<Integer> listOfInteger;
+        String emptyString;
     }
 
 
@@ -44,9 +45,9 @@ public class TableTest {
     public void parse() {
         //when
         final Row[] rows = Table.parse(Row.class, new String[] {
-                "| index | listOfInteger |",
-                "|   0   | [1;2;3;4;5;6] |",
-                "|   1   | [9;8;7;6;5;4] |"
+                "| index | listOfInteger | emptyString |",
+                "|   0   | [1;2;3;4;5;6] |             |",
+                "|   1   | [9;8;7;6;5;4] |     ''      |"
         });
 
         //then
@@ -54,6 +55,7 @@ public class TableTest {
         for (int row = 0; row < rows.length; row++) {
             Assert.assertEquals("unexpected index", row, rows[row].index);
             Assert.assertEquals("unexpected list length", 6, rows[row].listOfInteger.size());
+            Assert.assertEquals("string should be empty", "", rows[row].emptyString);
         }
     }
 }
