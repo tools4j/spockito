@@ -139,6 +139,7 @@ Sources and binaries can be downloaded from maven central:
 
 ### FAQ
 * [Frequently asked Questions](https://github.com/tools4j/spockito/issues?q=label:question)
+* [Bugs and Issues](https://github.com/tools4j/spockito/issues?q=label:bug)
 
 ### More Information
 * [MIT License](https://github.com/tools4j/spockito/blob/master/LICENSE)
