@@ -127,20 +127,20 @@ public class Spockito extends Suite {
      * <p>
      * The following reference types are supported:
      * <pre>
-     * {row} - the current row index (zero based), assignable to an integer type
-     * {*} - indicating that all rows are to be used, assignable to a collection type, a map or a Bean
-     * {ColumnA} - the value in the "ColumnA" column
-     * {ColumnB} - the value in the "ColumnB" column
+     * "row" - the current row index (zero based), assignable to an integer type
+     * "*" - indicating that all rows are to be used, assignable to a collection type, a map or a Bean
+     * "ColumnA" - the value in the "ColumnA" column
+     * "ColumnB" - the value in the "ColumnB" column
      * </pre>
      */
     @Retention(RetentionPolicy.RUNTIME)
     @Target(value = {ElementType.FIELD, ElementType.PARAMETER})
     public @interface Ref {
         /**
-         * Returns the column name, or {row} for row index and {*} to map all column values to the annotated variable.
+         * Returns the column name, or "row" for row index and "*" to map all column values to the annotated variable.
          * Can be omitted when annotating fields and the field name is identical to the column name.
          *
-         * @return the column name, or "{row}" for the row index, or "{*}" to indicate that all all column values should
+         * @return the column name, or "row" for the row index, or "*" to indicate that all all column values should
          *         be mapped to the annotated variable (for list, map and bean types)
          */
         String value() default "";
