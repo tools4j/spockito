@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/tools4j/spockito.svg?branch=master)](https://travis-ci.org/tools4j/spockito)
 [![Coverage Status](https://coveralls.io/repos/github/tools4j/spockito/badge.svg?branch=master)](https://coveralls.io/github/tools4j/spockito?branch=master)
-[![Maven Central](https://img.shields.io/maven-central/v/org.tools4j/tools4j-spockito.svg)](https://search.maven.org/#search%7Cga%7C1%7Ca%3A%22tools4j-spockito%22)
+[![Maven Central](https://img.shields.io/maven-central/v/org.tools4j/tools4j-spockito.svg)](https://search.maven.org/search?q=spockito)
 
 # spockito
 Java JUnit runner for parameterized tests where the test cases are defined in a table-like
@@ -136,7 +136,7 @@ Add the following dependency to your maven pom.xml file:
 
 ### Download
 Sources and binaries can be downloaded from maven central:
-* [tools4j-spockito](http://search.maven.org/#search%7Cga%7C1%7Ctools4j-spockito) in Maven Central
+* [tools4j-spockito](https://search.maven.org/search?q=spockito) in Maven Central
 
 ### FAQ
 * [Frequently asked Questions](https://github.com/tools4j/spockito/issues?q=label:question)
