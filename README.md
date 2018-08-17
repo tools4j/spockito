@@ -4,7 +4,7 @@
 
 # spockito
 Java JUnit runner for parameterized tests where the test cases are defined in a table-like
-manner. The @Unroll annotation has been inspired the Groovy framework Spock.
+manner. The @Unroll annotation has been inspired by the Groovy framework Spock.
  
 ### Unroll at method level
 
