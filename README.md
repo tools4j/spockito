@@ -75,12 +75,12 @@ An example with field injection is shown next:
 
 ```java
 @Spockito.Unroll({
-        "| Operation | Sign | Operand1 | Operand2 | Result | NeutralOperand2 |",
-        "|-----------|------|----------|----------|--------|-----------------|",
-        "| Add       |   +  |        4 |        7 |     11 |               0 |",
-        "| Subtract  |   -  |      111 |       12 |     99 |               0 |",
-        "| Multiply  |   *  |       24 |        5 |    120 |               1 |",
-        "| Divide    |   /  |       24 |        3 |      8 |               1 |"
+        "| Operation | Sign | Operand1 | Operand2 | Result | NeutralOperand |",
+        "|-----------|------|----------|----------|--------|----------------|",
+        "| Add       |   +  |        4 |        7 |     11 |              0 |",
+        "| Subtract  |   -  |      111 |       12 |     99 |              0 |",
+        "| Multiply  |   *  |       24 |        5 |    120 |              1 |",
+        "| Divide    |   /  |       24 |        3 |      8 |              1 |"
 })
 @Spockito.Name("[{row}]: {Operation}")
 @RunWith(Spockito.class)
@@ -97,7 +97,7 @@ public class UnrollClassDataToFieldsTest {
     @Spockito.Ref
     private int result;
     @Spockito.Ref
-    private int neutralOperand2;
+    private int neutralOperand;
 
     @Test
     @Spockito.Name("[{row}]: {Operand1} {Sign} {Operand2} = {Result}")
@@ -106,10 +106,10 @@ public class UnrollClassDataToFieldsTest {
     }
 
     @Test
-    @Spockito.Name("[{row}]: {Operand1} {Sign} {NeutralOperand2} = {Operand1}")
+    @Spockito.Name("[{row}]: {Operand1} {Sign} {NeutralOperand} = {Operand1}")
     public void testNeutralOperand() {
         Assert.assertEquals("Result with neutral operand is wrong!",
-                operand1, operation.evaluate(operand1, neutralOperand2));
+                operand1, operation.evaluate(operand1, neutralOperand));
     }
 }
 ```

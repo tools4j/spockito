@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2017 tools4j.org (Marco Terzer)
+ * Copyright (c) 2020 tools4j.org (Marco Terzer)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,12 +28,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @Spockito.Unroll({
-        "| Operation | Sign | Operand1 | Operand2 | Result | NeutralOperand2 |",
-        "|-----------|------|----------|----------|--------|-----------------|",
-        "| Add       |   +  |        4 |        7 |     11 |               0 |",
-        "| Subtract  |   -  |      111 |       12 |     99 |               0 |",
-        "| Multiply  |   *  |       24 |        5 |    120 |               1 |",
-        "| Divide    |   /  |       24 |        3 |      8 |               1 |"
+        "| Operation | Sign | Operand1 | Operand2 | Result | NeutralOperand |",
+        "|-----------|------|----------|----------|--------|----------------|",
+        "| Add       |   +  |        4 |        7 |     11 |              0 |",
+        "| Subtract  |   -  |      111 |       12 |     99 |              0 |",
+        "| Multiply  |   *  |       24 |        5 |    120 |              1 |",
+        "| Divide    |   /  |       24 |        3 |      8 |              1 |"
 })
 @RunWith(Spockito.class)
 public class UnrollClassDataToMethodTest {
@@ -48,11 +48,11 @@ public class UnrollClassDataToMethodTest {
     }
 
     @Test
-    @Spockito.Name(value = ": {Operand1} {Sign} {NeutralOperand2} = {Operand1}", shortFormat = true)
+    @Spockito.Name(value = ": {Operand1} {Sign} {NeutralOperand} = {Operand1}", shortFormat = true)
     public void testNeutralOperand(@Spockito.Ref("Operation") final Operation operation,
                                    @Spockito.Ref("Operand1") final int operand1,
-                                   @Spockito.Ref("NeutralOperand2") final int neutralOperand2) {
+                                   @Spockito.Ref("NeutralOperand") final int neutralOperand) {
         Assert.assertEquals("Result with neutral operand is wrong!",
-                operand1, operation.evaluate(operand1, neutralOperand2));
+                operand1, operation.evaluate(operand1, neutralOperand));
     }
 }
