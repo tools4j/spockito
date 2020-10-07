@@ -1,0 +1,4 @@
+include (
+    'spockito-table',
+    'spockito-junit4',
+    'spockito-junit5')

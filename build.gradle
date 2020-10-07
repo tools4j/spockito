@@ -1,153 +1,335 @@
-apply plugin: 'java'
-apply plugin: 'license'
-apply plugin: 'jacoco'
-apply plugin: 'com.github.kt3k.coveralls'
+/*
+The MIT License (MIT)
 
-sourceCompatibility = 1.8
-group = "org.tools4j"
-version = '1.7-SNAPSHOT'
-archivesBaseName = "tools4j-spockito"
+Copyright (c) 2020 tools4j.org (Marco Terzer, Anton Anufriev)
 
-jar {
-    manifest {
-        attributes 'Implementation-Title': 'tools4j-spockito', 'Implementation-Version': version
-    }
-}
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-repositories {
-    mavenCentral()
-}
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+ */
 buildscript {
-	repositories {
-		mavenCentral()
-		jcenter()
-	}
-	
-	dependencies {
-		classpath 'nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0'
-		classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.5.3"
-		classpath "org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.8.2"
-	}
-}
-
-dependencies {
-    compile 'junit:junit:4.12'
-}
-
-uploadArchives {
     repositories {
-       flatDir {
-           dirs 'build/repositories'
-       }
+        mavenCentral()
     }
 }
 
-license {
-    header rootProject.file('src/main/templates/LICENSE.template')
-    strictCheck true
-    sourceSets {
-        main {
-            java { include "**/*.java" }
-            resources { include "LICENSE.txt" }
+plugins {
+    id 'java-library'
+    id 'idea'
+    id 'io.freefair.javadoc-links' version '4.1.6' apply false
+    id 'biz.aQute.bnd.builder' version '5.0.0' apply false
+    id "com.github.hierynomus.license" version "0.15.0" apply false
+}
+
+defaultTasks 'clean', 'build'
+
+def projGroup = 'org.tools4j'
+def projVersion = file('version.txt').text.trim()
+
+def junit4Version = '4.13'
+def junit5Version = '5.7.0'
+
+ext {
+    //gradle clean build publish -PossrhUsername=mterzer -PossrhPassword=xxx
+
+    isReleaseVersion = !projVersion.endsWith('-SNAPSHOT')
+    releasesRepoUrl = 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
+    snapshotsRepoUrl = 'https://oss.sonatype.org/content/repositories/snapshots/'
+
+    println name + " version=" + projVersion + " release=" + isReleaseVersion
+
+    if (!project.hasProperty('ossrhUsername')) {
+        ossrhUsername = ''
+    }
+
+    if (!project.hasProperty('ossrhPassword')) {
+        ossrhPassword = ''
+    }
+}
+
+def projectPom = {
+    name = 'spockito'
+    packaging = 'pom'
+    // optionally artifactId can be defined here
+    description = 'Java JUnit runner for parameterized tests where the test cases are defined in a table-like manner.'
+    url = 'https://github.com/tools4j/spockito'
+
+    scm {
+        connection = 'scm:git:https://github.com/tools4j/spockito.git'
+        developerConnection = 'scm:git:https://github.com/tools4j/spockito.git'
+        url = 'https://github.com/tools4j/spockito.git'
+    }
+
+    licenses {
+        license {
+            name = 'The MIT License (MIT)'
+            url = 'https://opensource.org/licenses/MIT'
         }
     }
-	ext.year = Calendar.getInstance().get(Calendar.YEAR)
-}
 
-compileJava.dependsOn licenseFormat
-
-javadoc {
-	options.showFromPackage()
-	options.linkSource()
-	options.links("http://docs.oracle.com/javase/8/docs/api/");
-	options.docTitle = "tools4j-spockito API ${version}"
-	options.windowTitle = "tools4j-spockito API ${version}"
-	options.overview = "src/main/java/overview.html";
-}
-
-jacocoTestReport {
-    reports {
-        xml.enabled = true // coveralls plugin depends on xml format report
-        html.enabled = true
+    developers {
+        developer {
+            id = 'terzerm'
+            name = 'Marco Terzer'
+            email = 'terzerm@gmail.com'
+            url = 'https://github.com/terzerm'
+        }
     }
 }
 
-task javadocJar(type: Jar) {
-    classifier = 'javadoc'
-    from javadoc
+jar.enabled = false
+
+allprojects {
+    repositories {
+        mavenCentral()
+        mavenLocal()
+    }
 }
 
-task sourcesJar(type: Jar) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
-}
+subprojects {
+    apply plugin: 'java-library'
+    apply plugin: 'license'
+    //apply plugin: 'io.freefair.javadoc-links'
 
-artifacts {
-    archives javadocJar, sourcesJar
-}
+    dependencies {
+        testImplementation "org.junit.jupiter:junit-jupiter-params:${junit5Version}"
+        testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junit5Version}"
+    }
 
-//snapshot first, then release:
-//gradle clean uploadArchives -Pupload -PossrhUsername=xxx -PossrhPassword=xxx
-if (project.hasProperty('upload')) {
+    group = projGroup
+    version = projVersion
 
-    allprojects {
-        apply plugin: 'signing'
-        apply plugin: 'maven'
-        apply plugin: 'io.codearte.nexus-staging'
+    tasks.withType(Sign) {
+        onlyIf {
+            isReleaseVersion && gradle.taskGraph.hasTask(tasks.publish)
+        }
+    }
 
-        // Signature of artifacts
-        signing {
-            sign configurations.archives
+    tasks.withType(Jar) {
+        enabled = true
+        includeEmptyDirs = false
+    }
+
+    tasks.withType(JavaCompile) {
+        options.encoding = 'UTF-8'
+        options.deprecation = true
+    }
+
+    tasks.withType(Test) {
+        testLogging {
+            showStandardStreams = true
+            exceptionFormat = 'full'
         }
 
-        // OSSRH publication
-        uploadArchives {
-            repositories {
-                mavenDeployer {
-                    beforeDeployment {
-                        MavenDeployment deployment -> signing.signPom(deployment)
-                    }
-                    repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                        authentication(userName: ossrhUsername, password: ossrhPassword)
-                    }
-                    snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-                        authentication(userName: ossrhUsername, password: ossrhPassword)
-                    }
+        reports.html.enabled = false // Disable individual test reports
+    }
 
-                    pom.project {
-                        name 'spockito'
-                        packaging 'jar'
-                        // optionally artifactId can be defined here
-                        description 'Java JUnit runner for parameterized tests where the test cases are defined in a table-like manner.'
-                        url 'http://spockito.tools4j.org'
+    license {
+        header rootProject.file('etc/LICENSE.template')
+        strictCheck true
+        include "**/*.java"
+        ext.year = LocalDate.now().getYear()
+    }
 
-                        scm {
-                            connection 'scm:git:https://github.com/tools4j/spockito.git'
-                            developerConnection 'scm:git:https://github.com/tools4j/spockito.git'
-                            url 'https://github.com/tools4j/spockito.git'
-                        }
-                        licenses {
-                            license {
-                                name 'MIT License'
-                                url 'http://opensource.org/licenses/MIT'
-                            }
-                        }
+    compileJava.dependsOn licenseFormat
 
-                        developers {
-                            developer {
-                                id 'terzerm'
-                                name 'Marco Terzer'
-                            }
-                        }
-                    }
-                }
+    javadoc {
+        title = '<h1>Spockito</h1>'
+        options.bottom = '<i>Copyright &#169; 2017-2020 tools4j.org (Marco Terzer). All Rights Reserved.</i>'
+        options.encoding = 'UTF-8'
+        options.docEncoding = 'UTF-8'
+        options.charSet = 'UTF-8'
+        if (JavaVersion.current().isJava10Compatible()) {
+            options.addBooleanOption 'html5', true
+        }
+    }
+
+    task testJar(type: Jar, dependsOn: testClasses) {
+        archiveClassifier.set "test-${project.archivesBaseName}"
+        from sourceSets.test.output
+    }
+
+    configurations {
+        tests
+    }
+
+    artifacts {
+        tests testJar
+    }
+}
+
+project(':spockito-table') {
+    apply plugin: 'maven-publish'
+    apply plugin: 'signing'
+    apply plugin: 'biz.aQute.bnd.builder'
+    apply plugin: 'io.freefair.javadoc-links'
+
+    jar {
+        bnd """
+            Automatic-Module-Name:  org.tools4j.spockito-table
+            Bundle-Name:            org.tools4j.spockito-table
+            Bundle-SymbolicName:    org.tools4j.spockito-table
+            Implementation-Title:   Spockito
+            Implementation-Vendor:  tools4j.org
+            Implementation-Version: ${projVersion}
+            -exportcontents: org.tools4j.spockito, org.tools4j.spockito.*
+            # Suppress headers that reduce reproducibility.
+            -reproducible: true
+            -noextraheaders: true
+        """
+    }
+
+    java {
+        withSourcesJar()
+        withJavadocJar()
+    }
+
+    publishing {
+        publications {
+            spockitoTable(MavenPublication) {
+                from components.java
+                pom(projectPom)
             }
         }
 
-        nexusStaging {
-            username = ossrhUsername
-            password = ossrhPassword
+        repositories {
+            maven {
+                url = !isReleaseVersion ? snapshotsRepoUrl : releasesRepoUrl
+                credentials {
+                    username = ossrhUsername
+                    password = ossrhPassword
+                }
+            }
         }
     }
+
+    signing {
+        sign publishing.publications.spockitoTable
+    }
+}
+
+project(':spockito-junit4') {
+    apply plugin: 'maven-publish'
+    apply plugin: 'signing'
+    apply plugin: 'biz.aQute.bnd.builder'
+
+    dependencies {
+        api project(':spockito-table')
+        api "junit:junit:${junit4Version}"
+    }
+
+    jar {
+        bnd """
+            Automatic-Module-Name:  org.tools4j.spockito-junit4
+            Bundle-Name:            org.tools4j.spockito-junit4
+            Bundle-SymbolicName:    org.tools4j.spockito-junit4
+            Implementation-Title:   Spockito
+            Implementation-Vendor:  tools4j.org
+            Implementation-Version: ${projVersion}
+            -exportcontents: org.tools4j.spockito, org.tools4j.spockito.*
+            # Suppress headers that reduce reproducibility.
+            -reproducible: true
+            -noextraheaders: true
+        """
+    }
+
+    java {
+        withSourcesJar()
+        withJavadocJar()
+    }
+
+    publishing {
+        publications {
+            spockitoChronicle(MavenPublication) {
+                from components.java
+                pom(projectPom)
+            }
+        }
+
+        repositories {
+            maven {
+                url = !isReleaseVersion ? snapshotsRepoUrl : releasesRepoUrl
+                credentials {
+                    username = ossrhUsername
+                    password = ossrhPassword
+                }
+            }
+        }
+    }
+
+    signing {
+        sign publishing.publications.spockitoChronicle
+    }
+}
+
+project(':spockito-junit5') {
+    apply plugin: 'maven-publish'
+    apply plugin: 'signing'
+
+    dependencies {
+        api project(':spockito-table')
+        api "org.junit.jupiter:junit-jupiter-api:${junit5Version}"
+    }
+
+    java {
+        withSourcesJar()
+        withJavadocJar()
+    }
+
+    publishing {
+        publications {
+            spockitoSamples(MavenPublication) {
+                from components.java
+                pom(projectPom)
+            }
+        }
+
+        repositories {
+            maven {
+                url = !isReleaseVersion ? snapshotsRepoUrl : releasesRepoUrl
+                credentials {
+                    username = ossrhUsername
+                    password = ossrhPassword
+                }
+            }
+        }
+    }
+
+    signing {
+        sign publishing.publications.spockitoSamples
+    }
+}
+
+task testReport(type: TestReport) {
+    destinationDir = file("$buildDir/reports/allTests")
+    // Include the results from the `test` task in all sub-projects
+    reportOn subprojects*.test
+}
+
+task copyCrashLogs(type: Copy) {
+    from '.'
+    include '**/hs_err*.log'
+    include 'LICENSE'
+    into 'build/crash_logs'
+
+    includeEmptyDirs = false
+}
+
+wrapper {
+    gradleVersion = '6.1.1'
+    distributionType = 'ALL'
 }
