@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.tools4j.spockito;
+package org.tools4j.spockito.table;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
@@ -459,7 +459,7 @@ public final class Converters {
         private static boolean hasAccessibleSetters(final Class<?> clazz) {
             return !inspectSetters(clazz, new HashMap<>()).isEmpty();
         }
-        private static final Map<String, Accessor> inspectSetters(final Class<?> clazz, final Map<String, Accessor> accessorByName) {
+        private static Map<String, Accessor> inspectSetters(final Class<?> clazz, final Map<String, Accessor> accessorByName) {
             if (clazz == null || Object.class.equals(clazz)) {
                 return accessorByName;
             }
@@ -478,7 +478,7 @@ public final class Converters {
         private static boolean hasAccessibleFields(final Class<?> clazz) {
             return !inspectFields(clazz, new HashMap<>()).isEmpty();
         }
-        private static final Map<String, Accessor> inspectFields(final Class<?> clazz, final Map<String, Accessor> accessorByName) {
+        private static Map<String, Accessor> inspectFields(final Class<?> clazz, final Map<String, Accessor> accessorByName) {
             if (clazz == null || Object.class.equals(clazz)) {
                 return accessorByName;
             }
@@ -499,11 +499,11 @@ public final class Converters {
         return name;
     }
 
-    private static final String[] parseKeyValue(final String pair) {
+    private static String[] parseKeyValue(final String pair) {
         return Strings.split(pair, Strings.UNESCAPED_EQUAL, Strings.UNESCAPED_COLON);
     }
 
-    private static final String[] parseListValues(final String pair) {
+    private static String[] parseListValues(final String pair) {
         return Strings.split(pair, Strings.UNESCAPED_COMMA, Strings.UNESCAPED_SEMICOLON);
     }
 

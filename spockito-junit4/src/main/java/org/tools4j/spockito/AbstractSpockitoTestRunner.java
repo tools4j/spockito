@@ -23,6 +23,9 @@
  */
 package org.tools4j.spockito;
 
+import java.lang.annotation.Annotation;
+import java.util.List;
+
 import org.junit.runner.Description;
 import org.junit.runner.manipulation.Filter;
 import org.junit.runner.manipulation.NoTestsRemainException;
@@ -31,9 +34,6 @@ import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.Statement;
-
-import java.lang.annotation.Annotation;
-import java.util.List;
 
 /**
  * Common base for spockito test runners.

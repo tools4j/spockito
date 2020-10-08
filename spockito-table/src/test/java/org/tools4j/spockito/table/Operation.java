@@ -21,42 +21,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.tools4j.spockito;
+package org.tools4j.spockito.table;
 
-import java.util.List;
-
-import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-/**
- * Unit test for {@link Table}
- */
-public class TableTest {
-
-    static final class Row {
-        int index;
-        List<Integer> listOfInteger;
-        String emptyString;
-    }
-
-
-
-    @Test
-    public void parse() {
-        //when
-        final Row[] rows = Table.parse(Row.class, new String[] {
-                "| index | listOfInteger | emptyString |",
-                "|   0   | [1;2;3;4;5;6] |             |",
-                "|   1   | [9;8;7;6;5;4] |     ''      |"
-        });
-
-        //then
-        assertEquals(2, rows.length, "unexpected row count");
-        for (int row = 0; row < rows.length; row++) {
-            assertEquals(row, rows[row].index, "unexpected index");
-            assertEquals(6, rows[row].listOfInteger.size(), "unexpected list size");
-            assertEquals("", rows[row].emptyString, "string should be empty");
+public enum Operation {
+    Add {
+        public int evaluate(final int operand1, final int operand2) {
+            return operand1 + operand2;
         }
-    }
+        @Override
+        public int neutralSecondOperand() {
+            return 0;
+        }
+    },
+    Subtract {
+        public int evaluate(final int operand1, final int operand2) {
+            return operand1 - operand2;
+        }
+        @Override
+        public int neutralSecondOperand() {
+            return 0;
+        }
+    },
+    Multiply {
+        public int evaluate(final int operand1, final int operand2) {
+            return operand1 * operand2;
+        }
+        @Override
+        public int neutralSecondOperand() {
+            return 1;
+        }
+    },
+    Divide {
+        public int evaluate(final int operand1, final int operand2) {
+            return operand1 / operand2;
+        }
+        @Override
+        public int neutralSecondOperand() {
+            return 1;
+        }
+    };
+    abstract public int evaluate(int operand1, int operand2);
+    abstract public int neutralSecondOperand();
 }

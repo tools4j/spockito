@@ -23,10 +23,13 @@
  */
 package org.tools4j.spockito;
 
-import org.junit.runners.model.FrameworkMethod;
-
 import java.lang.reflect.Method;
 import java.util.Objects;
+
+import org.junit.runners.model.FrameworkMethod;
+
+import org.tools4j.spockito.table.TableRow;
+import org.tools4j.spockito.table.ValueConverter;
 
 /**
  * Extension of framwork method representing a test method with a data row.

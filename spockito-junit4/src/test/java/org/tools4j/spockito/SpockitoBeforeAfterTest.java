@@ -23,13 +23,21 @@
  */
 package org.tools4j.spockito;
 
-import org.junit.*;
-import org.junit.rules.TestName;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TestName;
+
+import org.tools4j.spockito.Spockito.Unroll;
 
 import static org.junit.Assert.assertEquals;
 
@@ -90,7 +98,7 @@ public class SpockitoBeforeAfterTest extends UnrollMethodDataTest {
     }
 
     @Test
-    @Spockito.Unroll({
+    @Unroll({
             "| Name     |",
             "| Test 1   |",
             "| Test 2   |"

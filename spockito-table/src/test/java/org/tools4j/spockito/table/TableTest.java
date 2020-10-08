@@ -21,16 +21,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.tools4j.spockito;
+package org.tools4j.spockito.table;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Parameter;
-import java.util.function.Function;
+import java.util.List;
 
-enum RefNames {
-    ;
-    public static final Function<Parameter, String> PARAMETER_NAME_OR_NULL = parameter ->
-        parameter.isNamePresent() ? parameter.getName() : null;
+import org.junit.jupiter.api.Test;
 
-    public static final Function<Field, String> FIELD_NAME = Field::getName;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+/**
+ * Unit test for {@link Table}
+ */
+public class TableTest {
+
+    static final class Row {
+        int index;
+        List<Integer> listOfInteger;
+        String emptyString;
+    }
+
+
+
+    @Test
+    public void parse() {
+        //when
+        final Row[] rows = Table.parse(Row.class, new String[] {
+                "| index | listOfInteger | emptyString |",
+                "|   0   | [1;2;3;4;5;6] |             |",
+                "|   1   | [9;8;7;6;5;4] |     ''      |"
+        });
+
+        //then
+        assertEquals(2, rows.length, "unexpected row count");
+        for (int row = 0; row < rows.length; row++) {
+            assertEquals(row, rows[row].index, "unexpected index");
+            assertEquals(6, rows[row].listOfInteger.size(), "unexpected list size");
+            assertEquals("", rows[row].emptyString, "string should be empty");
+        }
+    }
 }

@@ -46,6 +46,11 @@ import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 import org.junit.runners.model.TestClass;
 
+import org.tools4j.spockito.table.SpockitoValueConverter;
+import org.tools4j.spockito.table.Table;
+import org.tools4j.spockito.table.TableRow;
+import org.tools4j.spockito.table.ValueConverter;
+
 /**
  * The custom runner <code>Spockito</code> implements parameterized tests where the test data
  * is defined in a table-like structure via {@link Unroll} annotation.

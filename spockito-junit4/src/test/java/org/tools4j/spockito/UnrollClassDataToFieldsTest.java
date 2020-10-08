@@ -27,7 +27,10 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-@Spockito.Unroll({
+import org.tools4j.spockito.Spockito.Name;
+import org.tools4j.spockito.Spockito.Unroll;
+
+@Unroll({
         "| Operation | Sign | Operand1 | Operand2 | Result | NeutralOperand |",
         "|-----------|------|----------|----------|--------|----------------|",
         "| Add       |   +  |        4 |        7 |     11 |              0 |",
@@ -35,7 +38,7 @@ import org.junit.runner.RunWith;
         "| Multiply  |   *  |       24 |        5 |    120 |              1 |",
         "| Divide    |   /  |       24 |        3 |      8 |              1 |"
 })
-@Spockito.Name("[{row}]: {Operation}")
+@Name("[{row}]: {Operation}")
 @RunWith(Spockito.class)
 public class UnrollClassDataToFieldsTest {
 

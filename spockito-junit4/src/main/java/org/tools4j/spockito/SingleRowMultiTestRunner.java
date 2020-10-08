@@ -35,9 +35,13 @@ import org.junit.runners.model.FrameworkField;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 
+import org.tools4j.spockito.Spockito.Unroll;
+import org.tools4j.spockito.table.TableRow;
+import org.tools4j.spockito.table.ValueConverter;
+
 /**
  * A runner for the case of a single data row applied to a set of test methods. This case applies if the
- * {@link org.tools4j.spockito.Spockito.Unroll} annotation is present at test class level.
+ * {@link Unroll} annotation is present at test class level.
  */
 public class SingleRowMultiTestRunner extends AbstractSpockitoTestRunner {
 

@@ -27,7 +27,9 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-@Spockito.Unroll({
+import org.tools4j.spockito.Spockito.Unroll;
+
+@Unroll({
         "| Operation | Sign | Operand1 | Operand2 | Result | NeutralOperand |",
         "|-----------|------|----------|----------|--------|----------------|",
         "| Add       |   +  |        4 |        7 |     11 |              0 |",

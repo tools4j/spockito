@@ -23,32 +23,32 @@
  */
 package org.tools4j.spockito;
 
+import java.util.List;
+import java.util.Map;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.List;
-import java.util.Map;
-
 @RunWith(Spockito.class)
 public class AdvancedDataTypesTest {
 
-    private static class FieldBean {
-        int index;
-        String name;
+    public static class FieldBean {
+        public int index;
+        public String name;
     }
 
-    private static class AccessorBean {
+    public static class AccessorBean {
         private int index;
         private String name;
-        void setIndex(int index) {
+        public void setIndex(int index) {
             this.index = index;
         }
 
         private int getIndex() {
             return index;
         }
-        void setName(String name) {
+        public void setName(String name) {
             this.name = name;
         }
 

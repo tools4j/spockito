@@ -23,10 +23,10 @@
  */
 package org.tools4j.spockito;
 
+import java.util.Objects;
+
 import org.junit.runner.Description;
 import org.junit.runner.manipulation.Filter;
-
-import java.util.Objects;
 
 /**
  * Method filter wrapped around an original filter in {@link Spockito#filter(Filter)} to work around an Intellij problem
