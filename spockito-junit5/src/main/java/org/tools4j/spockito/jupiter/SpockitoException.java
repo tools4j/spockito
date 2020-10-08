@@ -21,16 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.tools4j.spockito.table;
+package org.tools4j.spockito.jupiter;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Parameter;
-import java.util.function.Function;
+public class SpockitoException extends RuntimeException {
+    private static final long serialVersionUID = 1L;
 
-enum RefNames {
-    ;
-    public static final Function<Parameter, String> PARAMETER_NAME_OR_NULL = parameter ->
-        parameter.isNamePresent() ? parameter.getName() : null;
+    public SpockitoException(final String message) {
+        super(message);
+    }
 
-    public static final Function<Field, String> FIELD_NAME = Field::getName;
+    public SpockitoException(final String message, final Throwable cause) {
+        super(message, cause);
+    }
 }

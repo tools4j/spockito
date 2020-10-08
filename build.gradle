@@ -283,6 +283,7 @@ project(':spockito-junit5') {
     dependencies {
         api project(':spockito-table')
         api "org.junit.jupiter:junit-jupiter-api:${junit5Version}"
+        api "org.junit.jupiter:junit-jupiter-params:${junit5Version}"
     }
 
     java {

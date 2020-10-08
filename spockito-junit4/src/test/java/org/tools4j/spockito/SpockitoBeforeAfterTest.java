@@ -50,6 +50,7 @@ public class SpockitoBeforeAfterTest extends UnrollMethodDataTest {
             "oneMoreUnroll[0]", "oneMoreUnroll[1]",
             "testUnrollAngularSums[Pentagon]", "testUnrollAngularSums[Square]", "testUnrollAngularSums[Triangle]",
             "testUnrollBirthdays[0]", "testUnrollBirthdays[1]",
+            "testUnrollNameAndYearOnly[0]", "testUnrollNameAndYearOnly[1]",
             "testUnrollNames[0]", "testUnrollNames[1]"
     );
 

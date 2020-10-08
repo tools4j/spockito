@@ -1,4 +1,4 @@
-/**
+package org.tools4j.spockito.jupiter; /**
  * The MIT License (MIT)
  *
  * Copyright (c) 2017-2020 tools4j.org (Marco Terzer)
@@ -21,58 +21,56 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.tools4j.spockito;
 
 import java.time.LocalDate;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.params.ParameterizedTest;
 
-@RunWith(Spockito.class)
-public class UnrollMethodDataTest {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-    @Test
-    @Spockito.Unroll({
+public class TableSourceTest {
+
+    @ParameterizedTest
+    @TableSource({
             "| Last Name | First Name |",
             "| Jones     | David      |",
             "| Jensen    | Astrid     |"
     })
     public void testUnrollNames(String lastName, String firstName) {
-        Assert.assertTrue("Last Name should start with J", lastName.startsWith("J"));
-        Assert.assertTrue("First Name should end with id", firstName.endsWith("id"));
+        assertTrue(lastName.startsWith("J"), "Last Name should start with J");
+        assertTrue(firstName.endsWith("id"), "First Name should end with id");
     }
 
-    @Test
-    @Spockito.Unroll({
+    @ParameterizedTest
+    @TableSource({
             "| Name  | Year | Birthday   |",
             "|-------|------|------------|",
             "| Henry | 1981 | 1981-11-28 |",
             "| Jessy | 1965 | 1965-03-28 |"
     })
-    @Spockito.Name("[{row}]: Name={0}")
+    //@Spockito.Name("[{row}]: Name={0}")
     public void testUnrollBirthdays(String name, int year, LocalDate birthday) {
-        Assert.assertEquals("Name should have 5 characters", 5, name.length());
-        Assert.assertTrue("Year is before 1990", 1990 > year);
-        Assert.assertEquals("Day is 28th", 28, birthday.getDayOfMonth());
-        Assert.assertEquals("Year is consistent with birthday", year, birthday.getYear());
+        assertEquals(5, name.length(), "Name should have 5 characters");
+        assertTrue(1990 > year, "Year is before 1990");
+        assertEquals(28, birthday.getDayOfMonth(), "Day is 28th");
+        assertEquals(year, birthday.getYear(), "Year is consistent with birthday");
     }
 
-    @Test
-    @Spockito.Unroll({
+    @ParameterizedTest
+    @TableSource({
             "| Name  | Year | Birthday   |",
             "|-------|------|------------|",
             "| Henry | 1981 | 1981-11-28 |",
             "| Jessy | 1965 | 1965-03-28 |"
     })
-    @Spockito.Name("[{row}]: Name={0}")
     public void testUnrollNameAndYearOnly(String name, int year) {
-        Assert.assertEquals("Name should have 5 characters", 5, name.length());
-        Assert.assertTrue("Year is before 1990", 1990 > year);
+        assertEquals(5, name.length(), "Name should have 5 characters");
+        assertTrue(1990 > year, "Year is before 1990");
     }
 
-    @Test
-    @Spockito.Unroll({
+    @ParameterizedTest
+    @TableSource({
             "| Object   | Vertices | Angle sum |",
             "|==========|==========|===========|",
             "| Triangle |     3    |    180    |",
@@ -80,11 +78,11 @@ public class UnrollMethodDataTest {
             "| Pentagon |     5    |    540    |",
             "|----------|----------|-----------|",
     })
-    @Spockito.Name("[{Object}]: ({Vertices}-2)*180 = {Angle sum}")
-    public void testUnrollAngularSums(@Spockito.Ref("Vertices") int n,
-                                      @Spockito.Ref("Angle sum") int degrees,
-                                      @Spockito.Ref("Object") String name) {
-        Assert.assertTrue("There should be 3 or more vertices", 3 <= n);
-        Assert.assertEquals("Angular sum is wrong for: " + name, degrees, (n-2)*180);
+    //@Spockito.Name("[{Object}]: ({Vertices}-2)*180 = {Angle sum}")
+    public void testUnrollAngularSums(@Ref("Vertices") int n,
+                                      @Ref("Angle sum") int degrees,
+                                      @Ref("Object") String name) {
+        assertTrue(3 <= n, "There should be 3 or more vertices");
+        assertEquals(degrees, (n-2)*180, "Angular sum is wrong for: " + name);
     }
 }

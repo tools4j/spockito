@@ -95,7 +95,7 @@ public class Spockito extends Suite {
     public @interface Name {
         /**
          * Optional pattern to derive the test's name from the parameters. Use
-         * numbers in braces to refer to the parameters or the additional data
+         * numbers in braces to refer to the parameters or additional data elements
          * as follows:
          * <pre>
          * {row} - the current row index (zero based)
