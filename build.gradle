@@ -1,7 +1,7 @@
 /*
 The MIT License (MIT)
 
-Copyright (c) 2020 tools4j.org (Marco Terzer, Anton Anufriev)
+Copyright (c) 2017-2021 tools4j.org (Marco Terzer, Anton Anufriev)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -149,7 +149,7 @@ subprojects {
 
     javadoc {
         title = '<h1>Spockito</h1>'
-        options.bottom = '<i>Copyright &#169; 2017-2020 tools4j.org (Marco Terzer). All Rights Reserved.</i>'
+        options.bottom = '<i>Copyright &#169; 2017-2021 tools4j.org (Marco Terzer). All Rights Reserved.</i>'
         options.encoding = 'UTF-8'
         options.docEncoding = 'UTF-8'
         options.charSet = 'UTF-8'
