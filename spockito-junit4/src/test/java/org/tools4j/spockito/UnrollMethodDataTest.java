@@ -23,11 +23,11 @@
  */
 package org.tools4j.spockito;
 
-import java.time.LocalDate;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.time.LocalDate;
 
 @RunWith(Spockito.class)
 public class UnrollMethodDataTest {

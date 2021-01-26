@@ -23,14 +23,14 @@
  */
 package org.tools4j.spockito;
 
-import java.math.BigInteger;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.math.BigInteger;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @RunWith(Spockito.class)
 public class FaqTest {

@@ -26,7 +26,6 @@ package org.tools4j.spockito;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.tools4j.spockito.Spockito.Name;
 import org.tools4j.spockito.Spockito.Unroll;
 

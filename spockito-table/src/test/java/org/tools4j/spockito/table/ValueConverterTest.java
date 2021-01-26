@@ -24,7 +24,6 @@
 package org.tools4j.spockito.table;
 
 import org.junit.jupiter.api.Test;
-import org.omg.CORBA.Object;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;

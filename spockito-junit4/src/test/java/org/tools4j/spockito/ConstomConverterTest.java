@@ -23,13 +23,12 @@
  */
 package org.tools4j.spockito;
 
-import java.lang.reflect.Type;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.tools4j.spockito.table.ValueConverter;
+
+import java.lang.reflect.Type;
 
 @RunWith(Spockito.class)
 @Spockito.UseValueConverter(ConstomConverterTest.MyIntegerConverter.class)
