@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2017-2020 tools4j.org (Marco Terzer)
+ * Copyright (c) 2017-2021 tools4j.org (Marco Terzer)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,10 +23,10 @@
  */
 package org.tools4j.spockito;
 
-import java.util.Objects;
-
 import org.junit.runner.Description;
 import org.junit.runner.manipulation.Filter;
+
+import java.util.Objects;
 
 /**
  * Method filter wrapped around an original filter in {@link Spockito#filter(Filter)} to work around an Intellij problem

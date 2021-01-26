@@ -23,43 +23,35 @@
  */
 package org.tools4j.spockito.table;
 
-public enum Operation {
-    Add {
-        public int evaluate(final int operand1, final int operand2) {
-            return operand1 + operand2;
-        }
-        @Override
-        public int neutralSecondOperand() {
-            return 0;
-        }
-    },
-    Subtract {
-        public int evaluate(final int operand1, final int operand2) {
-            return operand1 - operand2;
-        }
-        @Override
-        public int neutralSecondOperand() {
-            return 0;
-        }
-    },
-    Multiply {
-        public int evaluate(final int operand1, final int operand2) {
-            return operand1 * operand2;
-        }
-        @Override
-        public int neutralSecondOperand() {
-            return 1;
-        }
-    },
-    Divide {
-        public int evaluate(final int operand1, final int operand2) {
-            return operand1 / operand2;
-        }
-        @Override
-        public int neutralSecondOperand() {
-            return 1;
-        }
-    };
-    abstract public int evaluate(int operand1, int operand2);
-    abstract public int neutralSecondOperand();
+import java.lang.reflect.AnnotatedElement;
+
+import static java.util.Objects.requireNonNull;
+
+public interface InjectionContext {
+    enum Phase {
+        INIT, TEST
+    }
+    Phase phase();
+    AnnotatedElement annotatedElement();
+
+    static InjectionContext create(final Phase phase, final AnnotatedElement annotatedElement) {
+        requireNonNull(phase);
+        requireNonNull(annotatedElement);
+        return new InjectionContext() {
+            @Override
+            public Phase phase() {
+                return phase;
+            }
+
+            @Override
+            public AnnotatedElement annotatedElement() {
+                return annotatedElement;
+            }
+
+            @Override
+            public String toString() {
+                return "InjectionContext{phase=" + phase + ", annotatedElement=" + annotatedElement + "}";
+            }
+        };
+    }
 }

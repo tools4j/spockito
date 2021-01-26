@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2017-2020 tools4j.org (Marco Terzer)
+ * Copyright (c) 2017-2021 tools4j.org (Marco Terzer)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,6 +23,20 @@
  */
 package org.tools4j.spockito;
 
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.Runner;
+import org.junit.runner.manipulation.Filter;
+import org.junit.runner.manipulation.NoTestsRemainException;
+import org.junit.runners.Suite;
+import org.junit.runners.model.FrameworkMethod;
+import org.junit.runners.model.InitializationError;
+import org.junit.runners.model.TestClass;
+import org.tools4j.spockito.table.SpockitoValueConverter;
+import org.tools4j.spockito.table.Table;
+import org.tools4j.spockito.table.TableRow;
+import org.tools4j.spockito.table.ValueConverter;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
@@ -35,21 +49,6 @@ import java.lang.reflect.Parameter;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.Runner;
-import org.junit.runner.manipulation.Filter;
-import org.junit.runner.manipulation.NoTestsRemainException;
-import org.junit.runners.Suite;
-import org.junit.runners.model.FrameworkMethod;
-import org.junit.runners.model.InitializationError;
-import org.junit.runners.model.TestClass;
-
-import org.tools4j.spockito.table.SpockitoValueConverter;
-import org.tools4j.spockito.table.Table;
-import org.tools4j.spockito.table.TableRow;
-import org.tools4j.spockito.table.ValueConverter;
 
 /**
  * The custom runner <code>Spockito</code> implements parameterized tests where the test data
@@ -146,6 +145,10 @@ public class Spockito extends Suite {
     @Retention(RetentionPolicy.RUNTIME)
     @Target(value = {ElementType.FIELD, ElementType.PARAMETER})
     public @interface Ref {
+        /** Ref value to reference the row index */
+        String ROW_INDEX = "row";
+        /** Ref value to reference all columns for instance when converting to an aggregate Bean type */
+        String ALL_COLUMNS = "*";
         /**
          * Returns the column name, or "row" for row index and "*" to map all column values to the annotated variable.
          * Can be omitted when annotating fields and the field name is identical to the column name.
@@ -221,20 +224,6 @@ public class Spockito extends Suite {
         return Spockito.getValueConverter(useValueConverter, SpockitoValueConverter.DEFAULT_INSTANCE);
     }
 
-    static String parameterRefNameOrNull(final Parameter parameter) {
-        final Spockito.Ref ref = parameter.getAnnotation(Spockito.Ref.class);
-        if (ref == null) {
-            return parameter.isNamePresent() ? parameter.getName() : null;
-        } else {
-            return ref.value();
-        }
-    }
-
-    static String fieldRefOrName(final Field field) {
-        final Spockito.Ref ref = field.getAnnotation(Spockito.Ref.class);
-        return ref != null && !ref.value().isEmpty() ? ref.value() : field.getName();
-    }
-
     static Name nameAnnotationOrNull(final Executable executable) {
         final Name name = executable.getAnnotation(Name.class);
         return name != null ? name : executable.getDeclaringClass().getAnnotation(Name.class);
@@ -266,4 +255,17 @@ public class Spockito extends Suite {
         return defaultValueConverter;
     }
 
+    static String parameterRefOrNameOrNull(final Parameter parameter) {
+        final Spockito.Ref ref = parameter.getAnnotation(Spockito.Ref.class);
+        if (ref == null) {
+            return parameter.isNamePresent() ? parameter.getName() : null;
+        } else {
+            return ref.value();
+        }
+    }
+
+    static String fieldRefOrName(final Field field) {
+        final Spockito.Ref ref = field.getAnnotation(Spockito.Ref.class);
+        return ref != null && !ref.value().isEmpty() ? ref.value() : field.getName();
+    }
 }

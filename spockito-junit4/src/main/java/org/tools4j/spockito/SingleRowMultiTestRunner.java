@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2017-2020 tools4j.org (Marco Terzer)
+ * Copyright (c) 2017-2021 tools4j.org (Marco Terzer)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,21 +23,23 @@
  */
 package org.tools4j.spockito;
 
+import org.junit.Test;
+import org.junit.runners.model.FrameworkField;
+import org.junit.runners.model.FrameworkMethod;
+import org.junit.runners.model.InitializationError;
+import org.tools4j.spockito.Spockito.Unroll;
+import org.tools4j.spockito.table.Table;
+import org.tools4j.spockito.table.TableRow;
+import org.tools4j.spockito.table.ValueConverter;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
-import org.junit.Test;
-import org.junit.runners.model.FrameworkField;
-import org.junit.runners.model.FrameworkMethod;
-import org.junit.runners.model.InitializationError;
-
-import org.tools4j.spockito.Spockito.Unroll;
-import org.tools4j.spockito.table.TableRow;
-import org.tools4j.spockito.table.ValueConverter;
+import static org.tools4j.spockito.Spockito.Ref.ALL_COLUMNS;
+import static org.tools4j.spockito.Spockito.Ref.ROW_INDEX;
 
 /**
  * A runner for the case of a single data row applied to a set of test methods. This case applies if the
@@ -66,16 +68,16 @@ public class SingleRowMultiTestRunner extends AbstractSpockitoTestRunner {
     private Object createTestUsingConstructorInjection() throws Exception {
         final Constructor<?> constructor = getTestClass().getOnlyConstructor();
         final ValueConverter valueConverter = Spockito.getValueConverter(constructor.getAnnotation(Spockito.UseValueConverter.class), defaultValueConverter);
-        final Object[] args = tableRow.convertValues(constructor, Spockito::parameterRefNameOrNull, valueConverter);
+        final Object[] args = TableRowConverters.convert(tableRow, constructor, valueConverter);
         return constructor.newInstance(args);
     }
 
     private Object injectAnnotatedFields(final Object testInstance) throws Exception {
         final List<FrameworkField> frameworkFields = getFieldsAnnotatedByRef();
-        final List<Field> fields = frameworkFields.stream().map(FrameworkField::getField).collect(Collectors.toList());
-        final Object[] fieldValues = tableRow.convertValues(fields, Spockito::fieldRefOrName, defaultValueConverter);
-        for (int i = 0; i < fields.size(); i++) {
-            final Field field = fields.get(i);
+        final Field[] fields = frameworkFields.stream().map(FrameworkField::getField).toArray(Field[]::new);
+        final Object[] fieldValues = TableRowConverters.convert(tableRow, fields, defaultValueConverter);
+        for (int i = 0; i < fields.length; i++) {
+            final Field field = fields[i];
             try {
                 field.setAccessible(true);
                 field.set(testInstance, fieldValues[i]);
@@ -132,7 +134,7 @@ public class SingleRowMultiTestRunner extends AbstractSpockitoTestRunner {
             final List<FrameworkField> fields = getFieldsAnnotatedByRef();
             for (final FrameworkField field : fields) {
                 final String refName = field.getField().getAnnotation(Spockito.Ref.class).value();
-                if (!tableRow.isValidRefName(refName)) {
+                if (!isValidParameterRefOrName(tableRow.getTable(), refName)) {
                     errors.add(new Exception("Invalid @Ref value: " + refName +
                             " does not reference a column of the table defined by @Unroll"));
                 }
@@ -144,8 +146,8 @@ public class SingleRowMultiTestRunner extends AbstractSpockitoTestRunner {
         final Constructor<?> constructor = getTestClass().getOnlyConstructor();
         final java.lang.reflect.Parameter[] parameters = constructor.getParameters();
         for (int i = 0; i < parameters.length; i++) {
-            final String refName = Spockito.parameterRefNameOrNull(parameters[i]);
-            if (refName != null && !tableRow.isValidRefName(refName)) {
+            final String refName = Spockito.parameterRefOrNameOrNull(parameters[i]);
+            if (refName != null && !isValidParameterRefOrName(tableRow.getTable(), refName)) {
                 errors.add(new Exception("Invalid @Ref value or parameter name for argument " + i +
                         " of type " + parameters[i].getType() + " in the constructor: " + refName +
                         " does not reference a column of the table defined by @Unroll"));
@@ -173,6 +175,10 @@ public class SingleRowMultiTestRunner extends AbstractSpockitoTestRunner {
 
     private boolean fieldsAreAnnotated() {
         return !getFieldsAnnotatedByRef().isEmpty();
+    }
+
+    private static boolean isValidParameterRefOrName(final Table table, final String name) {
+        return table.hasColumn(name) || ROW_INDEX.equals(name) || ALL_COLUMNS.equals(name);
     }
 
 }

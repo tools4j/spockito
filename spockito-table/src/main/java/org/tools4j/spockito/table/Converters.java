@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2017-2020 tools4j.org (Marco Terzer)
+ * Copyright (c) 2017-2021 tools4j.org (Marco Terzer)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,15 +23,14 @@
  */
 package org.tools4j.spockito.table;
 
+import org.tools4j.spockito.table.GenericTypes.ActualType;
+
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.lang.reflect.WildcardType;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Time;
@@ -69,6 +68,10 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.function.Function;
+
+import static org.tools4j.spockito.table.GenericTypes.actualTypeForTypeParam;
+import static org.tools4j.spockito.table.GenericTypes.genericComponentType;
+import static org.tools4j.spockito.table.GenericTypes.genericListType;
 
 /**
  * Contains conversion functions and value converters used by {@link SpockitoValueConverter}.
@@ -148,7 +151,7 @@ public final class Converters {
                 elementValue = null;
             } else {
                 final ActualType elementType = actualTypeForTypeParam(genericType, 0, 1);
-                elementValue = elementConverter.convert(elementType.rawType, elementType.genericType, trimmed);
+                elementValue = elementConverter.convert(elementType.rawType(), elementType.genericType(), trimmed);
             }
             return type.cast(Optional.ofNullable(elementValue));
         }
@@ -171,6 +174,14 @@ public final class Converters {
             }
             final ActualType elementType = actualTypeForTypeParam(genericType, 0, 1);
             final List<?> list = toList(elementType, value);
+            return convert(type, genericType, list, value);
+        }
+
+        public <T> T convert(final Class<T> type, final Type genericType, final List<?> list) {
+            return convert(type, genericType, list, list);
+        }
+
+        public <T> T convert(final Class<T> type, final Type genericType, final List<?> list, final Object value) {
             if (type.isInstance(list)) {
                 return type.cast(list);
             }
@@ -196,7 +207,8 @@ public final class Converters {
                 return type.cast(new HashSet<>(list));
             }
             if (type.isAssignableFrom(EnumSet.class)) {
-                final EnumSet<?> enumSet = enumSet(elementType.rawType.asSubclass(Enum.class), list);
+                final ActualType elementType = actualTypeForTypeParam(genericType, 0, 1);
+                final EnumSet<?> enumSet = enumSet(elementType.rawType().asSubclass(Enum.class), list);
                 return type.cast(enumSet);
             }
             if (type.isAssignableFrom(ConcurrentLinkedQueue.class)) {
@@ -220,7 +232,7 @@ public final class Converters {
             final String[] parts = parseListValues(plainValue);
             final List<Object> list = new ArrayList<>(parts.length);
             for (int i = 0; i < parts.length; i++) {
-                list.add(elementConverter.convert(elementType.rawType, elementType.genericType, parts[i].trim()));
+                list.add(elementConverter.convert(elementType.rawType(), elementType.genericType(), parts[i].trim()));
             }
             return list;
         }
@@ -248,16 +260,10 @@ public final class Converters {
             if (!type.isArray()) {
                 throw new IllegalArgumentException("Type must be an array: " + type.getName());
             }
-            final Class<?> componentType = type.getComponentType();
-            final Type genericComponentType;
-            if (genericType instanceof GenericArrayType) {
-                genericComponentType = ((GenericArrayType)genericType).getGenericComponentType();
-            } else {
-                genericComponentType = componentType;
-            }
-            final Type genericListType = genericListType(genericComponentType);
+            final ActualType componentType = genericComponentType(type, genericType);
+            final Type genericListType = genericListType(componentType.genericType());
             final List<?> list = collectionConverter.convert(List.class, genericListType, value);
-            final Object array = Array.newInstance(componentType, list.size());
+            final Object array = Array.newInstance(componentType.rawType(), list.size());
             for (int i = 0; i < list.size(); i++) {
                 final Object val = list.get(i);
                 Array.set(array, i, val);
@@ -296,7 +302,7 @@ public final class Converters {
                 return type.cast(new Hashtable<>(map));
             }
             if (type.isAssignableFrom(EnumMap.class)) {
-                final EnumMap<?,?> enumMap = enumMap(keyType.rawType.asSubclass(Enum.class), map);
+                final EnumMap<?,?> enumMap = enumMap(keyType.rawType().asSubclass(Enum.class), map);
                 return type.cast(enumMap);
             }
             if (type.isAssignableFrom(Properties.class)) {
@@ -327,8 +333,8 @@ public final class Converters {
                     throw new IllegalArgumentException("Invalid map key/value pair: " + parts[i]);
                 }
                 try {
-                    final Object key = elementConverter.convert(keyType.rawType, keyType.genericType, keyAndValue[0].trim());
-                    final Object val = elementConverter.convert(valueType.rawType, valueType.genericType, keyAndValue[1].trim());
+                    final Object key = elementConverter.convert(keyType.rawType(), keyType.genericType(), keyAndValue[0].trim());
+                    final Object val = elementConverter.convert(valueType.rawType(), valueType.genericType(), keyAndValue[1].trim());
                     map.put(key, val);
                 } catch (final Exception e) {
                     throw new IllegalArgumentException("Conversion to map key/value failed: " + parts[i], e);
@@ -505,63 +511,6 @@ public final class Converters {
 
     private static String[] parseListValues(final String pair) {
         return Strings.split(pair, Strings.UNESCAPED_COMMA, Strings.UNESCAPED_SEMICOLON);
-    }
-
-    private static class ActualType {
-        final Class<?> rawType;
-        final Type genericType;
-        public ActualType(final Class<?> rawType, final Type genericType) {
-            this.rawType = Objects.requireNonNull(rawType);
-            this.genericType = Objects.requireNonNull(genericType);
-        }
-    }
-    private static ActualType actualTypeForTypeParam(final Type type, final int paramIndex, final int paramCount) {
-        if (type instanceof ParameterizedType) {
-            final Type[] actualTypeArgs = ((ParameterizedType) type).getActualTypeArguments();
-            if (actualTypeArgs.length == paramCount) {
-                Type actualType = actualTypeArgs[paramIndex];
-                if (actualType instanceof WildcardType) {
-                    final Type[] bounds = ((WildcardType) actualType).getUpperBounds();
-                    if (bounds.length == 1) {
-                        actualType = bounds[0];
-                    }
-                }
-                if (actualType instanceof Class) {
-                    return new ActualType((Class<?>) actualType, actualType);
-                }
-                if (actualType instanceof ParameterizedType) {
-                    final ParameterizedType parameterizedType = (ParameterizedType)actualType;
-                    if (parameterizedType.getRawType() instanceof Class) {
-                        return new ActualType((Class<?>)parameterizedType.getRawType(), parameterizedType);
-                    }
-                }
-            }
-        }
-        if (Properties.class.equals(type) && paramCount == 2) {
-            return new ActualType(String.class, String.class);
-        }
-        throw new IllegalArgumentException("Could not derive actual generic type [" + paramIndex + "] for " + type);
-    }
-
-    private static Type genericListType(final Type listElementType) {
-        return new ParameterizedType() {
-            @Override
-            public Type[] getActualTypeArguments() {
-                return new Type[]{listElementType};
-            }
-            @Override
-            public Type getRawType() {
-                return List.class;
-            }
-            @Override
-            public Type getOwnerType() {
-                return null;
-            }
-            @Override
-            public String toString() {
-                return List.class.getName() + "<" + listElementType + ">";
-            }
-        };
     }
 
     private Converters() {

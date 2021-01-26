@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2017-2020 tools4j.org (Marco Terzer)
+ * Copyright (c) 2017-2021 tools4j.org (Marco Terzer)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.tools4j.spockito.jupiter;
+package org.tools4j.spockito.table;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -29,28 +29,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation for fields or parameters of a test method or of the test constructor. Fields
- * need only be annotated if the field name differs from the column name of the test data.
- * Constructor or test method parameters need to be annotated if they are not in the same
- * order as the columns in the test data.
- * <p>
- * The following reference types are supported:
- * <pre>
- * "row" - the current row index (zero based), assignable to an integer type
- * "*" - indicating that all rows are to be used, assignable to a collection type, a map or a Bean
- * "ColumnA" - the value in the "ColumnA" column
- * "ColumnB" - the value in the "ColumnB" column
- * </pre>
+ * Annotation for fields or parameters referencing a whole {@link TableRow}.  If the target type is an integer, the
+ * row index will be assigned instead.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(value = {ElementType.FIELD, ElementType.PARAMETER})
-public @interface Ref {
-    /**
-     * Returns the column name, or "row" for row index and "*" to map all column values to the annotated variable.
-     * Can be omitted when annotating fields and the field name is identical to the column name.
-     *
-     * @return the column name, or "row" for the row index, or "*" to indicate that all all column values should
-     *         be mapped to the annotated variable (for list, map and bean types)
-     */
-    String value() default "";
+public @interface Row {
 }

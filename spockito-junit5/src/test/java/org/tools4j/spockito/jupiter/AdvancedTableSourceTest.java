@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2017-2020 tools4j.org (Marco Terzer)
+ * Copyright (c) 2017-2021 tools4j.org (Marco Terzer)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,10 +23,14 @@
  */
 package org.tools4j.spockito.jupiter;
 
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.tools4j.spockito.table.Column;
+import org.tools4j.spockito.table.Row;
+
 import java.util.List;
 import java.util.Map;
-
-import org.junit.jupiter.params.ParameterizedTest;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -58,16 +62,51 @@ public class AdvancedTableSourceTest {
         }
     }
 
+    @TableSource({
+            "| Index | Name  |",
+            "|   0   | Peter |",
+            "|   1   | Frank |",
+            "|   2   | Henry |"
+    })
+    private List<FieldBean> fieldBeansAsList;
+
+    @TableSource({
+            "| Index | Name  |",
+            "|   0   | Peter |",
+            "|   1   | Frank |",
+            "|   2   | Henry |"
+    })
+    private AccessorBean[] accessorBeansAsArray;
+
+    @Test
+    @ExtendWith(SpockitoExtension.class)
+    public void testFieldInjection() {
+        assertFieldsAreInjected();
+    }
+
+    private void assertFieldsAreInjected() {
+        assertNotNull(fieldBeansAsList,"fieldBeansAsList should not be null");
+        assertNotNull(accessorBeansAsArray,"accessorBeansAsArray should not be null");
+        assertEquals(3, fieldBeansAsList.size(),"fieldBeansAsList has wrong number of elements");
+        assertEquals(3, accessorBeansAsArray.length,"fieldBeansAsList has wrong number of elements");
+        assertEquals(2, fieldBeansAsList.get(2).index,"fieldBeansAsList.get(2).index");
+        assertEquals("Frank", fieldBeansAsList.get(1).name,"fieldBeansAsList.get(1).name");
+        assertEquals(1, accessorBeansAsArray[1].index,"accessorBeansAsArray[1].index");
+        assertEquals("Peter", accessorBeansAsArray[0].name,"fieldBeansAsList.get(1).name");
+    }
+
     @ParameterizedTest
     @TableSource({
             "| List      | Count |",
             "| 1,2,3,4,5 |   5   |",
             "| 17,99,101 |   3   |"
     })
+    @ExtendWith(SpockitoExtension.class)
     //@Spockito.Name("[{row}]")
     public void testUnrollSingleColumnsIntoList(final List<Integer> list, final int count) {
         assertNotNull(list,"list should not be null");
         assertEquals( count, list.size(),"list has wrong number of elements");
+        assertFieldsAreInjected();
     }
 
     @ParameterizedTest
@@ -101,7 +140,7 @@ public class AdvancedTableSourceTest {
             "| 2     | Test 2   |"
     })
     //@Spockito.Name("[{row}]: {1}")
-    public void testUnrollAllColumnsIntoFieldBean(final @Ref("*") FieldBean bean) {
+    public void testUnrollAllColumnsIntoFieldBeanWithAggregator(final @UseTableRowAggregator FieldBean bean) {
         assertNotNull(bean,"bean should not be null");
         assertTrue(bean.index > 0,"bean.index should be greater than zero");
         assertNotNull(bean.name,"bean.name should not be null");
@@ -114,7 +153,20 @@ public class AdvancedTableSourceTest {
             "| 2     | Test 2   |"
     })
     //@Spockito.Name("[{row}]: {1}")
-    public void testUnrollAllColumnsIntoAccessorBean(final @Ref("*") AccessorBean bean) {
+    public void testUnrollAllColumnsIntoFieldBeanWithRow(final @Row FieldBean bean) {
+        assertNotNull(bean,"bean should not be null");
+        assertTrue(bean.index > 0,"bean.index should be greater than zero");
+        assertNotNull(bean.name,"bean.name should not be null");
+    }
+
+    @ParameterizedTest
+    @TableSource({
+            "| Index | Name     |",
+            "| 1     | Test 1   |",
+            "| 2     | Test 2   |"
+    })
+    //@Spockito.Name("[{row}]: {1}")
+    public void testUnrollAllColumnsIntoAccessorBean(final @UseTableRowAggregator AccessorBean bean) {
         assertNotNull(bean,"bean should not be null");
         assertTrue(bean.index > 0,"bean.index should be greater than zero");
         assertNotNull(bean.getName(),"bean.name should not be null");
@@ -127,7 +179,20 @@ public class AdvancedTableSourceTest {
             "| 2     | 55  |"
     })
     //@Spockito.Name("[{row}]: {0}:Age={1}")
-    public void testUnrollAllColumnsIntoMap(final @Ref("*") Map<String, Integer> map) {
+    public void testUnrollAllColumnsIntoMap(final @UseTableRowAggregator Map<String, Integer> map) {
+        assertNotNull(map,"map should not be null");
+        assertTrue(map.get("Index") > 0,"map.Index should be greater than zero");
+        assertTrue(map.get("Age") > 40,"map.Age should be greater than zero");
+    }
+
+    @ParameterizedTest
+    @TableSource({
+            "| Index | Age |",
+            "| 1     | 44  |",
+            "| 2     | 55  |"
+    })
+    //@Spockito.Name("[{row}]: {0}:Age={1}")
+    public void testUnrollAllColumnsIntoMapWithRow(final @Row Map<String, Integer> map) {
         assertNotNull(map,"map should not be null");
         assertTrue(map.get("Index") > 0,"map.Index should be greater than zero");
         assertTrue(map.get("Age") > 40,"map.Age should be greater than zero");
@@ -139,7 +204,7 @@ public class AdvancedTableSourceTest {
             "| [ { index=1 ; name=cherry }, { index=2 ; name=apple } ] |",
             "| [ { index=10 ; name=rose }, { index=20 ; name=tulip } , { index=30 ; name=erika } ] |"
     })
-    public void testUnrollListOfBeans(final @Ref("List") List<FieldBean> list) {
+    public void testUnrollListOfBeans(final @Column("List") List<FieldBean> list) {
         assertNotNull(list,"list should not be null");
         assertTrue(2 <= list.size(),"list size should be at least 2");
     }

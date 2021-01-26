@@ -23,43 +23,26 @@
  */
 package org.tools4j.spockito.table;
 
-public enum Operation {
-    Add {
-        public int evaluate(final int operand1, final int operand2) {
-            return operand1 + operand2;
-        }
-        @Override
-        public int neutralSecondOperand() {
-            return 0;
-        }
-    },
-    Subtract {
-        public int evaluate(final int operand1, final int operand2) {
-            return operand1 - operand2;
-        }
-        @Override
-        public int neutralSecondOperand() {
-            return 0;
-        }
-    },
-    Multiply {
-        public int evaluate(final int operand1, final int operand2) {
-            return operand1 * operand2;
-        }
-        @Override
-        public int neutralSecondOperand() {
-            return 1;
-        }
-    },
-    Divide {
-        public int evaluate(final int operand1, final int operand2) {
-            return operand1 / operand2;
-        }
-        @Override
-        public int neutralSecondOperand() {
-            return 1;
-        }
-    };
-    abstract public int evaluate(int operand1, int operand2);
-    abstract public int neutralSecondOperand();
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+/**
+ * {@code @Data} is an annotation that is used to register {@linkplain DataProvider data providers} for the annotated
+ * field, method or method parameter.
+ *
+ * <p>{@code @DataProvider} may also be used as a meta-annotation in order to create a custom
+ * <em>composed annotation</em> that inherits the semantics of {@code @Data}.
+ */
+@Target({ ElementType.ANNOTATION_TYPE, ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER })
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+public @interface Data {
+	/**
+	 * The type of {@link DataProvider} to be used.
+	 * @return the data provider type
+	 */
+	Class<? extends DataProvider> value();
 }

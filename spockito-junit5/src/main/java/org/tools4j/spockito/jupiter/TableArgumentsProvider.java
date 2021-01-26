@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2017-2020 tools4j.org (Marco Terzer)
+ * Copyright (c) 2017-2021 tools4j.org (Marco Terzer)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,70 +23,39 @@
  */
 package org.tools4j.spockito.jupiter;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Stream;
-
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
-import org.junit.jupiter.params.support.AnnotationConsumer;
-
-import org.tools4j.spockito.table.SpockitoValueConverter;
+import org.tools4j.spockito.table.InjectionContext;
+import org.tools4j.spockito.table.InjectionContext.Phase;
+import org.tools4j.spockito.table.SpockitoException;
 import org.tools4j.spockito.table.Table;
-import org.tools4j.spockito.table.ValueConverter;
+import org.tools4j.spockito.table.TableData;
+import org.tools4j.spockito.table.TableDataProvider;
+
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.stream.Stream;
 
 /**
- * @since 2.0
+ * Provides arguments defined by {@link TableData} using {@link Table}.
  */
-final class TableArgumentsProvider implements ArgumentsProvider, AnnotationConsumer<TableSource> {
-
-    private TableSource annotation;
-    private Table table;
-
-    @Override
-    public void accept(final TableSource annotation) {
-        this.annotation = annotation;
-        this.table = parse(annotation.value());
-    }
+final class TableArgumentsProvider implements ArgumentsProvider {
 
     @Override
     public Stream<? extends Arguments> provideArguments(final ExtensionContext context) {
-        final ValueConverter valueConverter = getValueConverter(context);
         final Method testMethod = context.getRequiredTestMethod();
-        final List<Arguments> arguments = new ArrayList<>(table.getRowCount());
-        table.forEach(tableRow -> {
-            if (!tableRow.isSeparatorRow()) {
-                final Object[] rowValues = tableRow.convertValues(testMethod,
-                        TableArgumentsProvider::parameterRefNameOrNull, valueConverter);
-                arguments.add(Arguments.of(rowValues));
-            }
-        });
-        return arguments.stream();
-    }
-
-    private static ValueConverter getValueConverter(final ExtensionContext extensionContext) {
-        //FIXME make configurable
-        return SpockitoValueConverter.DEFAULT_INSTANCE;
-    }
-
-    private static String parameterRefNameOrNull(final Parameter parameter) {
-        final Ref ref = parameter.getAnnotation(Ref.class);
-        if (ref == null) {
-            return parameter.isNamePresent() ? parameter.getName() : null;
-        } else {
-            return ref.value();
+        final InjectionContext injectionContext = InjectionContext.create(Phase.TEST, testMethod);
+        final TableDataProvider tableDataProvider = TableSourceDataProvider.DEFAULT_INSTANCE;
+        if (!tableDataProvider.applicable(injectionContext)) {
+            //should not happen
+            throw new SpockitoException("Not applicable: " + tableDataProvider);
         }
-    }
-
-    private static Table parse(final String[] headerAndRows) {
-        try {
-            return Table.parse(headerAndRows);
-        } catch (final Exception e) {
-            throw new SpockitoException("TableSource parsing failed", e);
+        final Object data = tableDataProvider.provideData(injectionContext);
+        if (data instanceof Object[][]) {
+            return Arrays.stream((Object[][])data).map(Arguments::of);
         }
+        throw new SpockitoException("Table data provider " + tableDataProvider + " should return value of type Object[][], but found " + data);
     }
 
 }

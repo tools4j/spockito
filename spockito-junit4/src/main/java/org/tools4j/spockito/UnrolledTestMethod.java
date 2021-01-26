@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2017-2020 tools4j.org (Marco Terzer)
+ * Copyright (c) 2017-2021 tools4j.org (Marco Terzer)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,16 +23,16 @@
  */
 package org.tools4j.spockito;
 
-import java.lang.reflect.Method;
-import java.util.Objects;
-
 import org.junit.runners.model.FrameworkMethod;
-
 import org.tools4j.spockito.table.TableRow;
 import org.tools4j.spockito.table.ValueConverter;
 
+import java.lang.reflect.Method;
+
+import static java.util.Objects.requireNonNull;
+
 /**
- * Extension of framwork method representing a test method with a data row.
+ * Extension of framework method representing a test method with a data row.
  */
 public class UnrolledTestMethod extends FrameworkMethod {
 
@@ -41,8 +41,8 @@ public class UnrolledTestMethod extends FrameworkMethod {
 
     public UnrolledTestMethod(final Method method, final TableRow tableRow, final ValueConverter valueConverter) {
         super(method);
-        this.tableRow = Objects.requireNonNull(tableRow);
-        this.valueConverter = Objects.requireNonNull(valueConverter);
+        this.tableRow = requireNonNull(tableRow);
+        this.valueConverter = requireNonNull(valueConverter);
     }
 
     @Override
@@ -55,7 +55,7 @@ public class UnrolledTestMethod extends FrameworkMethod {
     }
 
     protected Object[] getTestArgs() {
-        return tableRow.convertValues(getMethod(), Spockito::parameterRefNameOrNull, valueConverter);
+        return TableRowConverters.convert(tableRow, getMethod(), valueConverter);
     }
 
     @Override

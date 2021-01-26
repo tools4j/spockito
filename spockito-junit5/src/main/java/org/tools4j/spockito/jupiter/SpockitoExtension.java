@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2017-2020 tools4j.org (Marco Terzer)
+ * Copyright (c) 2017-2021 tools4j.org (Marco Terzer)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,14 +23,15 @@
  */
 package org.tools4j.spockito.jupiter;
 
-public class SpockitoException extends RuntimeException {
-    private static final long serialVersionUID = 1L;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.extension.TestInstancePostProcessor;
+import org.tools4j.spockito.table.SpockitoAnnotations;
 
-    public SpockitoException(final String message) {
-        super(message);
+public class SpockitoExtension implements TestInstancePostProcessor {
+
+    @Override
+    public void postProcessTestInstance(final Object testInstance, final ExtensionContext context) {
+        SpockitoAnnotations.initData(testInstance);
     }
 
-    public SpockitoException(final String message, final Throwable cause) {
-        super(message, cause);
-    }
 }

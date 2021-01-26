@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2017-2020 tools4j.org (Marco Terzer)
+ * Copyright (c) 2017-2021 tools4j.org (Marco Terzer)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,9 +23,9 @@
  */
 package org.tools4j.spockito.table;
 
-import java.util.List;
-
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -45,18 +45,18 @@ public class TableTest {
     @Test
     public void parse() {
         //when
-        final Row[] rows = Table.parse(Row.class, new String[] {
+        final List<Row> rows = Table.parse(new String[] {
                 "| index | listOfInteger | emptyString |",
                 "|   0   | [1;2;3;4;5;6] |             |",
                 "|   1   | [9;8;7;6;5;4] |     ''      |"
-        });
+        }).toList(Row.class);
 
         //then
-        assertEquals(2, rows.length, "unexpected row count");
-        for (int row = 0; row < rows.length; row++) {
-            assertEquals(row, rows[row].index, "unexpected index");
-            assertEquals(6, rows[row].listOfInteger.size(), "unexpected list size");
-            assertEquals("", rows[row].emptyString, "string should be empty");
+        assertEquals(2, rows.size(), "unexpected row count");
+        for (int row = 0; row < rows.size(); row++) {
+            assertEquals(row, rows.get(row).index, "unexpected index");
+            assertEquals(6, rows.get(row).listOfInteger.size(), "unexpected list size");
+            assertEquals("", rows.get(row).emptyString, "string should be empty");
         }
     }
 }

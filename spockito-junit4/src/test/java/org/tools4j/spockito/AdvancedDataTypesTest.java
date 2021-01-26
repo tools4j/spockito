@@ -23,12 +23,12 @@
  */
 package org.tools4j.spockito;
 
-import java.util.List;
-import java.util.Map;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.List;
+import java.util.Map;
 
 @RunWith(Spockito.class)
 public class AdvancedDataTypesTest {

@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2017-2020 tools4j.org (Marco Terzer)
+ * Copyright (c) 2017-2021 tools4j.org (Marco Terzer)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -40,4 +40,15 @@ public interface ValueConverter {
      * @return the converted value
      */
     <T> T convert(Class<T> type, Type genericType, String value);
+
+    static ValueConverter create(final Class<? extends ValueConverter> type) {
+        if (SpockitoValueConverter.class.equals(type)) {
+            return SpockitoValueConverter.DEFAULT_INSTANCE;
+        }
+        try {
+            return type.newInstance();
+        } catch (final Exception e) {
+            throw new SpockitoException("Could not create value converter instance of type " + type.getName(), e);
+        }
+    }
 }

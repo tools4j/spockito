@@ -21,45 +21,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.tools4j.spockito.table;
+package org.tools4j.spockito.jupiter;
 
-public enum Operation {
-    Add {
-        public int evaluate(final int operand1, final int operand2) {
-            return operand1 + operand2;
-        }
-        @Override
-        public int neutralSecondOperand() {
-            return 0;
-        }
-    },
-    Subtract {
-        public int evaluate(final int operand1, final int operand2) {
-            return operand1 - operand2;
-        }
-        @Override
-        public int neutralSecondOperand() {
-            return 0;
-        }
-    },
-    Multiply {
-        public int evaluate(final int operand1, final int operand2) {
-            return operand1 * operand2;
-        }
-        @Override
-        public int neutralSecondOperand() {
-            return 1;
-        }
-    },
-    Divide {
-        public int evaluate(final int operand1, final int operand2) {
-            return operand1 / operand2;
-        }
-        @Override
-        public int neutralSecondOperand() {
-            return 1;
-        }
-    };
-    abstract public int evaluate(int operand1, int operand2);
-    abstract public int neutralSecondOperand();
+import org.junit.jupiter.api.extension.ParameterContext;
+import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
+import org.junit.jupiter.params.aggregator.ArgumentsAggregationException;
+import org.junit.jupiter.params.aggregator.ArgumentsAggregator;
+import org.tools4j.spockito.table.TableRow;
+import org.tools4j.spockito.table.ValueConverter;
+
+import java.lang.reflect.Parameter;
+
+import static org.tools4j.spockito.jupiter.TableValueConverter.valueConverter;
+
+public class TableRowAggregator implements ArgumentsAggregator {
+
+    @Override
+    public Object aggregateArguments(final ArgumentsAccessor accessor, final ParameterContext context) throws ArgumentsAggregationException {
+        final Parameter parameter = context.getParameter();
+        final ValueConverter valueConverter = valueConverter(context);
+        final TableRow tableRow = accessor.get(context.getIndex(), TableRow.class);
+        return tableRow.to(parameter.getType(), parameter.getParameterizedType(), valueConverter);
+    }
+
 }

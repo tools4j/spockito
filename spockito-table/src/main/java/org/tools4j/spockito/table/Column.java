@@ -23,43 +23,24 @@
  */
 package org.tools4j.spockito.table;
 
-public enum Operation {
-    Add {
-        public int evaluate(final int operand1, final int operand2) {
-            return operand1 + operand2;
-        }
-        @Override
-        public int neutralSecondOperand() {
-            return 0;
-        }
-    },
-    Subtract {
-        public int evaluate(final int operand1, final int operand2) {
-            return operand1 - operand2;
-        }
-        @Override
-        public int neutralSecondOperand() {
-            return 0;
-        }
-    },
-    Multiply {
-        public int evaluate(final int operand1, final int operand2) {
-            return operand1 * operand2;
-        }
-        @Override
-        public int neutralSecondOperand() {
-            return 1;
-        }
-    },
-    Divide {
-        public int evaluate(final int operand1, final int operand2) {
-            return operand1 / operand2;
-        }
-        @Override
-        public int neutralSecondOperand() {
-            return 1;
-        }
-    };
-    abstract public int evaluate(int operand1, int operand2);
-    abstract public int neutralSecondOperand();
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+/**
+ * Annotation for fields or parameters referencing a column of a {@link TableRow}. Fields need only be annotated if the
+ * field name differs from the column name.  Constructor or test method parameters need to be annotated if the index
+ * does not match the column index in the table.
+ */
+@Retention(RetentionPolicy.RUNTIME)
+@Target(value = {ElementType.FIELD, ElementType.PARAMETER})
+public @interface Column {
+    /**
+     * Returns the name to reference a column in the table.  The value can be omitted when annotating a field whose name
+     * matches the column name.
+     *
+     * @return the column name, empty to match field name
+     */
+    String value() default "";
 }

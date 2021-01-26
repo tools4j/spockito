@@ -21,45 +21,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.tools4j.spockito.table;
+package org.tools4j.spockito.jupiter;
 
-public enum Operation {
-    Add {
-        public int evaluate(final int operand1, final int operand2) {
-            return operand1 + operand2;
-        }
-        @Override
-        public int neutralSecondOperand() {
-            return 0;
-        }
-    },
-    Subtract {
-        public int evaluate(final int operand1, final int operand2) {
-            return operand1 - operand2;
-        }
-        @Override
-        public int neutralSecondOperand() {
-            return 0;
-        }
-    },
-    Multiply {
-        public int evaluate(final int operand1, final int operand2) {
-            return operand1 * operand2;
-        }
-        @Override
-        public int neutralSecondOperand() {
-            return 1;
-        }
-    },
-    Divide {
-        public int evaluate(final int operand1, final int operand2) {
-            return operand1 / operand2;
-        }
-        @Override
-        public int neutralSecondOperand() {
-            return 1;
-        }
-    };
-    abstract public int evaluate(int operand1, int operand2);
-    abstract public int neutralSecondOperand();
+import org.junit.jupiter.params.aggregator.AggregateWith;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ ElementType.PARAMETER, ElementType.ANNOTATION_TYPE })
+@Documented
+@AggregateWith(TableRowAggregator.class)
+public @interface UseTableRowAggregator {
 }

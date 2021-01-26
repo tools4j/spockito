@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2017-2020 tools4j.org (Marco Terzer)
+ * Copyright (c) 2017-2021 tools4j.org (Marco Terzer)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,125 +23,73 @@
  */
 package org.tools4j.spockito.table;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.lang.reflect.Type;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
+import static java.util.Objects.requireNonNull;
 
 /**
- * Represents a table with header row and data rows.
+ * Represents a table with a header row and zero to many data or separator rows; all table elements are strings.
  */
-public class Table implements Iterable<TableRow> {
+public interface Table extends Iterable<TableRow> {
 
-    private static final Table EMPTY = new Table();
+    int getColumnCount();
+    int getRowCount();
 
-    private final TableRow headers;
-    private final List<TableRow> data = new ArrayList<>();
+    String getColumnName(int index);
+    boolean hasColumn(String columnName);
+    int getColumnIndexByName(String columnName);
 
-    private Table() {
-        this.headers = TableRow.empty(this);
-    }
+    TableRow getRow(int rowIndex);
+    int getRowIndex(TableRow row);
 
-    private Table(final String headerString) {
-        this.headers = parseRow(this, 0, headerString);
-        if (headers.distinctCount() < headers.size()) {
-            throw new IllegalArgumentException("Duplicate column headers: " + headers);
-        }
-    }
-
-    public int getColumnCount() {
-        //null in constructor when parsing header row
-        return headers == null ? 0 : headers.size();
-    }
-
-    public int getColumnIndexByName(final String columnName) {
-        int columnIndex = headers.indexOf(columnName);
-        if (columnIndex < 0) {
-            if (columnName.length() > 0 && Character.isLowerCase(columnName.charAt(0))) {
-                columnIndex = headers.indexOf(Strings.firstCharToUpperCase(columnName));
-            }
-        }
-        if (columnIndex < 0) {
-            throw new IllegalArgumentException("No such column: " + columnName);
-        }
-        return columnIndex;
-    }
-
-    public boolean hasColumn(final String columnName) {
-        return 0 <= headers.indexOf(columnName);
-    }
-
-    public int getRowCount() {
-        return data.size();
-    }
-
-    public String getColumnName(final int index) {
-        return headers.get(index);
-    }
-
-    public TableRow getRow(final int rowIndex) {
-        return data.get(rowIndex);
-    }
-
-    public int getRowIndex(final TableRow row) {
-        return data.indexOf(row);
-    }
-
-    public String getValue(final int rowIndex, final int columnIndex) {
-        return data.get(rowIndex).get(columnIndex);
-    }
-
-    public String getValue(final int rowIndex, final String columnName) {
-        final int columnIndex = getColumnIndexByName(columnName);
-        return data.get(rowIndex).get(columnIndex);
-    }
+    String getValue(int rowIndex, int columnIndex);
+    String getValue(int rowIndex, String columnName);
 
     @Override
-    public Iterator<TableRow> iterator() {
-        return Collections.unmodifiableList(data).iterator();
+    Iterator<TableRow> iterator();
+    default Stream<TableRow> stream() {
+        return StreamSupport.stream(spliterator(), false);
     }
 
-    public static <T> T[] parse(final Class<T> rowType, final String[] headerAndRows) {
-        return parse(rowType, headerAndRows, new SpockitoValueConverter());
+    default <T> T to(final Class<T> type) {
+        return to(type, type);
     }
 
-    public static <T> T[] parse(final Class<T> rowType, final String[] headerAndRows, final ValueConverter valueConverter) {
-        final Table table = parse(headerAndRows);
-        final int rows = table.getRowCount();
-        final T[] result = (T[])Array.newInstance(rowType, rows);
-        for (int row = 0; row < rows; row++) {
-            result[row] = valueConverter.convert(rowType, rowType, table.getRow(row).asMap().toString());
-        }
-        return result;
+    default <T> T to(final Class<T> type, final Type genericType) {
+        return to(type, genericType, SpockitoValueConverter.DEFAULT_INSTANCE);
     }
 
-    public static Table parse(final String[] headerAndRows) {
-        if (headerAndRows.length > 0) {
-            final Table table = new Table(headerAndRows[0]);
-            for (int i = 1; i < headerAndRows.length; i++) {
-                final TableRow tableRow = parseRow(table, i, headerAndRows[i]);
-                if (!tableRow.isSeparatorRow()) {
-                    table.data.add(tableRow);
-                }
-            }
-            return table;
-        }
-        return Table.EMPTY;
+    default <T> T to(final Class<T> type, final Type genericType, final ValueConverter valueConverter) {
+        final TableConverter tableConverter = new SpockitoTableConverter(type, genericType, valueConverter);
+        return type.cast(tableConverter.convert(this));
     }
 
-    private static TableRow parseRow(final Table table, final int row, final String rowString) {
-        final String trimmed = rowString.trim();
-        if (trimmed.length() < 2 || trimmed.charAt(0) != '|' || trimmed.charAt(trimmed.length() - 1) != '|') {
-            throw new IllegalArgumentException("Invalid table data: row " + row + " must start and end with '|'");
-        }
-        final TableRow tableRow = TableRow.parse(table, trimmed);
-        if (row != 0) {
-            if (tableRow.size() > table.getColumnCount()) {
-                throw new IllegalArgumentException("Invalid table data: row " + row + " has more columns than header row: " + tableRow.size() + " > " + table.getColumnCount());
-            }
-        }
-        return tableRow;
+    default List<String[]> toList() {
+        return stream().map(TableRow::toArray).collect(Collectors.toList());
     }
 
+    default <T> List<T> toList(final Class<T> rowType) {
+        return toList(rowType, SpockitoValueConverter.DEFAULT_INSTANCE);
+    }
+
+    default <T> List<T> toList(final Class<T> rowType, final ValueConverter valueConverter) {
+        requireNonNull(rowType);
+        requireNonNull(valueConverter);
+        return stream().map(row -> row.to(rowType, valueConverter)).collect(Collectors.toList());
+    }
+    default <T> List<T> toList(final Class<T> rowType, final Type genericType, final ValueConverter valueConverter) {
+        requireNonNull(rowType);
+        requireNonNull(genericType);
+        requireNonNull(valueConverter);
+        return stream().map(row -> row.to(rowType, genericType, valueConverter)).collect(Collectors.toList());
+    }
+
+    static Table parse(final String[] headerAndRows) {
+        return SpockitoTable.parse(headerAndRows);
+    }
 }

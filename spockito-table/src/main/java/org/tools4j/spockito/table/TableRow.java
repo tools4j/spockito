@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2017-2020 tools4j.org (Marco Terzer)
+ * Copyright (c) 2017-2021 tools4j.org (Marco Terzer)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,146 +23,37 @@
  */
 package org.tools4j.spockito.table;
 
-import java.lang.reflect.Executable;
-import java.lang.reflect.Field;
-import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.function.Function;
-import java.util.regex.Pattern;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * Represents a single row of a {@link Table}.
  */
-public class TableRow {
+public interface TableRow extends Iterable<String> {
 
-    public static final String REF_ROW = "row";
-    public static final String REF_ALL = "*";
+    Table getTable();
+    int getColumnCount();
+    int getRowIndex();
+    boolean isSeparatorRow();
 
-    private static final Pattern UNESCAPED_PIPE = Pattern.compile("(?<=[^\\\\])\\|");
+    String get(int index);
+    int indexOf(String value);
 
-    private final Table table;
-    private final List<String> values = new ArrayList<>();
-
-    public TableRow(final Table table) {
-        this.table = Objects.requireNonNull(table);
-    }
-
-    public static TableRow empty(final Table table) {
-        return new TableRow(table);
-    }
-
-    public static TableRow parse(final Table table, final String rowString) {
-        final String noBars = Strings.removeSurroundingPipes(rowString);
-        final String[] parts = UNESCAPED_PIPE.split(noBars);
-        final TableRow tableRow = new TableRow(table);
-        for (final String part : parts) {
-            tableRow.values.add(Converters.STRING_CONVERTER.apply(Strings.unescape(part.trim())));
-        }
-        for (int i = parts.length; i < table.getColumnCount(); i++) {
-            tableRow.values.add(null);
-        }
-        return tableRow;
-    }
-
-    public Table getTable() {
-        return table;
-    }
-
-    public boolean isSeparatorRow() {
-        return values.stream().anyMatch(s -> s.contains("-") || s.contains("=")) &&
-                values.stream().allMatch(s -> Strings.allCharsMatchingAnyOf(s, '-', '='));
-    }
-
-    public boolean isValidRefName(final String refName) {
-        return REF_ROW.equals(refName) || REF_ALL.equals(refName) || table.hasColumn(refName);
-    }
-
-    public Object[] convertValues(final Executable executable,
-                                  final Function<? super Parameter, ? extends String> nameLookup,
-                                  final ValueConverter valueConverter) {
-        final Object[] converted = new Object[executable.getParameterCount()];
-        final Parameter[] parameters = executable.getParameters();
-        for (int i = 0; i < converted.length; i++) {
-            final String refName = nameLookup.apply(parameters[i]);
-            converted[i] = convertValue(refName, i, parameters[i].getType(), parameters[i].getParameterizedType(), valueConverter);
-        }
-        return converted;
-    }
-
-    public Object[] convertValues(final List<? extends Field> fields,
-                                  final Function<? super Field, ? extends String> nameLookup,
-                                  final ValueConverter valueConverter) {
-        final Object[] converted = new Object[fields.size()];
-        for (int i = 0; i < converted.length; i++) {
-            final Field field = fields.get(i);
-            final String refName = nameLookup.apply(field);
-            converted[i] = convertValue(refName, -1, field.getType(), field.getGenericType(), valueConverter);
-        }
-        return converted;
-    }
-
-    private Object convertValue(final String refNameOrNull, final int defaultColumnIndex,
-                                final Class<?> type, final Type genericType, final ValueConverter valueConverter) {
-        final String value;
-        if (REF_ROW.equals(refNameOrNull)) {
-            value = String.valueOf(getRowIndex());
-        } else if (REF_ALL.equals(refNameOrNull)) {
-            value = asMap().toString();
-        } else {
-            try {
-                final int columnIndex = refNameOrNull == null ? defaultColumnIndex : table.getColumnIndexByName(refNameOrNull);
-                value = get(columnIndex);
-            } catch (final Exception e) {
-                throw new IllegalArgumentException("Could not access column value " + refName(refNameOrNull, defaultColumnIndex), e);
-            }
-        }
-        try {
-            return valueConverter.convert(type, genericType, value);
-        } catch (final Exception e) {
-            throw new IllegalArgumentException("Conversion to " + genericType + " failed for column '" +
-                    refName(refNameOrNull, defaultColumnIndex) + "' value: " + value, e);
-        }
-    }
-
-    final Object refName(final String refNameOrNull, final int defaultColumnIndex) {
-        return refNameOrNull != null ? refNameOrNull : defaultColumnIndex;
-    }
-
-    public int size() {
-        return values.size();
-    }
-
-    public int distinctCount() {
-        return (int) values.stream().distinct().count();
-    }
-
-    public String get(final int index) {
-        return values.get(index);
-    }
-
-    public int indexOf(final String value) {
-        return values.indexOf(value);
-    }
-
-    public int getRowIndex() {
-        return table.getRowIndex(this);
-    }
-
-    public Map<String, String> asMap() {
-        final Map<String, String> map = new LinkedHashMap<>();
-        for (int i = 0; i < size(); i++) {
-            map.put(table.getColumnName(i), get(i));
-        }
-        return map;
-    }
+    String[] toArray();
+    List<String> toList();
+    Map<String, String> toMap();
+    <T> T to(Class<T> type);
+    <T> T to(Class<T> type, ValueConverter valueConverter);
+    <T> T to(Class<T> type, Type genericType, ValueConverter valueConverter);
 
     @Override
-    public String toString() {
-        return "TableRow" + values;
+    Iterator<String> iterator();
+    default Stream<String> stream() {
+        return StreamSupport.stream(spliterator(), false);
     }
+
 }

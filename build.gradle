@@ -40,7 +40,7 @@ defaultTasks 'clean', 'build'
 def projGroup = 'org.tools4j'
 def projVersion = file('version.txt').text.trim()
 
-def junit4Version = '4.13'
+def junit4Version = '4.13.1'
 def junit5Version = '5.7.0'
 
 ext {

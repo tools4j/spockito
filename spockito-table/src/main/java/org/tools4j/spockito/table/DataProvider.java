@@ -23,43 +23,27 @@
  */
 package org.tools4j.spockito.table;
 
-public enum Operation {
-    Add {
-        public int evaluate(final int operand1, final int operand2) {
-            return operand1 + operand2;
-        }
-        @Override
-        public int neutralSecondOperand() {
-            return 0;
-        }
-    },
-    Subtract {
-        public int evaluate(final int operand1, final int operand2) {
-            return operand1 - operand2;
-        }
-        @Override
-        public int neutralSecondOperand() {
-            return 0;
-        }
-    },
-    Multiply {
-        public int evaluate(final int operand1, final int operand2) {
-            return operand1 * operand2;
-        }
-        @Override
-        public int neutralSecondOperand() {
-            return 1;
-        }
-    },
-    Divide {
-        public int evaluate(final int operand1, final int operand2) {
-            return operand1 / operand2;
-        }
-        @Override
-        public int neutralSecondOperand() {
-            return 1;
-        }
-    };
-    abstract public int evaluate(int operand1, int operand2);
-    abstract public int neutralSecondOperand();
+/**
+ * A {@code Data} is responsible for {@linkplain #provideData providing} data to be injected to a field or to a single
+ * or multiple method parameters.
+ *
+ * <p>An {@code DataProvider} can be registered via the {@link Data @Data} annotation.
+ *
+ * <p>Implementations must provide a no-args constructor.
+ */
+public interface DataProvider {
+
+    default boolean applicable(final InjectionContext context) {
+        return true;
+    }
+
+    /**
+     * Provides the data to be injected to a field or to method parameters.
+     *
+     * @param context the current injection context; never {@code null}
+     * @return the data to inject; never {@code null}
+     * @throws Exception if data provision fails
+     */
+    Object provideData(InjectionContext context) throws Exception;
+
 }

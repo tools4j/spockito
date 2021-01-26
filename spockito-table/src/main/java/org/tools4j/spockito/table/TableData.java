@@ -21,24 +21,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.tools4j.spockito.jupiter;
-
-import org.junit.jupiter.params.provider.ArgumentsSource;
-import org.tools4j.spockito.table.Data;
-import org.tools4j.spockito.table.SpockitoValueConverter;
-import org.tools4j.spockito.table.ValueConverter;
+package org.tools4j.spockito.table;
 
 import java.lang.annotation.Documented;
+import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * Source for {@link org.junit.jupiter.params.ParameterizedTest ParameterizedTest} data declared in a table like
+ * Annotations to inject table data into a field, method or method parameter; the table data is define in a
  * structure as follows:
  * <pre>
  * | ColumnA   | ColumnB   | ColumnC   |
@@ -50,12 +47,12 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * The separator row after the column headers is optional and = instead of - can be used. Separator rows can be
  * placed anywhere in the table and are ignored when the table is parsed.
  */
-@Target({ANNOTATION_TYPE, METHOD, FIELD})
+@Target({ANNOTATION_TYPE, METHOD, FIELD, PARAMETER})
 @Retention(RUNTIME)
 @Documented
-@ArgumentsSource(TableArgumentsProvider.class)
-@Data(TableSourceDataProvider.class)
-public @interface TableSource {
+@Inherited
+@Data(TableDataProvider.class)
+public @interface TableData {
     /**
      * Test case data for parameterized tests structured as follows:
      * <pre>
