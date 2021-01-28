@@ -33,8 +33,11 @@ import java.lang.annotation.Target;
  * {@code @Data} is an annotation that is used to register {@linkplain DataProvider data providers} for the annotated
  * field, method or method parameter.
  *
- * <p>{@code @DataProvider} may also be used as a meta-annotation in order to create a custom
- * <em>composed annotation</em> that inherits the semantics of {@code @Data}.
+ * <p>{@code @Data} may also be used as a meta-annotation in order to create a custom <em>composed annotation</em>
+ * that inherits the semantics of {@code @Data}.
+ *
+ * <p>{@code @Data} are injected via {@link SpockitoAnnotations#initData(Object)} or when creating subclass instances of
+ * {@link SpockitoData}.
  */
 @Target({ ElementType.ANNOTATION_TYPE, ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER })
 @Retention(RetentionPolicy.RUNTIME)

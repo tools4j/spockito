@@ -35,8 +35,8 @@ import java.lang.reflect.Parameter;
 import static org.tools4j.spockito.table.SpockitoAnnotations.annotationDirectOrMeta;
 
 /**
- * Similar to the converters created by the factory methods in {@link TableRowConverter} but this time the parameters or
- * fields can be annotated to override the default name or index.
+ * Similar to the converters created by the factory methods in {@link SpockitoTableRowConverter} but with added support
+ * for {@linkplain ConvertWith @ConvertWith} and {@linkplain AggregateWith @AggregateWith}.
  */
 enum TableRowConverters {
     ;

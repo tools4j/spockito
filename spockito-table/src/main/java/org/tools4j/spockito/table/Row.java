@@ -23,16 +23,18 @@
  */
 package org.tools4j.spockito.table;
 
+import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation for fields or parameters referencing a whole {@link TableRow}.  If the target type is an integer, the
- * row index will be assigned instead.
+ * Annotation for fields or parameters referencing a whole {@link TableRow} of a {@link Table}.  If the target type is
+ * int, the row index will be assigned instead.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(value = {ElementType.FIELD, ElementType.PARAMETER})
+@Documented
 public @interface Row {
 }

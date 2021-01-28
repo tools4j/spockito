@@ -27,6 +27,7 @@ import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 import org.junit.jupiter.params.aggregator.ArgumentsAggregationException;
 import org.junit.jupiter.params.aggregator.ArgumentsAggregator;
+import org.tools4j.spockito.table.Table;
 import org.tools4j.spockito.table.TableRow;
 import org.tools4j.spockito.table.ValueConverter;
 
@@ -34,6 +35,12 @@ import java.lang.reflect.Parameter;
 
 import static org.tools4j.spockito.jupiter.TableValueConverter.valueConverter;
 
+/**
+ * Aggregator used by {@linkplain AggregateTableRow @AggregateTableRow} or if used with the
+ * {@linkplain org.junit.jupiter.params.aggregator.AggregateWith @AggregateWith} annotation.
+ *
+ * <p>The annotated method parameter references a whole {@link TableRow} of a {@link Table}.
+ */
 public class TableRowAggregator implements ArgumentsAggregator {
 
     @Override

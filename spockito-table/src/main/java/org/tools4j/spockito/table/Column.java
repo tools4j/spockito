@@ -23,6 +23,7 @@
  */
 package org.tools4j.spockito.table;
 
+import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -30,11 +31,15 @@ import java.lang.annotation.Target;
 
 /**
  * Annotation for fields or parameters referencing a column of a {@link TableRow}. Fields need only be annotated if the
- * field name differs from the column name.  Constructor or test method parameters need to be annotated if the index
- * does not match the column index in the table.
+ * field name differs from the column name.  Parameters need to be annotated if the index does not match the column
+ * index in the table.
+ *
+ * <p>{@code @Column} may also be used as a meta-annotation in order to create a custom <em>composed annotation</em>
+ * that inherits the semantics of {@code @Column}.
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(value = {ElementType.FIELD, ElementType.PARAMETER})
+@Target(value = {ElementType.ANNOTATION_TYPE, ElementType.FIELD, ElementType.PARAMETER})
+@Documented
 public @interface Column {
     /**
      * Returns the name to reference a column in the table.  The value can be omitted when annotating a field whose name

@@ -27,6 +27,13 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.TestInstancePostProcessor;
 import org.tools4j.spockito.table.SpockitoAnnotations;
 
+/**
+ * Test extension to initialise {@linkplain org.tools4j.spockito.table.DataProvider data providers} such as fields
+ * annotated with {@link org.tools4j.spockito.table.Data @Data} or {@link TableSource}.
+ *
+ * <p>This is identical to calling {@code SpockitoAnnotations.initData(testInstance)} in a
+ * {@linkplain org.junit.jupiter.api.BeforeEach @BeforeEach} method.
+ */
 public class SpockitoExtension implements TestInstancePostProcessor {
 
     @Override

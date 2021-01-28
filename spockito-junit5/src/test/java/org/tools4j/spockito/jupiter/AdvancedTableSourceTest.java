@@ -29,6 +29,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.tools4j.spockito.table.Column;
 import org.tools4j.spockito.table.Row;
 
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.util.List;
 import java.util.Map;
 
@@ -41,6 +46,11 @@ public class AdvancedTableSourceTest {
     public static class FieldBean {
         public int index;
         public String name;
+
+        @Override
+        public String toString() {
+            return "FieldBean{index=" + index + ", name='" + name + '\'' + '}';
+        }
     }
 
     public static class AccessorBean {
@@ -59,6 +69,11 @@ public class AdvancedTableSourceTest {
 
         private String getName() {
             return name;
+        }
+
+        @Override
+        public String toString() {
+            return "AccessorBean{index=" + index + ", name='" + name + '\'' + '}';
         }
     }
 
@@ -95,116 +110,116 @@ public class AdvancedTableSourceTest {
         assertEquals("Peter", accessorBeansAsArray[0].name,"fieldBeansAsList.get(1).name");
     }
 
-    @ParameterizedTest
     @TableSource({
             "| List      | Count |",
             "| 1,2,3,4,5 |   5   |",
             "| 17,99,101 |   3   |"
     })
     @ExtendWith(SpockitoExtension.class)
-    //@Spockito.Name("[{row}]")
+    @ParameterizedTest(name = "[{index}]: {0}")
     public void testUnrollSingleColumnsIntoList(final List<Integer> list, final int count) {
         assertNotNull(list,"list should not be null");
         assertEquals( count, list.size(),"list has wrong number of elements");
         assertFieldsAreInjected();
     }
 
-    @ParameterizedTest
     @TableSource({
             "| Map                        | Count |",
             "| 1:blue, 2:green, 3: yellow | 3     |",
             "| 1:sky, 2:hello world       | 2     |"
     })
-    //@Spockito.Name("[{row}]")
+    @ParameterizedTest(name = "[{index}]: {0}")
     public void testUnrollSingleColumnsIntoMap(final Map<Integer, String> map, final int count) {
         assertNotNull(map,"map should not be null");
         assertEquals( count, map.size(),"map has wrong number of elements");
     }
 
-    @ParameterizedTest
     @TableSource({
             "| FieldBean           | Name     |",
             "| index:1,name:Test 1 | Test 1   |",
             "| index:2,name:Test 2 | Test 2   |",
     })
-    //@Spockito.Name("[{row}]: {1}")
+    @ParameterizedTest(name = "[{index}]: {1}")
     public void testUnrollSingleColumnsIntoFieldBean(final FieldBean bean, final String testName) {
         assertNotNull(bean,"bean should not be null");
         assertEquals( testName, bean.name,"bean.name not as expected");
     }
 
-    @ParameterizedTest
     @TableSource({
             "| Index | Name     |",
             "| 1     | Test 1   |",
             "| 2     | Test 2   |"
     })
-    //@Spockito.Name("[{row}]: {1}")
-    public void testUnrollAllColumnsIntoFieldBeanWithAggregator(final @UseTableRowAggregator FieldBean bean) {
+    @ParameterizedTest
+    public void testUnrollAllColumnsIntoFieldBeanWithAggregator(final @AggregateTableRow FieldBean bean) {
         assertNotNull(bean,"bean should not be null");
         assertTrue(bean.index > 0,"bean.index should be greater than zero");
         assertNotNull(bean.name,"bean.name should not be null");
     }
 
-    @ParameterizedTest
     @TableSource({
             "| Index | Name     |",
             "| 1     | Test 1   |",
             "| 2     | Test 2   |"
     })
-    //@Spockito.Name("[{row}]: {1}")
+    @ParameterizedTest
     public void testUnrollAllColumnsIntoFieldBeanWithRow(final @Row FieldBean bean) {
         assertNotNull(bean,"bean should not be null");
         assertTrue(bean.index > 0,"bean.index should be greater than zero");
         assertNotNull(bean.name,"bean.name should not be null");
     }
 
-    @ParameterizedTest
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(value = {ElementType.FIELD, ElementType.PARAMETER})
+    @Column("Name")
+    @Documented
+    @interface Name {
+    }
+
     @TableSource({
             "| Index | Name     |",
             "| 1     | Test 1   |",
             "| 2     | Test 2   |"
     })
-    //@Spockito.Name("[{row}]: {1}")
-    public void testUnrollAllColumnsIntoAccessorBean(final @UseTableRowAggregator AccessorBean bean) {
+    @ParameterizedTest(name = "[{index}]: {1}")
+    public void testUnrollAllColumnsIntoAccessorBean(final @Name String name, final @AggregateTableRow AccessorBean bean) {
         assertNotNull(bean,"bean should not be null");
         assertTrue(bean.index > 0,"bean.index should be greater than zero");
         assertNotNull(bean.getName(),"bean.name should not be null");
+        assertEquals(name, bean.getName(),"name should equal bean.name");
     }
 
-    @ParameterizedTest
     @TableSource({
             "| Index | Age |",
             "| 1     | 44  |",
             "| 2     | 55  |"
     })
-    //@Spockito.Name("[{row}]: {0}:Age={1}")
-    public void testUnrollAllColumnsIntoMap(final @UseTableRowAggregator Map<String, Integer> map) {
+    @ParameterizedTest(name = "[{index}]: {0}")
+    public void testUnrollAllColumnsIntoMap(final @AggregateTableRow Map<String, Integer> map) {
         assertNotNull(map,"map should not be null");
         assertTrue(map.get("Index") > 0,"map.Index should be greater than zero");
         assertTrue(map.get("Age") > 40,"map.Age should be greater than zero");
     }
 
-    @ParameterizedTest
     @TableSource({
             "| Index | Age |",
             "| 1     | 44  |",
             "| 2     | 55  |"
     })
-    //@Spockito.Name("[{row}]: {0}:Age={1}")
+    @ParameterizedTest(name = "[{index}]: {0}")
     public void testUnrollAllColumnsIntoMapWithRow(final @Row Map<String, Integer> map) {
         assertNotNull(map,"map should not be null");
         assertTrue(map.get("Index") > 0,"map.Index should be greater than zero");
         assertTrue(map.get("Age") > 40,"map.Age should be greater than zero");
     }
 
-    @ParameterizedTest
     @TableSource({
             "| List |",
             "| [ { index=1 ; name=cherry }, { index=2 ; name=apple } ] |",
             "| [ { index=10 ; name=rose }, { index=20 ; name=tulip } , { index=30 ; name=erika } ] |"
     })
-    public void testUnrollListOfBeans(final @Column("List") List<FieldBean> list) {
+    @ParameterizedTest(name = "[{index}]: {0}")
+    public void testUnrollListOfBeans(final List<FieldBean> list) {
         assertNotNull(list,"list should not be null");
         assertTrue(2 <= list.size(),"list size should be at least 2");
     }

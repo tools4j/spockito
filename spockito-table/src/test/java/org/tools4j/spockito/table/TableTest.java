@@ -40,8 +40,6 @@ public class TableTest {
         String emptyString;
     }
 
-
-
     @Test
     public void parse() {
         //when

@@ -55,25 +55,24 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TableSourceTest {
 
-    @ParameterizedTest
     @TableSource({
             "| Last Name | First Name |",
             "| Jones     | David      |",
             "| Jensen    | Astrid     |"
     })
+    @ParameterizedTest(name = "[{index}] {1} {0}")
     public void testUnrollNames(String lastName, String firstName) {
         assertTrue(lastName.startsWith("J"), "Last Name should start with J");
         assertTrue(firstName.endsWith("id"), "First Name should end with id");
     }
 
-    @ParameterizedTest
     @TableSource({
             "| Name  | Year | Birthday   |",
             "|-------|------|------------|",
             "| Henry | 1981 | 1981-11-28 |",
             "| Jessy | 1965 | 1965-03-28 |"
     })
-    //@Spockito.Name("[{row}]: Name={0}")
+    @ParameterizedTest(name = "[{index}] {0}")
     public void testUnrollBirthdays(String name, int year, LocalDate birthday) {
         assertEquals(5, name.length(), "Name should have 5 characters");
         assertTrue(1990 > year, "Year is before 1990");
@@ -81,19 +80,18 @@ public class TableSourceTest {
         assertEquals(year, birthday.getYear(), "Year is consistent with birthday");
     }
 
-    @ParameterizedTest
     @TableSource({
             "| Name  | Year | Birthday   |",
             "|-------|------|------------|",
             "| Henry | 1981 | 1981-11-28 |",
             "| Jessy | 1965 | 1965-03-28 |"
     })
+    @ParameterizedTest(name = "[{index}] {0}")
     public void testUnrollNameAndYearOnly(String name, int year) {
         assertEquals(5, name.length(), "Name should have 5 characters");
         assertTrue(1990 > year, "Year is before 1990");
     }
 
-    @ParameterizedTest
     @TableSource({
             "| Object   | Vertices | Angle sum |",
             "|==========|==========|===========|",
@@ -102,7 +100,7 @@ public class TableSourceTest {
             "| Pentagon |     5    |    540    |",
             "|----------|----------|-----------|",
     })
-    //@Spockito.Name("[{Object}]: ({Vertices}-2)*180 = {Angle sum}")
+    @ParameterizedTest(name = "{2}: ({1}-2)*180 = {0}")
     public void testUnrollAngularSums(@Column("Vertices") int n,
                                       @Column("Angle sum") int degrees,
                                       @Column("Object") String name) {

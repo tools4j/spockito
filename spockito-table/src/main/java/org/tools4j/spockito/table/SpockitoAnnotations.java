@@ -33,22 +33,51 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Contains static methods to initialise instances with annotated members.
+ */
 public enum SpockitoAnnotations {
     ;
 
+    /**
+     * Initialises fields and invokes methods of the provided instance that are annotated with {@linkplain Data @Data}
+     * providers.
+     *
+     * @param instance the instance to initialise
+     */
     public static void initData(final Object instance) {
         initDataFields(instance);
         invokeDataMethods(instance);
     }
 
+    /**
+     * Initialises fields of the provided instance that are annotated with {@linkplain Data @Data} providers; annotated
+     * methods are not invoked.
+     *
+     * @param instance the instance to initialise
+     */
     public static void initDataFields(final Object instance) {
         initDataFields(instance, instance.getClass());
     }
 
+    /**
+     * Invokes methods of the provided instance that are annotated with {@linkplain Data @Data} providers; annotated
+     * fields are not initialised.
+     *
+     * @param instance the instance to initialise
+     */
     public static void invokeDataMethods(final Object instance) {
         invokeDataMethods(instance, instance.getClass());
     }
 
+    /**
+     * Returns direct and indirect (meta) annotations on a given element.
+     *
+     * @param element           the annotated element
+     * @param annotationClass   the type of annotation to look for
+     * @param <A>               generic type of desired annotation
+     * @return the annotation if found on this element, or null if not found
+     */
     public static <A extends Annotation> A annotationDirectOrMeta(final AnnotatedElement element, final Class<A> annotationClass) {
         return annotationDirectOrMeta(element, annotationClass, new HashSet<>());
     }

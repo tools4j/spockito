@@ -27,13 +27,41 @@ import java.lang.reflect.AnnotatedElement;
 
 import static java.util.Objects.requireNonNull;
 
+/**
+ * Context passed to {@link DataProvider#provideData(InjectionContext)} in the process of initialising the
+ * {@linkplain #annotatedElement() annotated element}.
+ */
 public interface InjectionContext {
+    /**
+     * THe phase during which the injection occurs.
+     */
     enum Phase {
-        INIT, TEST
+        /** Initialisation phase if injection is triggered via {@link SpockitoAnnotations#initData(Object)} */
+        INIT,
+        /** Test phase if injection is triggered via a test framework such as junit */
+        TEST
     }
+
+    /**
+     * The phase in which the injection occurs
+     * @return the injection phase
+     */
     Phase phase();
+
+    /**
+     * The annotated element which is in process of being injected with a value.
+     * @return the injection target annotated with the value to inject
+     */
     AnnotatedElement annotatedElement();
 
+    /**
+     * Static factory method for injection context.
+     *
+     * @param phase             the injectin phase
+     * @param annotatedElement  the annotated element
+     * @return a new injection context instance for the provided arguments
+     * @throws NullPointerException if any of the arguments is null
+     */
     static InjectionContext create(final Phase phase, final AnnotatedElement annotatedElement) {
         requireNonNull(phase);
         requireNonNull(annotatedElement);

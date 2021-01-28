@@ -23,8 +23,37 @@
  */
 package org.tools4j.spockito.table;
 
+/**
+ * Class that can be extended and whose {@link Data data} provider elements will be automatically initialised upon
+ * construction.
+ *
+ * <p>For instance a table can be inlined in a (test) method as follows:
+ *
+ * <pre>
+   void printPersons() {
+     final class Person {
+       String name;
+       int age;
+     }
+     final class MyData extends SpockitoData {
+       {@code @TableData}({
+         "| Name  | Age |",
+         "| Henry |  27 |",
+         "| Frank |  29 |"
+       })
+      {@code List<Person> persons;}
+     }
+
+     final MyData data = new MyData();
+     data.persons.forEach(person -&gt; System.out.println(person.name + " is " + person.age + " years old"));
+   }
+ * </pre>
+ */
 public class SpockitoData {
 
+    /**
+     * Default constructor; invokes {@link SpockitoAnnotations#initData(Object)} with itself.
+     */
     public SpockitoData() {
         SpockitoAnnotations.initData(this);
     }

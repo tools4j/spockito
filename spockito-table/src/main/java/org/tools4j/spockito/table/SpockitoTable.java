@@ -30,7 +30,7 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Represents a table with header row and data rows.
+ * Spockito's default implementation of a {@link Table}.
  */
 public class SpockitoTable implements Table {
 

@@ -37,6 +37,12 @@ import java.lang.reflect.Parameter;
 
 import static org.tools4j.spockito.table.SpockitoAnnotations.annotationDirectOrMeta;
 
+/**
+ * Provides values defined by a {@link TableSource @TableSource} annotation.
+ *
+ * <p>The implementation is based on {@link TableDataProvider} but annotated {@linkplain Testable testable} methods are
+ * not invoked.  The test framework invokes testable methods using {@link TableArgumentsProvider}.
+ */
 public class TableSourceDataProvider extends TableDataProvider {
 
     public static final TableSourceDataProvider DEFAULT_INSTANCE = new TableSourceDataProvider();

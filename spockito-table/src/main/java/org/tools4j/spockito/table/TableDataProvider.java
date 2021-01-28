@@ -31,6 +31,9 @@ import java.util.function.Function;
 
 import static java.util.Objects.requireNonNull;
 
+/**
+ * Provides values defined by a {@link TableData @TableData} annotation.
+ */
 public class TableDataProvider implements DataProvider {
 
     private final Function<? super InjectionContext, ? extends Table> tableFactory;

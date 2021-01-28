@@ -32,6 +32,9 @@ import java.util.Properties;
 
 import static java.util.Objects.requireNonNull;
 
+/**
+ * Contains static helper methods to inspect and specify generic types.
+ */
 public enum GenericTypes {
     ;
     public interface ActualType {

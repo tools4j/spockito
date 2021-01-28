@@ -24,10 +24,10 @@
 package org.tools4j.spockito.table;
 
 /**
- * A {@code Data} is responsible for {@linkplain #provideData providing} data to be injected to a field or to a single
- * or multiple method parameters.
+ * A {@code DataProvider} is responsible for {@linkplain #provideData providing} data to be injected to a field or to
+ * parameters of a method.
  *
- * <p>An {@code DataProvider} can be registered via the {@link Data @Data} annotation.
+ * <p>A {@code DataProvider} can be registered via the {@link Data @Data} annotation.
  *
  * <p>Implementations must provide a no-args constructor.
  */

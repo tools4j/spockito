@@ -102,7 +102,7 @@ public class SpockitoTableRowConverter implements TableRowConverter {
                 }
                 return convert(tableRow.toMap().toString(), "row(" + tableRow.getRowIndex() + ")");
             }
-            final Column column = annotatedElementOrNull.getAnnotation(Column.class);
+            final Column column = annotationDirectOrMeta(annotatedElementOrNull, Column.class);
             if (column != null) {
                 name = column.value();
             }

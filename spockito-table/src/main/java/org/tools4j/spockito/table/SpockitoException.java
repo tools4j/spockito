@@ -23,7 +23,11 @@
  */
 package org.tools4j.spockito.table;
 
+/**
+ * Exception thrown when spockito fails to inject data for instance due to failed value conversion.
+ */
 public class SpockitoException extends RuntimeException {
+
     private static final long serialVersionUID = 1L;
 
     public SpockitoException(final String message) {

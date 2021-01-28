@@ -24,16 +24,19 @@
 package org.tools4j.spockito.jupiter;
 
 import org.junit.jupiter.params.aggregator.AggregateWith;
+import org.tools4j.spockito.table.TableRow;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Retention(RetentionPolicy.RUNTIME)
+/**
+ * Annotation to reference a whole {@link TableRow} of a {@link TableSource}.
+ *
+ * <p>This is a shorter version equivalent to {@code @AggregateWith(TableRowAggregator.class)}.
+ */
 @Target({ ElementType.PARAMETER, ElementType.ANNOTATION_TYPE })
 @Documented
 @AggregateWith(TableRowAggregator.class)
-public @interface UseTableRowAggregator {
+public @interface AggregateTableRow {
 }
