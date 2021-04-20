@@ -1,4 +1,4 @@
-/**
+/*
  * The MIT License (MIT)
  *
  * Copyright (c) 2017-2021 tools4j.org (Marco Terzer)
@@ -33,6 +33,14 @@ package org.tools4j.spockito.table;
  */
 public interface DataProvider {
 
+    /**
+     * Returns true if the data provider is applicable for the given injection context.  The method returns true by
+     * default but some implementations may return false in certain circumstances for instance to prevent double
+     * injection of data when running methods as tests.
+     *
+     * @param context the injection context
+     * @return true by default
+     */
     default boolean applicable(final InjectionContext context) {
         return true;
     }
@@ -42,8 +50,7 @@ public interface DataProvider {
      *
      * @param context the current injection context; never {@code null}
      * @return the data to inject; never {@code null}
-     * @throws Exception if data provision fails
      */
-    Object provideData(InjectionContext context) throws Exception;
+    Object provideData(InjectionContext context);
 
 }

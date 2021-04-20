@@ -1,4 +1,4 @@
-/**
+/*
  * The MIT License (MIT)
  *
  * Copyright (c) 2017-2021 tools4j.org (Marco Terzer)
@@ -27,15 +27,20 @@ import org.junit.jupiter.params.aggregator.AggregateWith;
 import org.tools4j.spockito.table.TableRow;
 
 import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+
+import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
+import static java.lang.annotation.ElementType.PARAMETER;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * Annotation to reference a whole {@link TableRow} of a {@link TableSource}.
  *
  * <p>This is a shorter version equivalent to {@code @AggregateWith(TableRowAggregator.class)}.
  */
-@Target({ ElementType.PARAMETER, ElementType.ANNOTATION_TYPE })
+@Target({ANNOTATION_TYPE, PARAMETER})
+@Retention(RUNTIME)
 @Documented
 @AggregateWith(TableRowAggregator.class)
 public @interface AggregateTableRow {

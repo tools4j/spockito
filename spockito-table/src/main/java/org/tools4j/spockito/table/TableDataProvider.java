@@ -1,4 +1,4 @@
-/**
+/*
  * The MIT License (MIT)
  *
  * Copyright (c) 2017-2021 tools4j.org (Marco Terzer)
@@ -74,7 +74,7 @@ public class TableDataProvider implements DataProvider {
             for (int i = 0; i < table.getRowCount(); i++) {
                 final TableRow row = table.getRow(i);
                 for (int j = 0; j < parameters.length; j++) {
-                    values[i][j] = tableRowConverter(parameters[j], j, valueConverter).convert(row);
+                    values[i][j] = tableRowConverter(context, parameters[j], j, valueConverter).convert(row);
                 }
             }
             return values;
@@ -85,10 +85,11 @@ public class TableDataProvider implements DataProvider {
         throw new SpockitoException("Annotated element is not supported: " + element);
     }
 
-    protected TableRowConverter tableRowConverter(final Parameter parameter,
+    protected TableRowConverter tableRowConverter(final InjectionContext context,
+                                                  final Parameter parameter,
                                                   final int index,
                                                   final ValueConverter valueConverter) {
-        return SpockitoTableRowConverter.create(parameter, index, valueConverter);
+        return SpockitoTableRowConverter.create(context, parameter, index, valueConverter);
     }
 
 }

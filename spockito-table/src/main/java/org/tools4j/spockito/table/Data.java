@@ -1,4 +1,4 @@
-/**
+/*
  * The MIT License (MIT)
  *
  * Copyright (c) 2017-2021 tools4j.org (Marco Terzer)
@@ -24,10 +24,14 @@
 package org.tools4j.spockito.table;
 
 import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
+import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.PARAMETER;
 
 /**
  * {@code @Data} is an annotation that is used to register {@linkplain DataProvider data providers} for the annotated
@@ -39,7 +43,7 @@ import java.lang.annotation.Target;
  * <p>{@code @Data} are injected via {@link SpockitoAnnotations#initData(Object)} or when creating subclass instances of
  * {@link SpockitoData}.
  */
-@Target({ ElementType.ANNOTATION_TYPE, ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER })
+@Target({ANNOTATION_TYPE, METHOD, FIELD, PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface Data {

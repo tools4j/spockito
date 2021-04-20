@@ -21,39 +21,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.tools4j.spockito.table;
+package org.tools4j.spockito.jupiter;
 
-import java.lang.reflect.Type;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
-
-/**
- * Represents a single row of a {@link Table}.
- */
-public interface TableRow extends Iterable<String> {
-
-    Table getTable();
-    int getColumnCount();
-    int getRowIndex();
-    boolean isSeparatorRow();
-
-    String get(int index);
-    int indexOf(String value);
-
-    String[] toArray();
-    List<String> toList();
-    Map<String, String> toMap();
-    <T> T to(Class<T> type);
-    <T> T to(Class<T> type, ValueConverter valueConverter);
-    <T> T to(Class<T> type, Type genericType, ValueConverter valueConverter);
-
-    @Override
-    Iterator<String> iterator();
-    default Stream<String> stream() {
-        return StreamSupport.stream(spliterator(), false);
-    }
-
+public enum Operation {
+    Add {
+        public int evaluate(final int operand1, final int operand2) {
+            return operand1 + operand2;
+        }
+        @Override
+        public int neutralSecondOperand() {
+            return 0;
+        }
+    },
+    Subtract {
+        public int evaluate(final int operand1, final int operand2) {
+            return operand1 - operand2;
+        }
+        @Override
+        public int neutralSecondOperand() {
+            return 0;
+        }
+    },
+    Multiply {
+        public int evaluate(final int operand1, final int operand2) {
+            return operand1 * operand2;
+        }
+        @Override
+        public int neutralSecondOperand() {
+            return 1;
+        }
+    },
+    Divide {
+        public int evaluate(final int operand1, final int operand2) {
+            return operand1 / operand2;
+        }
+        @Override
+        public int neutralSecondOperand() {
+            return 1;
+        }
+    };
+    abstract public int evaluate(int operand1, int operand2);
+    abstract public int neutralSecondOperand();
 }

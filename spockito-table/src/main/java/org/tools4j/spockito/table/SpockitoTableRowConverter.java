@@ -1,4 +1,4 @@
-/**
+/*
  * The MIT License (MIT)
  *
  * Copyright (c) 2017-2021 tools4j.org (Marco Terzer)
@@ -35,7 +35,7 @@ import static org.tools4j.spockito.table.SpockitoAnnotations.annotationDirectOrM
 
 public class SpockitoTableRowConverter implements TableRowConverter {
 
-    private final Data dataOrNull;
+    private final InjectionContext dataSubContextOrNull;
     private final AnnotatedElement annotatedElementOrNull;
     private final String nameOrNull;
     private final int index;
@@ -43,14 +43,14 @@ public class SpockitoTableRowConverter implements TableRowConverter {
     private final Type targetType;
     private final ValueConverter valueConverter;
 
-    public SpockitoTableRowConverter(final Data dataOrNull,
+    public SpockitoTableRowConverter(final InjectionContext dataSubContextOrNull,
                                      final AnnotatedElement annotatedElementOrNull,
                                      final String nameOrNull,
                                      final int index,
                                      final Class<?> targetClass,
                                      final Type targetType,
                                      final ValueConverter valueConverter) {
-        this.dataOrNull = dataOrNull;
+        this.dataSubContextOrNull = dataSubContextOrNull;
         this.annotatedElementOrNull = annotatedElementOrNull;
         this.nameOrNull = nameOrNull;
         this.index = index;
@@ -59,8 +59,8 @@ public class SpockitoTableRowConverter implements TableRowConverter {
         this.valueConverter = requireNonNull(valueConverter);
     }
 
-    public static TableRowConverter create(final Parameter parameter, final int index, final ValueConverter valueConverter) {
-        return new SpockitoTableRowConverter(annotationDirectOrMeta(parameter, Data.class), parameter,
+    public static TableRowConverter create(final InjectionContext context, final Parameter parameter, final int index, final ValueConverter valueConverter) {
+        return new SpockitoTableRowConverter(dataSubContextOrNull(context, parameter), parameter,
                 parameterNameIfPresent(parameter), index, parameter.getType(), parameter.getParameterizedType(), valueConverter);
     }
 
@@ -81,8 +81,8 @@ public class SpockitoTableRowConverter implements TableRowConverter {
     @Override
     public Object convert(final TableRow tableRow) {
         requireNonNull(tableRow);
-        if (dataOrNull != null && annotatedElementOrNull != null) {
-            final Object value = dataForAnnotatedElementOrNull(annotatedElementOrNull, dataOrNull);
+        if (dataSubContextOrNull != null) {
+            final Object value = dataForSubContextOrNull(dataSubContextOrNull);
             if (value != null) {
                 return value;
             }
@@ -95,7 +95,7 @@ public class SpockitoTableRowConverter implements TableRowConverter {
         }
         String name = nameOrNull;
         if (annotatedElementOrNull != null) {
-            final Row row = annotatedElementOrNull.getAnnotation(Row.class);
+            final Row row = annotationDirectOrMeta(annotatedElementOrNull, Row.class);
             if (row != null) {
                 if (int.class == targetClass) {
                     return tableRow.getRowIndex();
@@ -143,18 +143,28 @@ public class SpockitoTableRowConverter implements TableRowConverter {
         }
     }
 
-    private static Object dataForAnnotatedElementOrNull(final AnnotatedElement element, final Data data) {
-        requireNonNull(element);
-        requireNonNull(data);
+    private static InjectionContext dataSubContextOrNull(final InjectionContext context,
+                                                         final AnnotatedElement annotatedElement) {
+        final Data data = annotationDirectOrMeta(annotatedElement, Data.class);
+        if (data != null) {
+            return InjectionContext.create(context.phase(), annotatedElement);
+        }
+        return null;
+    }
+
+    private static Object dataForSubContextOrNull(final InjectionContext subContext) {
+        requireNonNull(subContext);
+        final Data data = annotationDirectOrMeta(subContext.annotatedElement(), Data.class);
         try {
             final DataProvider dataProvider = data.value().newInstance();
-            final InjectionContext context = InjectionContext.create(Phase.INIT, element);
+            final InjectionContext context = InjectionContext.create(Phase.INIT, subContext.annotatedElement());
             if (!dataProvider.applicable(context)) {
                 return null;
             }
-            return dataProvider.provideData(InjectionContext.create(Phase.INIT, element));
+            return dataProvider.provideData(InjectionContext.create(Phase.INIT, subContext.annotatedElement()));
         } catch (final Exception e) {
-            throw new SpockitoException("Cannot provide data for " + element + " annotated with @" + Data.class.getSimpleName(), e);
+            throw new SpockitoException("Cannot provide data for " + subContext.annotatedElement() + " annotated with @"
+                    + Data.class.getSimpleName() + " (or meta annotation)", e);
         }
     }
 }

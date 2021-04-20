@@ -1,4 +1,4 @@
-/**
+/*
  * The MIT License (MIT)
  *
  * Copyright (c) 2017-2021 tools4j.org (Marco Terzer)
@@ -29,6 +29,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.PARAMETER;
+
 /**
  * Annotation for fields or parameters referencing a column of a {@link TableRow}. Fields need only be annotated if the
  * field name differs from the column name.  Parameters need to be annotated if the index does not match the column
@@ -38,7 +42,7 @@ import java.lang.annotation.Target;
  * that inherits the semantics of {@code @Column}.
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(value = {ElementType.ANNOTATION_TYPE, ElementType.FIELD, ElementType.PARAMETER})
+@Target(value = {ANNOTATION_TYPE, FIELD, PARAMETER})
 @Documented
 public @interface Column {
     /**

@@ -1,4 +1,4 @@
-/**
+/*
  * The MIT License (MIT)
  *
  * Copyright (c) 2017-2021 tools4j.org (Marco Terzer)
@@ -24,17 +24,20 @@
 package org.tools4j.spockito.table;
 
 import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
+import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.PARAMETER;
 
 /**
  * Annotation for fields or parameters referencing a whole {@link TableRow} of a {@link Table}.  If the target type is
  * int, the row index will be assigned instead.
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(value = {ElementType.FIELD, ElementType.PARAMETER})
+@Target(value = {ANNOTATION_TYPE, FIELD, PARAMETER})
 @Documented
 public @interface Row {
 }

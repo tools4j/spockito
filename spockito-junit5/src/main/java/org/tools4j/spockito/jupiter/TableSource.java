@@ -1,4 +1,4 @@
-/**
+/*
  * The MIT License (MIT)
  *
  * Copyright (c) 2017-2021 tools4j.org (Marco Terzer)
@@ -35,6 +35,7 @@ import java.lang.annotation.Target;
 import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
@@ -50,7 +51,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  * The separator row after the column headers is optional and = instead of - can be used. Separator rows can be
  * placed anywhere in the table and are ignored when the table is parsed.
  */
-@Target({ANNOTATION_TYPE, METHOD, FIELD})
+@Target({ANNOTATION_TYPE, METHOD, FIELD, PARAMETER})
 @Retention(RUNTIME)
 @Documented
 @ArgumentsSource(TableArgumentsProvider.class)

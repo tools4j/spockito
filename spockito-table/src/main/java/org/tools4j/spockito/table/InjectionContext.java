@@ -1,4 +1,4 @@
-/**
+/*
  * The MIT License (MIT)
  *
  * Copyright (c) 2017-2021 tools4j.org (Marco Terzer)
@@ -36,9 +36,15 @@ public interface InjectionContext {
      * THe phase during which the injection occurs.
      */
     enum Phase {
-        /** Initialisation phase if injection is triggered via {@link SpockitoAnnotations#initData(Object)} */
+        /**
+         * Initialisation phase if injection is triggered at initialisation time, for instance when using the Junit-5
+         * {@code SpockitoExtension}, when using {@link SpockitoData} or when directly invoking
+         * {@link SpockitoAnnotations#initData(Object)}.
+         */
         INIT,
-        /** Test phase if injection is triggered via a test framework such as junit */
+        /**
+         * Test phase if injection is triggered via a test framework such as junit when invoking the test.
+         */
         TEST
     }
 

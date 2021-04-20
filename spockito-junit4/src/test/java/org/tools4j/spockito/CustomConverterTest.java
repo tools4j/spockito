@@ -1,4 +1,4 @@
-/**
+/*
  * The MIT License (MIT)
  *
  * Copyright (c) 2017-2021 tools4j.org (Marco Terzer)
@@ -31,8 +31,8 @@ import org.tools4j.spockito.table.ValueConverter;
 import java.lang.reflect.Type;
 
 @RunWith(Spockito.class)
-@Spockito.UseValueConverter(ConstomConverterTest.MyIntegerConverter.class)
-public class ConstomConverterTest {
+@Spockito.UseValueConverter(CustomConverterTest.MyIntegerConverter.class)
+public class CustomConverterTest {
 
     static class MyInteger {
         int intValue;
@@ -102,7 +102,7 @@ public class ConstomConverterTest {
             "| (3,4) |"
     })
     @Spockito.Name("[{row}]: point={0}")
-    @Spockito.UseValueConverter(ConstomConverterTest.PointConverter.class)
+    @Spockito.UseValueConverter(CustomConverterTest.PointConverter.class)
     public void testConverterOnMethodLevel(final Point point) {
         Assert.assertNotNull("point should not be null", point);
         Assert.assertTrue("point.x should be greater than 0", point.x > 0);

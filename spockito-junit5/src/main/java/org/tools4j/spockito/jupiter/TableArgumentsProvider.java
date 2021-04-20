@@ -1,4 +1,4 @@
-/**
+/*
  * The MIT License (MIT)
  *
  * Copyright (c) 2017-2021 tools4j.org (Marco Terzer)
@@ -48,7 +48,7 @@ final class TableArgumentsProvider implements ArgumentsProvider {
         final InjectionContext injectionContext = InjectionContext.create(Phase.TEST, testMethod);
         final TableDataProvider tableDataProvider = TableSourceDataProvider.DEFAULT_INSTANCE;
         if (!tableDataProvider.applicable(injectionContext)) {
-            //should not happen
+            //should not happen as it should always be applicable for TEST phase
             throw new SpockitoException("Not applicable: " + tableDataProvider);
         }
         final Object data = tableDataProvider.provideData(injectionContext);

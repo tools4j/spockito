@@ -1,4 +1,4 @@
-/**
+/*
  * The MIT License (MIT)
  *
  * Copyright (c) 2017-2021 tools4j.org (Marco Terzer)
@@ -52,13 +52,13 @@ public class TableSourceDataProvider extends TableDataProvider {
     }
 
     private static Table table(final InjectionContext injectionContext) {
-        final TableSource tableData = injectionContext.annotatedElement().getAnnotation(TableSource.class);
-        return Table.parse(tableData.value());
+        final TableSource tableSource = injectionContext.annotatedElement().getAnnotation(TableSource.class);
+        return Table.parse(tableSource.value());
     }
 
     private static Class<? extends ValueConverter> valueConverter(final InjectionContext injectionContext) {
-        final TableSource tableData = injectionContext.annotatedElement().getAnnotation(TableSource.class);
-        return tableData.valueConverter();
+        final TableSource tableSource = injectionContext.annotatedElement().getAnnotation(TableSource.class);
+        return tableSource.valueConverter();
     }
 
     @Override
@@ -75,7 +75,10 @@ public class TableSourceDataProvider extends TableDataProvider {
     }
 
     @Override
-    protected TableRowConverter tableRowConverter(final Parameter parameter, final int index, final ValueConverter valueConverter) {
-        return TableRowConverters.create(parameter, index, valueConverter);
+    protected TableRowConverter tableRowConverter(final InjectionContext context,
+                                                  final Parameter parameter,
+                                                  final int index,
+                                                  final ValueConverter valueConverter) {
+        return TableRowConverters.create(context, parameter, index, valueConverter);
     }
 }
