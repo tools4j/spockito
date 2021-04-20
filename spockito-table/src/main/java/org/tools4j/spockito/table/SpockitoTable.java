@@ -26,8 +26,11 @@ package org.tools4j.spockito.table;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * Spockito's default implementation of a {@link Table}.
@@ -47,6 +50,13 @@ public class SpockitoTable implements Table {
         this.headers = parseRow(this, 0, headerString);
         if (headers.stream().distinct().count() < headers.getColumnCount()) {
             throw new IllegalArgumentException("Duplicate column headers: " + headers);
+        }
+    }
+
+    SpockitoTable(final List<String> headers, final List<List<String>> rows) {
+        this.headers = new SpockitoTableRow(this, headers);
+        for (final List<String> row : rows) {
+            data.add(new SpockitoTableRow(this, row));
         }
     }
 
@@ -102,6 +112,21 @@ public class SpockitoTable implements Table {
         return Collections.unmodifiableList(data).iterator();
     }
 
+    @Override
+    public Table filter(final Predicate<? super TableRow> filter) {
+        return new SpockitoTable(headers.toList(), stream().filter(filter).map(TableRow::toList).collect(Collectors.toList()));
+    }
+
+    @Override
+    public Table sort(final Comparator<? super TableRow> comparator) {
+        return new SpockitoTable(headers.toList(), stream().sorted(comparator).map(TableRow::toList).collect(Collectors.toList()));
+    }
+
+    @Override
+    public TableJoiner join(final Table table) {
+        return new SpockitoTableJoiner(this, table);
+    }
+
     public static <T> T[] parse(final Class<T> rowType, final String[] headerAndRows) {
         return parse(rowType, headerAndRows, new SpockitoValueConverter());
     }
@@ -109,6 +134,7 @@ public class SpockitoTable implements Table {
     public static <T> T[] parse(final Class<T> rowType, final String[] headerAndRows, final ValueConverter valueConverter) {
         final SpockitoTable table = parse(headerAndRows);
         final int rows = table.getRowCount();
+        @SuppressWarnings("unchecked")
         final T[] result = (T[])Array.newInstance(rowType, rows);
         for (int row = 0; row < rows; row++) {
             result[row] = valueConverter.convert(rowType, rowType, table.getRow(row).toMap().toString());

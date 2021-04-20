@@ -24,8 +24,10 @@
 package org.tools4j.spockito.table;
 
 import java.lang.reflect.Type;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -55,6 +57,10 @@ public interface Table extends Iterable<TableRow> {
     default Stream<TableRow> stream() {
         return StreamSupport.stream(spliterator(), false);
     }
+
+    Table filter(Predicate<? super TableRow> filter);
+    Table sort(Comparator<? super TableRow> comparator);
+    TableJoiner join(Table table);
 
     default <T> T to(final Class<T> type) {
         return to(type, type);

@@ -41,6 +41,7 @@ public interface TableRow extends Iterable<String> {
     boolean isSeparatorRow();
 
     String get(int index);
+    String get(String name);
     int indexOf(String value);
 
     String[] toArray();

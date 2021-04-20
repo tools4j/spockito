@@ -1,4 +1,4 @@
-/**
+/*
  * The MIT License (MIT)
  *
  * Copyright (c) 2017-2021 tools4j.org (Marco Terzer)
@@ -165,6 +165,7 @@ public class SpockitoDataTest {
                 final List<TableRow> myChildren = children.stream().filter(
                         childRow -> Objects.equals(parent.get(1), childRow.get(1))
                 ).collect(Collectors.toList());
+
                 switch (parent.getRowIndex()) {
                     case 0:
                         assertEquals("Peter", parent.get(0), "parent[0]");

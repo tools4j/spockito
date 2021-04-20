@@ -40,10 +40,15 @@ import static org.tools4j.spockito.table.Strings.UNESCAPED_PIPE;
 public class SpockitoTableRow implements TableRow {
 
     private final Table table;
-    private final List<String> values = new ArrayList<>();
+    private final List<String> values;
 
     public SpockitoTableRow(final Table table) {
+        this(table, new ArrayList<>());
+    }
+
+    SpockitoTableRow(final Table table, final List<String> values) {
         this.table = requireNonNull(table);
+        this.values = requireNonNull(values);
     }
 
     public static SpockitoTableRow empty(final Table table) {
@@ -82,6 +87,14 @@ public class SpockitoTableRow implements TableRow {
     @Override
     public String get(final int index) {
         return values.get(index);
+    }
+
+    public String get(final String column) {
+        final int index = table.getColumnIndexByName(column);
+        if (index >= 0) {
+            return get(index);
+        }
+        throw new IllegalArgumentException("No such column: " + column);
     }
 
     @Override
