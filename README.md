@@ -3,45 +3,62 @@
 [![Maven Central](https://img.shields.io/maven-central/v/org.tools4j/tools4j-spockito.svg)](https://search.maven.org/search?q=spockito)
 
 # spockito
-Java JUnit runner for parameterized tests where the test cases are defined in a table-like
-manner. The @Unroll annotation has been inspired by the Groovy framework Spock.
- 
-### Unroll at method level
+Simple Java library to define data in a table-like manner.  The library also provides a Junit 5 
+[@TableSource](https://github.com/tools4j/spockito/blob/master/spockito-junit5/src/main/java/org/tools4j/spockito/jupiter/TableSource.java)
+annotation to define arguments for parameterized tests in a simple table structure.  The
+[SpockitoExtension](https://github.com/tools4j/spockito/blob/master/spockito-junit5/src/main/java/org/tools4j/spockito/jupiter/SpockitoExtension.java)
+can be used to automatically propagate fields in a test class with table data.  
 
-Test cases are defined via ``@Spockito.Unroll`` annotation directly on the test method. The best explanation are
-probably a few simple examples:
+We also support parameterized test data in table format for Junit 4 tests through the classic
+[Spockito](https://github.com/tools4j/spockito/blob/master/spockito-junit4/src/main/java/org/tools4j/spockito/Spockito.java)
+test runner (see [here](https://github.com/tools4j/spockito/blob/master/README-JUNIT4.md) for more information and 
+examples for spockito with Junit 4).
+ 
+### Parameterized tests with @TableSource
+
+Arguments for parameterized tests can be defined via ``@TableSource`` annotation as follows:
 
 ```java
-@RunWith(Spockito.class)
-public class UnrollMethodDataTest {
+public class TableSourceTest {
 
-    @Test
-    @Spockito.Unroll({
+    @TableSource({
             "| Last Name | First Name |",
             "| Jones     | David      |",
             "| Jensen    | Astrid     |"
     })
+    @ParameterizedTest(name = "[{index}] {1} {0}")
     public void testUnrollNames(String lastName, String firstName) {
-        Assert.assertTrue("Last Name should start with J", lastName.startsWith("J"));
-        Assert.assertTrue("First Name should end with id", firstName.endsWith("id"));
+        assertTrue(lastName.startsWith("J"), "Last Name should start with J");
+        assertTrue(firstName.endsWith("id"), "First Name should end with id");
     }
 
-    @Test
-    @Spockito.Unroll({
+    @TableSource({
             "| Name  | Year | Birthday   |",
             "|-------|------|------------|",
             "| Henry | 1981 | 1981-11-28 |",
             "| Jessy | 1965 | 1965-03-28 |"
     })
-    @Spockito.Name("[{row}]: Name={0}")
+    @ParameterizedTest(name = "[{index}] {0}")
     public void testUnrollBirthdays(String name, int year, LocalDate birthday) {
-        Assert.assertEquals("Name should have 5 characters", 5, name.length());
-        Assert.assertTrue("Year is before 1990", 1990 > year);
-        Assert.assertEquals("Day is 28th", 28, birthday.getDayOfMonth());
+        assertEquals(5, name.length(), "Name should have 5 characters");
+        assertTrue(1990 > year, "Year is before 1990");
+        assertEquals(28, birthday.getDayOfMonth(), "Day is 28th");
+        assertEquals(year, birthday.getYear(), "Year is consistent with birthday");
     }
 
-    @Test
-    @Spockito.Unroll({
+    @TableSource({
+            "| Name  | Year | Birthday   |",
+            "|-------|------|------------|",
+            "| Henry | 1981 | 1981-11-28 |",
+            "| Jessy | 1965 | 1965-03-28 |"
+    })
+    @ParameterizedTest(name = "[{index}] {0}")
+    public void testUnrollNameAndYearOnly(String name, int year) {
+        assertEquals(5, name.length(), "Name should have 5 characters");
+        assertTrue(1990 > year, "Year is before 1990");
+    }
+
+    @TableSource({
             "| Object   | Vertices | Angle sum |",
             "|==========|==========|===========|",
             "| Triangle |     3    |    180    |",
@@ -49,29 +66,24 @@ public class UnrollMethodDataTest {
             "| Pentagon |     5    |    540    |",
             "|----------|----------|-----------|",
     })
-    @Spockito.Name("[{Object}]: ({Vertices}-2)*180 = {Angle sum}")
-    public void testUnrollAngularSums(@Spockito.Ref("Vertices") int n,
-                                      @Spockito.Ref("Angle sum") int degrees,
-                                      @Spockito.Ref("Object") String name) {
-        Assert.assertTrue("There should be 3 or more vertices", 3 <= n);
-        Assert.assertEquals("Angular sum is wrong for: " + name, degrees, (n-2)*180);
+    @ParameterizedTest(name = "{2}: ({1}-2)*180 = {0}")
+    public void testUnrollAngularSums(@Column("Vertices") int n,
+                                      @Column("Angle sum") int degrees,
+                                      @Column("Object") String name) {
+        assertTrue(3 <= n, "There should be 3 or more vertices");
+        assertEquals(degrees, (n-2)*180, "Angular sum is wrong for: " + name);
     }
 }
 ```
-This and other examples can be found [here](https://github.com/tools4j/spockito/blob/master/src/test/java/org/tools4j/spockito/).
+This and other examples can be found [here](https://github.com/tools4j/spockito/blob/master/spockito-junit5/src/test/java/org/tools4j/spockito/jupiter).
 
 #### Run above test in IDE (here: IntelliJ)
-![spockito-ide-test-run](https://github.com/tools4j/spockito/blob/master/ide-run-SpockitoTest.png)
+![spockito-junit5-idea-testrun.png](https://github.com/tools4j/spockito/blob/master/spockito-junit5-idea-testrun.png)
 
-### Unroll at class level
+### Injecting test data into fields of the test class
 
-Alternatively, the test data can be defined at class level. All methods can then use the same test cases. The values
-are either
-* directly injected to the method as method parameters
-* passed to the single test constructor where they are usually assigned to a member variable
-* directly assigned to a field annotated with ``@Spockito.Ref``
-
-An example with field injection is shown next:
+Sometimes test data is applicable to multiple methods or tests use more than one table source.  Spockito supports this
+conveniently through the ``@SpockitoExtension``:
 
 ```java
 @Spockito.Unroll({
