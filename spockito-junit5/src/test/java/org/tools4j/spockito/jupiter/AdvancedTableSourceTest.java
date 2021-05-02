@@ -34,9 +34,9 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -237,36 +237,32 @@ public class AdvancedTableSourceTest {
             "| Lizzy | Finley | 41  |"
     })
     @ParameterizedTest(name = "[{index}]: {0}")
-    public void assertParentChild(final @AggregateTableRow Person parent,
+    public void assertParentChild(final @Row int rowIndex,
                                   final @TableSource({
                                           "| First | Last   | Age |",
                                           "| Nina  | Mayer  |   3 |",
                                           "| Gary  | Mayer  |   1 |",
                                           "| Linda | Finley |  10 |",
-                                  }) List<Person> children) {
-        final Person[] myChildren = children.stream().filter(
-                child -> Objects.equals(parent.last, child.last)
-        ).toArray(Person[]::new);
-
-        int rowIndex = 0;//FIXME
+                                  }) @JoinOn("Last") ArrayList<Person> children,
+                                  final @AggregateTableRow Person parent) {
         switch (rowIndex) {
             case 0:
                 assertEquals("Peter", parent.first, "parentfirst");
                 assertEquals("Mayer", parent.last, "parent.last");
-                assertEquals("36", parent.age, "parent.age");
-                assertEquals(2, myChildren.length, "myChildren.length");
-                assertEquals("Nina", myChildren[0].first, "myChildren[0].first");
-                assertEquals("3", myChildren[0].age, "myChildren[0].age");
-                assertEquals("Gary", myChildren[1].first, "myChildren[1].first");
-                assertEquals("1", myChildren[1].age, "myChildren[1].age");
+                assertEquals(36, parent.age, "parent.age");
+                assertEquals(2, children.size(), "myChildren.size");
+                assertEquals("Nina", children.get(0).first, "myChildren[0].first");
+                assertEquals(3, children.get(0).age, "myChildren[0].age");
+                assertEquals("Gary", children.get(1).first, "myChildren[1].first");
+                assertEquals(1, children.get(1).age, "myChildren[1].age");
                 break;
             case 1:
                 assertEquals("Lizzy", parent.first, "parent.first");
                 assertEquals("Finley", parent.last, "parent.last");
-                assertEquals("41", parent.age, "parent.age");
-                assertEquals(1, myChildren.length, "myChildren.length");
-                assertEquals("Linda", myChildren[0].first, "myChildren[0].first");
-                assertEquals("10", myChildren[0].age, "myChildren[0].age");
+                assertEquals(41, parent.age, "parent.age");
+                assertEquals(1, children.size(), "myChildren.size");
+                assertEquals("Linda", children.get(0).first, "myChildren[0].first");
+                assertEquals(10, children.get(0).age, "myChildren[0].age");
                 break;
             default:
                 fail("Unexpected row: " + rowIndex);

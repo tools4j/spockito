@@ -86,6 +86,11 @@ public class SpockitoTable implements Table {
         return data.size();
     }
 
+    @Override
+    public List<String> getColumnNames() {
+        return headers.toList();
+    }
+
     public String getColumnName(final int index) {
         return headers.get(index);
     }
@@ -123,8 +128,8 @@ public class SpockitoTable implements Table {
     }
 
     @Override
-    public TableJoiner join(final Table table) {
-        return new SpockitoTableJoiner(this, table);
+    public TableJoiner join(final TableRow row) {
+        return new SpockitoTableJoiner(this, row);
     }
 
     public static <T> T[] parse(final Class<T> rowType, final String[] headerAndRows) {

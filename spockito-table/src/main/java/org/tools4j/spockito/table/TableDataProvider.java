@@ -59,10 +59,20 @@ public class TableDataProvider implements DataProvider {
         return tableData.valueConverter();
     }
 
+    public Table provideTable(final InjectionContext context) {
+        return tableFactory.apply(context);
+    }
+
+    public ValueConverter provideValueConverter(final InjectionContext context) {
+        return ValueConverter.create(valueConverterTypeLookup.apply(context));
+    }
+
     @Override
     public Object provideData(final InjectionContext context) {
-        final Table table = tableFactory.apply(context);
-        final ValueConverter valueConverter = ValueConverter.create(valueConverterTypeLookup.apply(context));
+        return provideData(context, provideTable(context), provideValueConverter(context));
+    }
+
+    public Object provideData(final InjectionContext context, final Table table, final ValueConverter valueConverter) {
         final AnnotatedElement element = context.annotatedElement();
         if (element instanceof Field) {
             final Field field = (Field)element;

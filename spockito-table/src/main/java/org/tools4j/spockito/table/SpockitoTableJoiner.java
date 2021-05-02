@@ -27,198 +27,102 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Predicate;
-import java.util.stream.IntStream;
 
 import static java.util.Objects.requireNonNull;
 
 public class SpockitoTableJoiner implements TableJoiner {
 
-    private final Table left;
-    private final Table right;
+    private final Table child;
+    private final TableRow parent;
 
-    public SpockitoTableJoiner(final Table left, final Table right) {
-        this.left = requireNonNull(left);
-        this.right = requireNonNull(right);
+    public SpockitoTableJoiner(final Table child, final TableRow parent) {
+        this.child = requireNonNull(child);
+        this.parent = requireNonNull(parent);
     }
 
     @Override
-    public JoinTypes on(final int left, final int right) {
-        return new SpockitoJoinTypes().and(left, right);
+    public JoinBuilder onAllCommonColumns() {
+        final LinkedHashSet<String> common = new LinkedHashSet<>(parent.getTable().getColumnNames());
+        common.retainAll(child.getColumnNames());
+        JoinBuilder result = null;
+        for (final String name : common) {
+            result = result == null ? on(name, name) : result.and(name, name);
+        }
+        if (result != null) {
+            return result;
+        }
+        throw new IllegalStateException("No common columns found in parent and child table: " +
+                parent.getTable().getColumnNames() + " / " + child.getColumnNames());
     }
 
     @Override
-    public JoinTypes on(final String left, final String right) {
-        return new SpockitoJoinTypes().and(left, right);
+    public JoinBuilder on(final int child, final int parent) {
+        return new Builder().and(child, parent);
     }
 
-    private class SpockitoJoinTypes implements JoinTypes {
+    @Override
+    public JoinBuilder on(final String child, final String parent) {
+        return new Builder().and(child, parent);
+    }
 
-        final IntArr lefts = new IntArr();
-        final IntArr rights = new IntArr();
+    @Override
+    public JoinBuilder on(final String common) {
+        return on(common, common);
+    }
+
+    private class Builder implements JoinBuilder {
+
+        final List<String> children = new ArrayList<>();
+        final List<String> parents = new ArrayList<>();
 
         @Override
-        public JoinTypes and(final int leftColumn, final int rightColumn) {
-            if (leftColumn < 0 || leftColumn >= left.getColumnCount()) {
-                throw new IllegalArgumentException("Invalid left column index: " + leftColumn);
+        public JoinBuilder and(final int childColumn, final int parentColumn) {
+            if (childColumn < 0 || childColumn >= child.getColumnCount()) {
+                throw new IllegalArgumentException("Invalid child column index: " + childColumn);
             }
-            if (rightColumn < 0 || rightColumn >= right.getColumnCount()) {
-                throw new IllegalArgumentException("Invalid right column index: " + rightColumn);
+            if (parentColumn < 0 || parentColumn >= parent.getColumnCount()) {
+                throw new IllegalArgumentException("Invalid parent column index: " + parentColumn);
             }
-            lefts.add(leftColumn);
-            rights.add(rightColumn);
+            children.add(child.getColumnName(childColumn));
+            parents.add(parent.getTable().getColumnName(parentColumn));
             return this;
         }
 
         @Override
-        public JoinTypes and(final String leftColumn, final String rightColumn) {
-            return and(left.getColumnIndexByName(leftColumn), right.getColumnIndexByName(rightColumn));
+        public JoinBuilder and(final String childColumn, final String parentColumn) {
+            if (!child.hasColumn(childColumn)) {
+                throw new IllegalArgumentException("Invalid child column name: " + childColumn);
+            }
+            if (!parent.getTable().hasColumn(parentColumn)) {
+                throw new IllegalArgumentException("Invalid parent column name: " + parentColumn);
+            }
+            children.add(childColumn);
+            parents.add(parentColumn);
+            return this;
         }
 
         @Override
-        public Table asInnerJoin() {
-            return new SpockitoTable(mergeHeaders(), joinFromLeft(false));
+        public JoinBuilder and(final String common) {
+            return and(common, common);
         }
 
         @Override
-        public Table asRightJoin() {
-            return new SpockitoTable(mergeHeaders(), joinFromLeft(true));
-        }
-
-        @Override
-        public Table asLeftJoin() {
-            return new SpockitoTable(mergeHeaders(), joinFromRight(false));
-        }
-
-        @Override
-        public Table asFullOuterJoin() {
-            final List<List<String>> data = joinFromLeft(true);
-            data.addAll(joinFromRight(true));
-            return new SpockitoTable(mergeHeaders(), data);
-        }
-
-        private List<List<String>> joinFromLeft(final boolean outerJoin) {
-            final int leftRows = left.getRowCount();
-            final int rightRows = right.getRowCount();
-            final IntArr leftIdx = new IntArr();
-            final IntArr rightIdx = new IntArr();
-            for (int i = 0; i < leftRows; i++) {
-                final TableRow leftRow = left.getRow(i);
-                final String[] leftValues = lefts.stream().mapToObj(leftRow::get).toArray(String[]::new);
-                final Predicate<TableRow> matcher = rightRow -> {
-                    final String[] rightValues = rights.stream().mapToObj(rightRow::get).toArray(String[]::new);
-                    return Arrays.equals(leftValues, rightValues);
-                };
-                boolean empty = true;
-                for (int j = 0; j < rightRows; j++) {
-                    if (matcher.test(right.getRow(j))) {
-                        leftIdx.add(i);
-                        rightIdx.add(j);
-                        empty = false;
-                    }
-                }
-                if (empty && outerJoin) {
-                    leftIdx.add(i);
-                    rightIdx.add(-1);
+        public Table apply() {
+            final String[] parentValues = parents.stream().map(parent::get).toArray(String[]::new);
+            final Predicate<TableRow> matcher = childRow -> {
+                final String[] childValues = children.stream().map(childRow::get).toArray(String[]::new);
+                return Arrays.equals(parentValues, childValues);
+            };
+            final int childRows = child.getRowCount();
+            final List<List<String>> rows = new ArrayList<>();
+            for (int i = 0; i < childRows; i++) {
+                final TableRow row = child.getRow(i);
+                if (matcher.test(row)) {
+                    rows.add(row.toList());
                 }
             }
-            return mergeData(leftIdx.toArray(), rightIdx.toArray());
-        }
-
-        private List<List<String>> joinFromRight(final boolean outerJoinOnly) {
-            final int leftRows = left.getRowCount();
-            final int rightRows = right.getRowCount();
-            final IntArr leftIdx = new IntArr();
-            final IntArr rightIdx = new IntArr();
-            for (int i = 0; i < rightRows; i++) {
-                final TableRow rightRow = right.getRow(i);
-                final String[] rightValues = rights.stream().mapToObj(rightRow::get).toArray(String[]::new);
-                final Predicate<TableRow> matcher = leftRow -> {
-                    final String[] leftValues = lefts.stream().mapToObj(leftRow::get).toArray(String[]::new);
-                    return Arrays.equals(rightValues, leftValues);
-                };
-                boolean empty = true;
-                for (int j = 0; j < rightRows; j++) {
-                    if (matcher.test(right.getRow(j))) {
-                        empty = false;
-                        if (outerJoinOnly) {
-                            break;
-                        }
-                        rightIdx.add(i);
-                        leftIdx.add(j);
-                    }
-                }
-                if (empty) {
-                    rightIdx.add(i);
-                    leftIdx.add(-1);
-                }
-            }
-            return mergeData(leftIdx.toArray(), rightIdx.toArray());
-        }
-
-        private List<String> mergeHeaders() {
-            final Set<String> uniqueNames = new LinkedHashSet<>();
-            for (int i = 0; i < left.getColumnCount(); i++) {
-                addName(uniqueNames, left.getColumnName(i));
-            }
-            for (int i = 0; i < right.getColumnCount(); i++) {
-                addName(uniqueNames, right.getColumnName(i));
-            }
-            return new ArrayList<>(uniqueNames);
-        }
-
-        private List<List<String>> mergeData(final int[] leftRows, final int[] rightRows) {
-            final int rows = Math.max(leftRows.length, rightRows.length);
-            final int leftCols = left.getColumnCount();
-            final int rightCols = right.getColumnCount();
-            final int cols = leftCols + rightCols;
-            final List<List<String>> data = new ArrayList<>(rows);
-            for (int i = 0; i < rows; i++) {
-                final List<String> row = new ArrayList<>(cols);
-                for (int j = 0; j < leftCols; j++) {
-                    row.add(leftRows[i] >= 0 ? left.getValue(leftRows[i], j) : null);
-                }
-                for (int j = 0; j < rightCols; j++) {
-                    row.add(rightRows[i] >= 0 ? right.getValue(rightRows[i], j) : null);
-                }
-                data.add(row);
-            }
-            return data;
-        }
-
-        private void addName(final Set<String> uniqueNames, final String name) {
-            if (uniqueNames.add(name)) {
-                return;
-            }
-            for (int j = 0; j >= 0; j++) {
-                String indexedName = name + "_" + j;
-                if (uniqueNames.add(indexedName)) {
-                    return;
-                }
-            }
-            throw new IllegalArgumentException("Indexing of name failed: " + name);
-        }
-    }
-
-    private static class IntArr {
-        int[] array;
-        int size = 0;
-        void add(final int value) {
-            ensureCapacity(size + 1);
-            array[size++] = value;
-        }
-        int[] toArray() {
-            return Arrays.copyOf(array, size);
-        }
-        IntStream stream() {
-            return Arrays.stream(array, 0, size);
-        }
-        void ensureCapacity(final int capacity) {
-            if (capacity > array.length) {
-                final int newLen = Math.max(capacity, 2 * array.length);
-                array = Arrays.copyOf(array, newLen);
-            }
+            return new SpockitoTable(child.getColumnNames(), rows);
         }
     }
 }

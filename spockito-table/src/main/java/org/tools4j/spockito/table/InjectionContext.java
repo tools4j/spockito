@@ -23,9 +23,11 @@
  */
 package org.tools4j.spockito.table;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 
 import static java.util.Objects.requireNonNull;
+import static org.tools4j.spockito.table.SpockitoAnnotations.annotationDirectOrMeta;
 
 /**
  * Context passed to {@link DataProvider#provideData(InjectionContext)} in the process of initialising the
@@ -87,5 +89,23 @@ public interface InjectionContext {
                 return "InjectionContext{phase=" + phase + ", annotatedElement=" + annotatedElement + "}";
             }
         };
+    }
+
+    /**
+     * Creates a sub-context of this context for the provided element using the same phase as this context, but only
+     * if the element has annotated with an annotation of the provided type (via direct or meta); otherwise null is
+     * returned.
+     *
+     * @param element           the element for which to return a sub-context
+     * @param annotationClass   the type of annotation to look for on the provided element
+     * @return a sub-context if element has the required annotation, and null otherwise
+     */
+    default InjectionContext createSubContextOrNull(final AnnotatedElement element,
+                                                    final Class<? extends Annotation> annotationClass) {
+        final Annotation annotation = annotationDirectOrMeta(element, annotationClass);
+        if (annotation != null) {
+            return InjectionContext.create(phase(), element);
+        }
+        return null;
     }
 }

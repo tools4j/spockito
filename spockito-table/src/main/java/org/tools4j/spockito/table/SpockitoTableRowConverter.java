@@ -60,8 +60,9 @@ public class SpockitoTableRowConverter implements TableRowConverter {
     }
 
     public static TableRowConverter create(final InjectionContext context, final Parameter parameter, final int index, final ValueConverter valueConverter) {
-        return new SpockitoTableRowConverter(dataSubContextOrNull(context, parameter), parameter,
-                parameterNameIfPresent(parameter), index, parameter.getType(), parameter.getParameterizedType(), valueConverter);
+        return new SpockitoTableRowConverter(context.createSubContextOrNull(parameter, Data.class), parameter,
+                parameterNameIfPresent(parameter), index, parameter.getType(), parameter.getParameterizedType(),
+                valueConverter);
     }
 
     public static TableRowConverter create(final Field field, final ValueConverter valueConverter) {
@@ -82,7 +83,7 @@ public class SpockitoTableRowConverter implements TableRowConverter {
     public Object convert(final TableRow tableRow) {
         requireNonNull(tableRow);
         if (dataSubContextOrNull != null) {
-            final Object value = dataForSubContextOrNull(dataSubContextOrNull);
+            final Object value = dataForAnnotatedElement(dataSubContextOrNull.annotatedElement());
             if (value != null) {
                 return value;
             }
@@ -143,27 +144,15 @@ public class SpockitoTableRowConverter implements TableRowConverter {
         }
     }
 
-    private static InjectionContext dataSubContextOrNull(final InjectionContext context,
-                                                         final AnnotatedElement annotatedElement) {
-        final Data data = annotationDirectOrMeta(annotatedElement, Data.class);
-        if (data != null) {
-            return InjectionContext.create(context.phase(), annotatedElement);
-        }
-        return null;
-    }
-
-    private static Object dataForSubContextOrNull(final InjectionContext subContext) {
-        requireNonNull(subContext);
-        final Data data = annotationDirectOrMeta(subContext.annotatedElement(), Data.class);
+    private static Object dataForAnnotatedElement(final AnnotatedElement element) {
+        requireNonNull(element);
+        final Data data = annotationDirectOrMeta(element, Data.class);
         try {
             final DataProvider dataProvider = data.value().newInstance();
-            final InjectionContext context = InjectionContext.create(Phase.INIT, subContext.annotatedElement());
-            if (!dataProvider.applicable(context)) {
-                return null;
-            }
-            return dataProvider.provideData(InjectionContext.create(Phase.INIT, subContext.annotatedElement()));
+            final InjectionContext context = InjectionContext.create(Phase.INIT, element);
+            return dataProvider.applicable(context) ? dataProvider.provideData(context) : null;
         } catch (final Exception e) {
-            throw new SpockitoException("Cannot provide data for " + subContext.annotatedElement() + " annotated with @"
+            throw new SpockitoException("Cannot provide data for " + element + " annotated with @"
                     + Data.class.getSimpleName() + " (or meta annotation)", e);
         }
     }

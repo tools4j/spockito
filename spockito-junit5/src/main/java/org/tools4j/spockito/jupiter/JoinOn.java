@@ -21,19 +21,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.tools4j.spockito.table;
+package org.tools4j.spockito.jupiter;
 
-public interface TableJoiner {
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
-    JoinBuilder onAllCommonColumns();
-    JoinBuilder on(int child, int parent);
-    JoinBuilder on(String child, String parent);
-    JoinBuilder on(String common);
+import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
+import static java.lang.annotation.ElementType.PARAMETER;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-    interface JoinBuilder {
-        JoinBuilder and(int child, int parent);
-        JoinBuilder and(String child, String parent);
-        JoinBuilder and(String common);
-        Table apply();
-    }
+/**
+ * Annotation for a method parameter to join the parameter's table data with the parent table that defines the
+ * parameterized test data.  Both the test method and the parameter are typically annotated with {@link TableSource} to
+ * define parent and child table, respectively.
+ */
+@Target({ANNOTATION_TYPE, PARAMETER})
+@Retention(RUNTIME)
+@Documented
+public @interface JoinOn {
+    /** @return join fields that are common in the parent and the child table*/
+    String[] value() default {};
+    /** @return join fields in the parent table; must have a counter part in {@link #child()}*/
+    String[] parent() default {};
+    /** @return join fields in the child table; must have a counter part in {@link #parent()}*/
+    String[] child() default {};
 }

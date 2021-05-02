@@ -42,6 +42,7 @@ public interface Table extends Iterable<TableRow> {
     int getColumnCount();
     int getRowCount();
 
+    List<String> getColumnNames();
     String getColumnName(int index);
     boolean hasColumn(String columnName);
     int getColumnIndexByName(String columnName);
@@ -60,7 +61,7 @@ public interface Table extends Iterable<TableRow> {
 
     Table filter(Predicate<? super TableRow> filter);
     Table sort(Comparator<? super TableRow> comparator);
-    TableJoiner join(Table table);
+    TableJoiner join(TableRow row);
 
     default <T> T to(final Class<T> type) {
         return to(type, type);
