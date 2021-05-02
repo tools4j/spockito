@@ -80,46 +80,6 @@ This and other examples can be found [here](https://github.com/tools4j/spockito/
 #### Run above test in IDE (here: IntelliJ)
 ![spockito-junit5-idea-testrun.png](https://github.com/tools4j/spockito/blob/master/spockito-junit5-idea-testrun.png)
 
-### Injecting test data into fields of the test class
-
-Sometimes test data is applicable to multiple methods or tests use more than one table source.  Spockito supports this
-conveniently through the ``@SpockitoExtension``:
-
-```java
-@ExtendWith(SpockitoExtension.class)
-public class SpockitoExtensionTest {
-
-    public static class DataRow {
-        Operation operation;
-        char sign;
-        int operand1;
-        int operand2;
-        int result;
-        int neutralOperand;
-    }
-
-    @TableSource({
-            "| Operation | Sign | Operand1 | Operand2 | Result | NeutralOperand |",
-            "|-----------|------|----------|----------|--------|----------------|",
-            "| Add       |   +  |        4 |        7 |     11 |              0 |",
-            "| Subtract  |   -  |      111 |       12 |     99 |              0 |",
-            "| Multiply  |   *  |       24 |        5 |    120 |              1 |",
-            "| Divide    |   /  |       24 |        3 |      8 |              1 |"
-    })
-    private TableRow[] testData;
-
-    @ParameterizedTest(name = "[{index}]: {2} {1} {3} = {4}")
-    public void testOperation(Operation operation, char sign, int operand1, int operand2, int result) {
-        assertEquals(result, operation.evaluate(operand1, operand2), "Result is wrong!");
-    }
-
-    @ParameterizedTest(name = "[{index}]: {2} {1} {3} = {2}")
-    public void testNeutralOperand(Operation operation, char sign, int operand1, int neutralOperand) {
-        assertEquals(operand1, operation.evaluate(operand1, neutralOperand), "Result with neutral operand is wrong!");
-    }
-}
-```
-
 This and other examples can be found [here](https://github.com/tools4j/spockito/spockito-junit5/blob/master/src/test/java/org/tools4j/spockito/jupiter/).
 
 ### Maven

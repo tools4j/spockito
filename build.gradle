@@ -113,6 +113,10 @@ subprojects {
     group = projGroup
     version = projVersion
 
+    test {
+        useJUnitPlatform()
+    }
+
     tasks.withType(Sign) {
         onlyIf {
             isReleaseVersion && gradle.taskGraph.hasTask(tasks.publish)

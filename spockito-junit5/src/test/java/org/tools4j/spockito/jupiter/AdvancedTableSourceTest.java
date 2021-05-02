@@ -34,7 +34,6 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -243,7 +242,7 @@ public class AdvancedTableSourceTest {
                                           "| Nina  | Mayer  |   3 |",
                                           "| Gary  | Mayer  |   1 |",
                                           "| Linda | Finley |  10 |",
-                                  }) @JoinOn("Last") ArrayList<Person> children,
+                                  }) @JoinOn("Last") List<Person> children,
                                   final @AggregateTableRow Person parent) {
         switch (rowIndex) {
             case 0:

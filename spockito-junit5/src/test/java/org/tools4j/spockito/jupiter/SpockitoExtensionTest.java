@@ -23,6 +23,7 @@
  */
 package org.tools4j.spockito.jupiter;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.tools4j.spockito.table.TableRow;
@@ -30,6 +31,7 @@ import org.tools4j.spockito.table.TableRow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(SpockitoExtension.class)
+@Disabled
 public class SpockitoExtensionTest {
 
     public static class DataRow {
