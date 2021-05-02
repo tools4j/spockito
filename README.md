@@ -86,65 +86,53 @@ Sometimes test data is applicable to multiple methods or tests use more than one
 conveniently through the ``@SpockitoExtension``:
 
 ```java
-@Spockito.Unroll({
-        "| Operation | Sign | Operand1 | Operand2 | Result | NeutralOperand |",
-        "|-----------|------|----------|----------|--------|----------------|",
-        "| Add       |   +  |        4 |        7 |     11 |              0 |",
-        "| Subtract  |   -  |      111 |       12 |     99 |              0 |",
-        "| Multiply  |   *  |       24 |        5 |    120 |              1 |",
-        "| Divide    |   /  |       24 |        3 |      8 |              1 |"
-})
-@Spockito.Name("[{row}]: {Operation}")
-@RunWith(Spockito.class)
-public class UnrollClassDataToFieldsTest {
+@ExtendWith(SpockitoExtension.class)
+public class SpockitoExtensionTest {
 
-    @Spockito.Ref
-    private Operation operation;
-    @Spockito.Ref
-    private char sign;
-    @Spockito.Ref
-    private int operand1;
-    @Spockito.Ref
-    private int operand2;
-    @Spockito.Ref
-    private int result;
-    @Spockito.Ref
-    private int neutralOperand;
-
-    @Test
-    @Spockito.Name("[{row}]: {Operand1} {Sign} {Operand2} = {Result}")
-    public void testOperation() {
-        Assert.assertEquals("Result is wrong!", result, operation.evaluate(operand1, operand2));
+    public static class DataRow {
+        Operation operation;
+        char sign;
+        int operand1;
+        int operand2;
+        int result;
+        int neutralOperand;
     }
 
-    @Test
-    @Spockito.Name("[{row}]: {Operand1} {Sign} {NeutralOperand} = {Operand1}")
-    public void testNeutralOperand() {
-        Assert.assertEquals("Result with neutral operand is wrong!",
-                operand1, operation.evaluate(operand1, neutralOperand));
+    @TableSource({
+            "| Operation | Sign | Operand1 | Operand2 | Result | NeutralOperand |",
+            "|-----------|------|----------|----------|--------|----------------|",
+            "| Add       |   +  |        4 |        7 |     11 |              0 |",
+            "| Subtract  |   -  |      111 |       12 |     99 |              0 |",
+            "| Multiply  |   *  |       24 |        5 |    120 |              1 |",
+            "| Divide    |   /  |       24 |        3 |      8 |              1 |"
+    })
+    private TableRow[] testData;
+
+    @ParameterizedTest(name = "[{index}]: {2} {1} {3} = {4}")
+    public void testOperation(Operation operation, char sign, int operand1, int operand2, int result) {
+        assertEquals(result, operation.evaluate(operand1, operand2), "Result is wrong!");
+    }
+
+    @ParameterizedTest(name = "[{index}]: {2} {1} {3} = {2}")
+    public void testNeutralOperand(Operation operation, char sign, int operand1, int neutralOperand) {
+        assertEquals(operand1, operation.evaluate(operand1, neutralOperand), "Result with neutral operand is wrong!");
     }
 }
 ```
-This and other examples can be found [here](https://github.com/tools4j/spockito/blob/master/src/test/java/org/tools4j/spockito/).
 
-### More examples
-* [UnrollMethodDataTest.java](https://github.com/tools4j/spockito/blob/master/src/test/java/org/tools4j/spockito/UnrollMethodDataTest.java)
-* [UnrollClassDataToFieldsTest.java](https://github.com/tools4j/spockito/blob/master/src/test/java/org/tools4j/spockito/UnrollClassDataToFieldsTest.java)
-* [UnrollClassDataToConstructorTest.java](https://github.com/tools4j/spockito/blob/master/src/test/java/org/tools4j/spockito/UnrollClassDataToConstructorTest.java)
-* [UnrollClassDataToMethodTest.java](https://github.com/tools4j/spockito/blob/master/src/test/java/org/tools4j/spockito/UnrollClassDataToMethodTest.java)
-* [all tests](https://github.com/tools4j/spockito/blob/master/src/test/java/org/tools4j/spockito/)
+This and other examples can be found [here](https://github.com/tools4j/spockito/spockito-junit5/blob/master/src/test/java/org/tools4j/spockito/jupiter/).
 
 ### Maven
 Add the following dependency to your maven pom.xml file:
 
  ```xml
  <dependency>
-     <groupId>org.tools4j</groupId>
-     <artifactId>tools4j-spockito</artifactId>
-     <version>1.6</version>
-     <scope>test</scope>
- </dependency>
- ```
+    <groupId>org.tools4j</groupId>
+    <artifactId>spockito-junit5</artifactId>
+    <version>2.0</version>
+    <scope>test</scope>
+</dependency>
+```
 
 ### Download
 Sources and binaries can be downloaded from maven central:

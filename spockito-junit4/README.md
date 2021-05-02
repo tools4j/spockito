@@ -1,11 +1,6 @@
-[![Build Status](https://travis-ci.org/tools4j/spockito.svg?branch=master)](https://travis-ci.org/tools4j/spockito)
-[![Coverage Status](https://coveralls.io/repos/github/tools4j/spockito/badge.svg?branch=master)](https://coveralls.io/github/tools4j/spockito?branch=master)
-[![Maven Central](https://img.shields.io/maven-central/v/org.tools4j/tools4j-spockito.svg)](https://search.maven.org/search?q=spockito)
+# spockito-junit4
+Java JUnit 4.x runner for parameterized tests where the test cases are defined in a table-like manner.
 
-# spockito
-Java JUnit runner for parameterized tests where the test cases are defined in a table-like
-manner. The @Unroll annotation has been inspired by the Groovy framework Spock.
- 
 ### Unroll at method level
 
 Test cases are defined via ``@Spockito.Unroll`` annotation directly on the test method. The best explanation are
@@ -58,10 +53,10 @@ public class UnrollMethodDataTest {
     }
 }
 ```
-This and other examples can be found [here](https://github.com/tools4j/spockito/blob/master/src/test/java/org/tools4j/spockito/).
+This and other examples can be found [here](https://github.com/tools4j/spockito/blob/master/spockito-junit4/src/test/java/org/tools4j/spockito/).
 
 #### Run above test in IDE (here: IntelliJ)
-![spockito-ide-test-run](https://github.com/tools4j/spockito/blob/master/ide-run-SpockitoTest.png)
+![spockito-junit4-idea-testrun.png](https://github.com/tools4j/spockito/blob/master/spockito-junit4-idea-testrun.png)
 
 ### Unroll at class level
 
@@ -113,14 +108,14 @@ public class UnrollClassDataToFieldsTest {
     }
 }
 ```
-This and other examples can be found [here](https://github.com/tools4j/spockito/blob/master/src/test/java/org/tools4j/spockito/).
+This and other examples can be found [here](https://github.com/tools4j/spockito/blob/master/spockito-junit4/src/test/java/org/tools4j/spockito/).
 
 ### More examples
-* [UnrollMethodDataTest.java](https://github.com/tools4j/spockito/blob/master/src/test/java/org/tools4j/spockito/UnrollMethodDataTest.java)
-* [UnrollClassDataToFieldsTest.java](https://github.com/tools4j/spockito/blob/master/src/test/java/org/tools4j/spockito/UnrollClassDataToFieldsTest.java)
-* [UnrollClassDataToConstructorTest.java](https://github.com/tools4j/spockito/blob/master/src/test/java/org/tools4j/spockito/UnrollClassDataToConstructorTest.java)
-* [UnrollClassDataToMethodTest.java](https://github.com/tools4j/spockito/blob/master/src/test/java/org/tools4j/spockito/UnrollClassDataToMethodTest.java)
-* [all tests](https://github.com/tools4j/spockito/blob/master/src/test/java/org/tools4j/spockito/)
+* [UnrollMethodDataTest.java](https://github.com/tools4j/spockito/blob/master/spockito-junit4/src/test/java/org/tools4j/spockito/UnrollMethodDataTest.java)
+* [UnrollClassDataToFieldsTest.java](https://github.com/tools4j/spockito/blob/master/spockito-junit4/src/test/java/org/tools4j/spockito/UnrollClassDataToFieldsTest.java)
+* [UnrollClassDataToConstructorTest.java](https://github.com/tools4j/spockito/blob/master/spockito-junit4/src/test/java/org/tools4j/spockito/UnrollClassDataToConstructorTest.java)
+* [UnrollClassDataToMethodTest.java](https://github.com/tools4j/spockito/blob/master/spockito-junit4/src/test/java/org/tools4j/spockito/UnrollClassDataToMethodTest.java)
+* [all tests](https://github.com/tools4j/spockito/blob/master/spockito-junit4/src/test/java/org/tools4j/spockito/)
 
 ### Maven
 Add the following dependency to your maven pom.xml file:
@@ -128,19 +123,12 @@ Add the following dependency to your maven pom.xml file:
  ```xml
  <dependency>
      <groupId>org.tools4j</groupId>
-     <artifactId>tools4j-spockito</artifactId>
-     <version>1.6</version>
+     <artifactId>spockito-junit4</artifactId>
+     <version>2.0</version>
      <scope>test</scope>
  </dependency>
  ```
 
 ### Download
 Sources and binaries can be downloaded from maven central:
-* [tools4j-spockito](https://search.maven.org/search?q=spockito) in Maven Central
-
-### FAQ
-* [Frequently asked Questions](https://github.com/tools4j/spockito/issues?q=label:question)
-* [Bugs and Issues](https://github.com/tools4j/spockito/issues?q=label:bug)
-
-### More Information
-* [MIT License](https://github.com/tools4j/spockito/blob/master/LICENSE)
+* [spockito-junit4](https://search.maven.org/search?q=spockito-junit4) in Maven Central
