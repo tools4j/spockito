@@ -35,12 +35,21 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.MonthDay;
 import java.time.OffsetDateTime;
+import java.time.OffsetTime;
+import java.time.Period;
+import java.time.Year;
+import java.time.YearMonth;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -68,6 +77,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 
 import static org.tools4j.spockito.table.GenericTypes.actualTypeForTypeParam;
 import static org.tools4j.spockito.table.GenericTypes.genericComponentType;
@@ -89,16 +99,30 @@ public final class Converters {
 
     public static final Function<? super String, BigInteger> BIG_INTEGER_CONVERTER = BigInteger::new;
     public static final Function<? super String, BigDecimal> BIG_DECIMAL_CONVERTER = BigDecimal::new;
+
     public static final Function<? super String, LocalDate> LOCAL_DATE_CONVERTER = LocalDate::parse;
     public static final Function<? super String, LocalTime> LOCAL_TIME_CONVERTER = LocalTime::parse;
     public static final Function<? super String, LocalDateTime> LOCAL_DATE_TIME_CONVERTER = LocalDateTime::parse;
-    public static final Function<? super String, ZonedDateTime> ZONED_DATE_TIME_CONVERTER = ZonedDateTime::parse;
+    public static final Function<? super String, OffsetTime> OFFSET_TIME_CONVERTER = OffsetTime::parse;
     public static final Function<? super String, OffsetDateTime> OFFSET_DATE_TIME_CONVERTER = OffsetDateTime::parse;
+    public static final Function<? super String, ZonedDateTime> ZONED_DATE_TIME_CONVERTER = ZonedDateTime::parse;
     public static final Function<? super String, Instant> INSTANT_CONVERTER = Instant::parse;
+    public static final Function<? super String, Year> YEAR_CONVERTER = Year::parse;
+    public static final Function<? super String, YearMonth> YEAR_MONTH_CONVERTER = YearMonth::parse;
+    public static final Function<? super String, MonthDay> MONTH_DAY_CONVERTER = MonthDay::parse;
+    public static final Function<? super String, Duration> DURATION_CONVERTER = Duration::parse;
+    public static final Function<? super String, Period> PERIOD_CONVERTER = Period::parse;
+    public static final Function<? super String, ZoneOffset> ZONE_OFFSET_CONVERTER = ZoneOffset::of;
+    public static final Function<? super String, ZoneId> ZONE_ID_CONVERTER = ZoneId::of;
+    public static final Function<? super String, DateTimeFormatter> DATE_TIME_FORMATTER_CONVERTER = DateTimeFormatter::ofPattern;
+
     public static final Function<? super String, Date> DATE_CONVERTER = s -> Date.from(Timestamp.valueOf(s).toInstant());
     public static final Function<? super String, java.sql.Date> SQL_DATE_CONVERTER = java.sql.Date::valueOf;
     public static final Function<? super String, Time> SQL_TIME_CONVERTER = Time::valueOf;
     public static final Function<? super String, Timestamp> SQL_TIMESTAMP_CONVERTER = Timestamp::valueOf;
+
+    public static final Function<? super String, Pattern> PATTERN_CONVERTER = Pattern::compile;
+
     public static final Function<? super String, String> STRING_CONVERTER = s -> Strings.removeStartAndEndChars(s, '\'', '\'');
     public static final Function<? super String, StringBuilder> STRING_BUILDER_CONVERTER = s -> new StringBuilder(STRING_CONVERTER.apply(s));
     public static final Function<? super String, StringBuffer> STRING_BUFFER_CONVERTER = s -> new StringBuffer(STRING_CONVERTER.apply(s));

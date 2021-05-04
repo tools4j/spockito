@@ -32,14 +32,22 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.Month;
+import java.time.MonthDay;
 import java.time.OffsetDateTime;
+import java.time.OffsetTime;
+import java.time.Period;
+import java.time.Year;
+import java.time.YearMonth;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -77,6 +85,7 @@ import java.util.concurrent.ConcurrentNavigableMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -281,8 +290,8 @@ public class ValueConverterTest {
 
     @Test
     public void convertLocalTime() {
-        assertEquals(LocalTime.of(17, 15, 31), converter.convert(LocalTime.class, null, "17:15:31"),"Unexpected intValue");
-        assertEquals(LocalTime.of(17, 15, 31, 111000000), converter.convert(LocalTime.class, null, "17:15:31.111"),"Unexpected intValue");
+        assertEquals(LocalTime.of(17, 15, 31), converter.convert(LocalTime.class, null, "17:15:31"),"Unexpected value");
+        assertEquals(LocalTime.of(17, 15, 31, 111000000), converter.convert(LocalTime.class, null, "17:15:31.111"),"Unexpected value");
         final LocalTime[] localTimes = new LocalTime[] {
                 LocalTime.of(17, 10, 4),
                 LocalTime.of(3, 12, 31),
@@ -314,22 +323,22 @@ public class ValueConverterTest {
     }
 
     @Test
-    public void convertZonedDateTime() {
-        assertEquals(ZonedDateTime.of(2017, 03, 22, 17, 15, 31, 0, ZoneOffset.UTC), converter.convert(ZonedDateTime.class, null, "2017-03-22T17:15:31+00:00"),"Unexpected value");
-        assertEquals(ZonedDateTime.of(2017, 03, 22, 17, 15, 31, 111000000, ZoneOffset.UTC), converter.convert(ZonedDateTime.class, null, "2017-03-22T17:15:31.111+00:00"),"Unexpected value");
-        for (final String id : ZoneId.getAvailableZoneIds()) {
-            final ZoneId zoneId = ZoneId.of(id);
-            if ("GMT0".equals(zoneId.getId())) continue;//JDK bug, fixed in Java 9
-            final ZonedDateTime[] zonedDateTimes = new ZonedDateTime[]{
-                    ZonedDateTime.of(2010, 10, 4, 17, 10, 4, 0, zoneId),
-                    ZonedDateTime.of(2017, 12, 31, 3, 12, 31, 0, zoneId),
-                    ZonedDateTime.of(2016, 9, 1, 11, 9, 1, 0, zoneId),
-                    ZonedDateTime.of(2000, 1, 1, 12, 1, 1, 0, zoneId),
-                    ZonedDateTime.of(0, 1, 1, 23, 59, 59, 123456789, zoneId),
-                    ZonedDateTime.of(1970, 2, 28, 00, 00, 00, 000000001, zoneId),
+    public void convertOffsetTime() {
+        assertEquals(OffsetTime.of(17, 15, 31, 0, ZoneOffset.UTC), converter.convert(OffsetTime.class, null, "17:15:31+00:00"),"Unexpected value");
+        assertEquals(OffsetTime.of(17, 15, 31, 987654321, ZoneOffset.UTC), converter.convert(OffsetTime.class, null, "17:15:31.987654321+00:00"),"Unexpected value");
+        final int halfHourInSeconds = 30 * 60;
+        for (int offsetSeconds = ZoneOffset.MIN.getTotalSeconds(); offsetSeconds < ZoneOffset.MAX.getTotalSeconds(); offsetSeconds += halfHourInSeconds) {
+            final ZoneOffset zoneOffset = ZoneOffset.ofTotalSeconds(offsetSeconds);
+            final OffsetTime[] offsetTimes = new OffsetTime[]{
+                    OffsetTime.of(17, 10, 4, 0, zoneOffset),
+                    OffsetTime.of(3, 12, 31, 0, zoneOffset),
+                    OffsetTime.of(11, 9, 1, 0, zoneOffset),
+                    OffsetTime.of(12, 1, 1, 0, zoneOffset),
+                    OffsetTime.of(23, 59, 59, 123456789, zoneOffset),
+                    OffsetTime.of(00, 00, 00, 000000001, zoneOffset),
             };
-            for (final ZonedDateTime exp : zonedDateTimes) {
-                assertEquals(exp, converter.convert(ZonedDateTime.class, null, exp.toString()),"Unexpected value");
+            for (final OffsetTime exp : offsetTimes) {
+                assertEquals(exp, converter.convert(OffsetTime.class, null, exp.toString()), "Unexpected value");
             }
         }
     }
@@ -356,6 +365,27 @@ public class ValueConverterTest {
     }
 
     @Test
+    public void convertZonedDateTime() {
+        assertEquals(ZonedDateTime.of(2017, 03, 22, 17, 15, 31, 0, ZoneOffset.UTC), converter.convert(ZonedDateTime.class, null, "2017-03-22T17:15:31+00:00"),"Unexpected value");
+        assertEquals(ZonedDateTime.of(2017, 03, 22, 17, 15, 31, 111000000, ZoneOffset.UTC), converter.convert(ZonedDateTime.class, null, "2017-03-22T17:15:31.111+00:00"),"Unexpected value");
+        for (final String id : ZoneId.getAvailableZoneIds()) {
+            final ZoneId zoneId = ZoneId.of(id);
+            if ("GMT0".equals(zoneId.getId())) continue;//JDK bug, fixed in Java 9
+            final ZonedDateTime[] zonedDateTimes = new ZonedDateTime[]{
+                    ZonedDateTime.of(2010, 10, 4, 17, 10, 4, 0, zoneId),
+                    ZonedDateTime.of(2017, 12, 31, 3, 12, 31, 0, zoneId),
+                    ZonedDateTime.of(2016, 9, 1, 11, 9, 1, 0, zoneId),
+                    ZonedDateTime.of(2000, 1, 1, 12, 1, 1, 0, zoneId),
+                    ZonedDateTime.of(0, 1, 1, 23, 59, 59, 123456789, zoneId),
+                    ZonedDateTime.of(1970, 2, 28, 00, 00, 00, 000000001, zoneId),
+            };
+            for (final ZonedDateTime exp : zonedDateTimes) {
+                assertEquals(exp, converter.convert(ZonedDateTime.class, null, exp.toString()),"Unexpected value");
+            }
+        }
+    }
+
+    @Test
     public void convertInstant() {
         assertEquals(LocalDateTime.of(2017, 03, 22, 17, 15, 31, 0).toInstant(ZoneOffset.UTC), converter.convert(Instant.class, null, "2017-03-22T17:15:31Z"),"Unexpected value");
         assertEquals(LocalDateTime.of(2017, 03, 22, 17, 15, 31, 111000000).toInstant(ZoneOffset.UTC), converter.convert(Instant.class, null, "2017-03-22T17:15:31.111Z"),"Unexpected value");
@@ -373,6 +403,147 @@ public class ValueConverterTest {
             for (final Instant exp : instants) {
                 assertEquals(exp, converter.convert(Instant.class, null, exp.toString()),"Unexpected value");
             }
+        }
+    }
+
+    @Test
+    public void convertYear() {
+        assertEquals(Year.of(2184), converter.convert(Year.class, null, "2184"),"Unexpected value");
+        assertEquals(Year.of(2021), converter.convert(Year.class, null, "2021"),"Unexpected value");
+        assertEquals(Year.of(2017), converter.convert(Year.class, null, "2017"),"Unexpected value");
+        assertEquals(Year.of(1901), converter.convert(Year.class, null, "1901"),"Unexpected value");
+        assertEquals(Year.of(1), converter.convert(Year.class, null, "0001"),"Unexpected value");
+        assertEquals(Year.of(0), converter.convert(Year.class, null, "0000"),"Unexpected value");
+        assertEquals(Year.of(-1), converter.convert(Year.class, null, "-0001"),"Unexpected value");
+        assertEquals(Year.of(-125), converter.convert(Year.class, null, "-0125"),"Unexpected value");
+        assertEquals(Year.of(Year.MIN_VALUE), converter.convert(Year.class, null, "-999999999"),"Unexpected value");
+        assertEquals(Year.of(Year.MAX_VALUE), converter.convert(Year.class, null, "+999999999"),"Unexpected value");
+        assertEquals(Year.now(), converter.convert(Year.class, null, Year.now().toString()),"Unexpected value");
+    }
+
+    @Test
+    public void convertYearMonth() {
+        assertEquals(YearMonth.of(2021, Month.MAY), converter.convert(YearMonth.class, null, "2021-05"),"Unexpected value");
+        assertEquals(YearMonth.of(2021, Month.DECEMBER), converter.convert(YearMonth.class, null, "2021-12"),"Unexpected value");
+        final Year[] years = {
+                Year.of(2184),
+                Year.of(2021),
+                Year.of(2017),
+                Year.of(1901),
+                Year.of(-1250),
+                Year.of(Year.MIN_VALUE),
+                Year.of(Year.MAX_VALUE),
+                Year.now()
+        };
+        for (final Year year : years) {
+            for (final Month month : Month.values()) {
+                final YearMonth exp = YearMonth.of(year.getValue(), month);
+                final String pre = year.getValue() > 9999 ? "+" : "";
+                assertEquals(exp, converter.convert(YearMonth.class, null, pre + exp),"Unexpected value");
+            }
+        }
+    }
+
+    @Test
+    public void convertMonthDay() {
+        assertEquals(MonthDay.of(Month.MAY, 4), converter.convert(MonthDay.class, null, "--05-04"),"Unexpected value");
+        assertEquals(MonthDay.of(Month.DECEMBER, 31), converter.convert(MonthDay.class, null, "--12-31"),"Unexpected value");
+        for (final Month month : Month.values()) {
+            for (int day = 1; day < month.maxLength(); day++) {
+                final MonthDay exp = MonthDay.of(month, day);
+                assertEquals(exp, converter.convert(MonthDay.class, null, exp.toString()),"Unexpected value");
+            }
+        }
+    }
+
+    @Test
+    public void convertDuration() {
+        assertEquals(Duration.ofDays(7), converter.convert(Duration.class, null, "P7D"),"Unexpected value");
+        assertEquals(Duration.ofHours(5), converter.convert(Duration.class, null, "PT5H"),"Unexpected value");
+        assertEquals(Duration.ofMinutes(6), converter.convert(Duration.class, null, "PT6M"),"Unexpected value");
+        assertEquals(Duration.ofSeconds(31), converter.convert(Duration.class, null, "PT31S"),"Unexpected value");
+        assertEquals(Duration.ofMillis(234), converter.convert(Duration.class, null, "PT0.234S"),"Unexpected value");
+        assertEquals(Duration.ofNanos(123456789), converter.convert(Duration.class, null, "PT0.123456789S"),"Unexpected value");
+        assertEquals(Duration.ofSeconds(7, 123456789), converter.convert(Duration.class, null, "PT7.123456789S"),"Unexpected value");
+        assertEquals(Duration.ofDays(-7), converter.convert(Duration.class, null, "P-7D"),"Unexpected value");
+        assertEquals(Duration.ofHours(-5), converter.convert(Duration.class, null, "PT-5H"),"Unexpected value");
+        assertEquals(Duration.ofMinutes(-6), converter.convert(Duration.class, null, "PT-6M"),"Unexpected value");
+        assertEquals(Duration.ofSeconds(-31), converter.convert(Duration.class, null, "PT-31S"),"Unexpected value");
+//JDK BUG?        assertEquals(Duration.ofMillis(-234), converter.convert(Duration.class, null, "PT-0.234S"),"Unexpected value");
+        assertEquals(Duration.ofMillis(-234), converter.convert(Duration.class, null, "-PT0.234S"),"Unexpected value");
+        assertEquals(Duration.ofSeconds(-1, -234_000_000), converter.convert(Duration.class, null, "PT-1.234S"),"Unexpected value");
+        assertEquals(Duration.ofNanos(-123456789), converter.convert(Duration.class, null, "-PT0.123456789S"),"Unexpected value");
+        assertEquals(Duration.ofSeconds(-7, -123456789), converter.convert(Duration.class, null, "-PT7.123456789S"),"Unexpected value");
+        assertEquals(Duration.ZERO, converter.convert(Duration.class, null, "P0D"),"Unexpected value");
+        assertEquals(Duration.parse("P2DT23H59M31.123456789S"), converter.convert(Duration.class, null, "P2DT23H59M31.123456789S"),"Unexpected value");
+        assertEquals(Duration.parse("P-2DT23H59M31.123456789S"), converter.convert(Duration.class, null, "P-2DT23H59M31.123456789S"),"Unexpected value");
+        assertEquals(Duration.parse("-P2DT23H59M31.123456789S"), converter.convert(Duration.class, null, "-P2DT23H59M31.123456789S"),"Unexpected value");
+    }
+
+    @Test
+    public void convertPeriod() {
+        assertEquals(Period.of(100, 4, 22), converter.convert(Period.class, null, "P100Y4M22D"),"Unexpected value");
+        assertEquals(Period.ofYears(100), converter.convert(Period.class, null, "P100Y"),"Unexpected value");
+        assertEquals(Period.ofMonths(4), converter.convert(Period.class, null, "P4M"),"Unexpected value");
+        assertEquals(Period.ofDays(22), converter.convert(Period.class, null, "P22D"),"Unexpected value");
+        assertEquals(Period.ofWeeks(52), converter.convert(Period.class, null, "P52W"),"Unexpected value");
+        assertEquals(Period.of(-100, -4, -22), converter.convert(Period.class, null, "-P100Y4M22D"),"Unexpected value");
+        assertEquals(Period.ofYears(-100), converter.convert(Period.class, null, "P-100Y"),"Unexpected value");
+        assertEquals(Period.ofMonths(-4), converter.convert(Period.class, null, "P-4M"),"Unexpected value");
+        assertEquals(Period.ofDays(-22), converter.convert(Period.class, null, "P-22D"),"Unexpected value");
+        assertEquals(Period.ofWeeks(-52), converter.convert(Period.class, null, "P-52W"),"Unexpected value");
+        assertEquals(Period.ZERO, converter.convert(Period.class, null, "P0D"),"Unexpected value");
+        assertEquals(Period.parse("P1Y2M3W4D"), converter.convert(Period.class, null, "P1Y2M3W4D"),"Unexpected value");
+        assertEquals(Period.parse("P-1Y2M3W4D"), converter.convert(Period.class, null, "P-1Y2M3W4D"),"Unexpected value");
+        assertEquals(Period.parse("-P1Y2M3W4D"), converter.convert(Period.class, null, "-P1Y2M3W4D"),"Unexpected value");
+    }
+
+    @Test
+    public void testZoneOffset() {
+        assertEquals(ZoneOffset.ofHoursMinutesSeconds(11, 22, 33), converter.convert(ZoneOffset.class, null, "+11:22:33"),"Unexpected value");
+        assertEquals(ZoneOffset.ofHoursMinutesSeconds(-11, -22, -33), converter.convert(ZoneOffset.class, null, "-11:22:33"),"Unexpected value");
+        assertEquals(ZoneOffset.ofHoursMinutes(11, 22), converter.convert(ZoneOffset.class, null, "+11:22"),"Unexpected value");
+        assertEquals(ZoneOffset.ofHoursMinutes(-11, -22), converter.convert(ZoneOffset.class, null, "-11:22"),"Unexpected value");
+        assertEquals(ZoneOffset.ofHours(11), converter.convert(ZoneOffset.class, null, "+11"),"Unexpected value");
+        assertEquals(ZoneOffset.ofHours(-11), converter.convert(ZoneOffset.class, null, "-11"),"Unexpected value");
+        assertEquals(ZoneOffset.UTC, converter.convert(ZoneOffset.class, null, "+00"),"Unexpected value");
+        assertEquals(ZoneOffset.UTC, converter.convert(ZoneOffset.class, null, "+00:00"),"Unexpected value");
+        assertEquals(ZoneOffset.UTC, converter.convert(ZoneOffset.class, null, "+00:00:00"),"Unexpected value");
+        assertEquals(ZoneOffset.MIN, converter.convert(ZoneOffset.class, null, "-18"),"Unexpected value");
+        assertEquals(ZoneOffset.MAX, converter.convert(ZoneOffset.class, null, "+18"),"Unexpected value");
+        final int halfHourInSeconds = 30 * 60;
+        for (int offsetSeconds = ZoneOffset.MIN.getTotalSeconds(); offsetSeconds < ZoneOffset.MAX.getTotalSeconds(); offsetSeconds += halfHourInSeconds) {
+            final ZoneOffset exp = ZoneOffset.ofTotalSeconds(offsetSeconds);
+            assertEquals(exp, converter.convert(ZoneOffset.class, null, exp.toString()),"Unexpected value");
+            assertEquals(ZoneId.ofOffset("", exp), converter.convert(ZoneId.class, null, exp.toString()),"Unexpected value");
+        }
+    }
+
+    @Test
+    public void testZoneId() {
+        assertEquals(ZoneId.of("America/New_York"), converter.convert(ZoneId.class, null, "America/New_York"),"Unexpected value");
+        assertEquals(ZoneId.of("Europe/Paris"), converter.convert(ZoneId.class, null, "Europe/Paris"),"Unexpected value");
+        assertEquals(ZoneId.of("Australia/Melbourne"), converter.convert(ZoneId.class, null, "Australia/Melbourne"),"Unexpected value");
+        assertEquals(ZoneOffset.UTC, converter.convert(ZoneId.class, null, "+00"),"Unexpected value");
+        for (final String zoneId : ZoneId.getAvailableZoneIds()) {
+            final ZoneId exp = ZoneId.of(zoneId);
+            assertEquals(exp, converter.convert(ZoneId.class, null, exp.toString()),"Unexpected value");
+        }
+    }
+
+    @Test
+    public void testDateTimeFormatter() {
+        final String[] patterns = {
+                "yyyy-MM-DD",
+                "HH:mm:ss",
+                "HH:mm:ss.SSS",
+                "HH:mm:ss.SSSSSSSSS",
+                "yyyy-MM-DD HH:mm:ss",
+                "yyyy-MM-DD HH:mm:ss.SSS",
+                "yyyy-MM-DD HH:mm:ss.SSSSSSSSS"
+        };
+        for (final String pattern : patterns) {
+            assertNotNull(converter.convert(DateTimeFormatter.class, null, pattern), "Unexpected value");
         }
     }
 
@@ -450,6 +621,20 @@ public class ValueConverterTest {
         };
         for (final Timestamp exp : timestamps) {
             assertEquals(exp, converter.convert(Timestamp.class, null, exp.toString()),"Unexpected value");
+        }
+    }
+
+    @Test
+    public void testPattern() {
+        assertEquals("Hello\\s+world\\s+\\d+", converter.convert(Pattern.class, null, "Hello\\s+world\\s+\\d+").toString(), "Unexpected value");
+        final String[] patterns = {
+                ".*",
+                "^.*$",
+                "\\s+",
+                "\\w+"
+        };
+        for (final String pattern : patterns) {
+            assertEquals(pattern, converter.convert(Pattern.class, null, pattern).toString(), "Unexpected value");
         }
     }
 

@@ -26,12 +26,21 @@ package org.tools4j.spockito.table;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.MonthDay;
 import java.time.OffsetDateTime;
+import java.time.OffsetTime;
+import java.time.Period;
+import java.time.Year;
+import java.time.YearMonth;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -43,6 +52,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 
 /**
  * Default value converter implementation for Spockito. All supported conversions are defined as a constant in
@@ -105,13 +115,23 @@ public class SpockitoValueConverter implements ValueConverter {
         registerConverterFunction(LocalDate.class, Converters.LOCAL_DATE_CONVERTER);
         registerConverterFunction(LocalTime.class, Converters.LOCAL_TIME_CONVERTER);
         registerConverterFunction(LocalDateTime.class, Converters.LOCAL_DATE_TIME_CONVERTER);
-        registerConverterFunction(ZonedDateTime.class, Converters.ZONED_DATE_TIME_CONVERTER);
+        registerConverterFunction(OffsetTime.class, Converters.OFFSET_TIME_CONVERTER);
         registerConverterFunction(OffsetDateTime.class, Converters.OFFSET_DATE_TIME_CONVERTER);
+        registerConverterFunction(ZonedDateTime.class, Converters.ZONED_DATE_TIME_CONVERTER);
         registerConverterFunction(Instant.class, Converters.INSTANT_CONVERTER);
+        registerConverterFunction(Year.class, Converters.YEAR_CONVERTER);
+        registerConverterFunction(YearMonth.class, Converters.YEAR_MONTH_CONVERTER);
+        registerConverterFunction(MonthDay.class, Converters.MONTH_DAY_CONVERTER);
+        registerConverterFunction(Duration.class, Converters.DURATION_CONVERTER);
+        registerConverterFunction(Period.class, Converters.PERIOD_CONVERTER);
+        registerConverterFunction(ZoneOffset.class, Converters.ZONE_OFFSET_CONVERTER);
+        registerConverterFunction(ZoneId.class, Converters.ZONE_ID_CONVERTER);
+        registerConverterFunction(DateTimeFormatter.class, Converters.DATE_TIME_FORMATTER_CONVERTER);
         registerConverterFunction(Date.class, Converters.DATE_CONVERTER);
         registerConverterFunction(java.sql.Date.class, Converters.SQL_DATE_CONVERTER);
         registerConverterFunction(java.sql.Time.class, Converters.SQL_TIME_CONVERTER);
         registerConverterFunction(java.sql.Timestamp.class, Converters.SQL_TIMESTAMP_CONVERTER);
+        registerConverterFunction(Pattern.class, Converters.PATTERN_CONVERTER);
         registerConverterFunction(StringBuilder.class, Converters.STRING_BUILDER_CONVERTER);
         registerConverterFunction(StringBuffer.class, Converters.STRING_BUFFER_CONVERTER);
 
