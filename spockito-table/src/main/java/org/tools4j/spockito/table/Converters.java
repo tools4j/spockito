@@ -35,11 +35,13 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.Month;
 import java.time.MonthDay;
 import java.time.OffsetDateTime;
 import java.time.OffsetTime;
@@ -52,6 +54,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -65,7 +68,6 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.TreeMap;
@@ -76,9 +78,12 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
+import static java.util.Objects.requireNonNull;
 import static org.tools4j.spockito.table.GenericTypes.actualTypeForTypeParam;
 import static org.tools4j.spockito.table.GenericTypes.genericComponentType;
 import static org.tools4j.spockito.table.GenericTypes.genericListType;
@@ -107,9 +112,36 @@ public final class Converters {
     public static final Function<? super String, OffsetDateTime> OFFSET_DATE_TIME_CONVERTER = OffsetDateTime::parse;
     public static final Function<? super String, ZonedDateTime> ZONED_DATE_TIME_CONVERTER = ZonedDateTime::parse;
     public static final Function<? super String, Instant> INSTANT_CONVERTER = Instant::parse;
+    public static final Function<? super String, Month> MONTH_CONVERTER = s -> {
+        //try numeric
+        if (s.length() == 1 || s.length()== 2) {
+            final int digit = s.charAt(0) - '0';
+            if (s.length() == 1 && digit >= 1 && digit <= 9) {
+                return Month.of(digit);
+            }
+            if (s.length() == 2 && digit == 1) {
+                final int digit2 = s.charAt(1) - '0';
+                if (digit2 >= 0 && digit2 <= 2) {
+                    return Month.of(10 + digit2);
+                }
+            }
+        }
+        //try by name (or prefix of name)
+        if (s.length() >= 3) {
+            final String upper = s.toUpperCase();
+            for (final Month month : Month.values()) {
+                if (month.name().startsWith(upper)) {
+                    return month;
+                }
+            }
+        }
+        throw new IllegalArgumentException("Cannot convert string to Month: " + s);
+    };
     public static final Function<? super String, Year> YEAR_CONVERTER = Year::parse;
     public static final Function<? super String, YearMonth> YEAR_MONTH_CONVERTER = YearMonth::parse;
     public static final Function<? super String, MonthDay> MONTH_DAY_CONVERTER = MonthDay::parse;
+    public static final Function<? super String, DayOfWeek> DAY_OF_WEEK_CONVERTER = new EnumNamePrefixConverter<>(DayOfWeek.class, 3, false);
+
     public static final Function<? super String, Duration> DURATION_CONVERTER = Duration::parse;
     public static final Function<? super String, Period> PERIOD_CONVERTER = Period::parse;
     public static final Function<? super String, ZoneOffset> ZONE_OFFSET_CONVERTER = ZoneOffset::of;
@@ -120,6 +152,25 @@ public final class Converters {
     public static final Function<? super String, java.sql.Date> SQL_DATE_CONVERTER = java.sql.Date::valueOf;
     public static final Function<? super String, Time> SQL_TIME_CONVERTER = Time::valueOf;
     public static final Function<? super String, Timestamp> SQL_TIMESTAMP_CONVERTER = Timestamp::valueOf;
+    public static final Function<? super String, TimeUnit> TIME_UNIT_CONVERTER = timeunitConverter();
+    private static Function<? super String, TimeUnit> timeunitConverter() {
+        final Map<String, TimeUnit> unitsByName = new HashMap<>();
+        unitsByName.put("ns", TimeUnit.NANOSECONDS);
+        unitsByName.put("us", TimeUnit.MICROSECONDS);
+        unitsByName.put("ms", TimeUnit.MILLISECONDS);
+        unitsByName.put("s", TimeUnit.SECONDS);
+        unitsByName.put("m", TimeUnit.MINUTES);
+        unitsByName.put("h", TimeUnit.HOURS);
+        unitsByName.put("d", TimeUnit.DAYS);
+        final EnumNamePrefixConverter<TimeUnit> unitsByPRefix = new EnumNamePrefixConverter<>(TimeUnit.class, 3, false);
+        return s -> {
+            final TimeUnit value = unitsByName.get(s);
+            if (value != null) {
+                return value;
+            }
+            return unitsByPRefix.apply(s);
+        };
+    }
 
     public static final Function<? super String, Pattern> PATTERN_CONVERTER = Pattern::compile;
 
@@ -154,6 +205,44 @@ public final class Converters {
         }
     };
 
+    public static class EnumNamePrefixConverter<E extends Enum<E>> implements Function<String, E> {
+        private final Class<E> enumType;
+        private final int prefixMinLength;
+        private final boolean caseSensitive;
+        private final Map<String, E> valuesPyPrefix;
+
+        public EnumNamePrefixConverter(final Class<E> enumType,
+                                       final int prefixMinLength,
+                                       final boolean caseSensitive) {
+            this.enumType = requireNonNull(enumType);
+            this.prefixMinLength = prefixMinLength;
+            this.caseSensitive = caseSensitive;
+            final E[] values = enumType.getEnumConstants();
+            this.valuesPyPrefix = Arrays.stream(values).collect(Collectors.toMap(
+                    caseSensitive ?
+                            e -> e.name().substring(0, prefixMinLength) :
+                            e -> e.name().substring(0, prefixMinLength).toUpperCase(),
+                    Function.identity()
+            ));
+            if (valuesPyPrefix.size() != values.length) {
+                throw new IllegalArgumentException("Enum name prefixes of length " + prefixMinLength +
+                        " are not unique for " + enumType.getName());
+            }
+        }
+
+        @Override
+        public E apply(final String s) {
+            if (s.length() >= prefixMinLength) {
+                final String key = caseSensitive ? s : s.toUpperCase();
+                final E candidate = valuesPyPrefix.get(key.substring(0, prefixMinLength));
+                if (candidate != null && candidate.name().startsWith(key)) {
+                    return candidate;
+                }
+            }
+            throw new IllegalArgumentException("Cannot convert string to " + enumType.getName() + ": " + s);
+        }
+    }
+
     /**
      * Value converter for target type {@link Optional}.
      */
@@ -161,7 +250,7 @@ public final class Converters {
         private final ValueConverter elementConverter;
 
         public OptionalConverter(final ValueConverter elementConverter) {
-            this.elementConverter = Objects.requireNonNull(elementConverter);
+            this.elementConverter = requireNonNull(elementConverter);
         }
 
         @Override
@@ -188,7 +277,7 @@ public final class Converters {
     public static class CollectionConverter implements ValueConverter {
         private final ValueConverter elementConverter;
         public CollectionConverter(final ValueConverter elementConverter) {
-            this.elementConverter = Objects.requireNonNull(elementConverter);
+            this.elementConverter = requireNonNull(elementConverter);
         }
 
         @Override
@@ -275,7 +364,7 @@ public final class Converters {
         private final ValueConverter elementConverter;
         private final CollectionConverter collectionConverter;
         public ArrayConverter(final ValueConverter elementConverter) {
-            this.elementConverter = Objects.requireNonNull(elementConverter);
+            this.elementConverter = requireNonNull(elementConverter);
             this.collectionConverter = new CollectionConverter(elementConverter);
         }
 
@@ -302,7 +391,7 @@ public final class Converters {
     public static class MapConverter implements ValueConverter {
         private final ValueConverter elementConverter;
         public MapConverter(final ValueConverter elementConverter) {
-            this.elementConverter = Objects.requireNonNull(elementConverter);
+            this.elementConverter = requireNonNull(elementConverter);
         }
 
         @Override
@@ -382,7 +471,7 @@ public final class Converters {
 
         private final ValueConverter elementConverter;
         public BeanConverter(final ValueConverter elementConverter) {
-            this.elementConverter = Objects.requireNonNull(elementConverter);
+            this.elementConverter = requireNonNull(elementConverter);
         }
 
         @Override

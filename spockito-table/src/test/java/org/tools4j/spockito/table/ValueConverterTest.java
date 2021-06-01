@@ -32,6 +32,7 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -84,6 +85,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentNavigableMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
@@ -407,6 +409,28 @@ public class ValueConverterTest {
     }
 
     @Test
+    public void convertMonth() {
+        final String crap = "xyzcrap";
+        for (final Month month : Month.values()) {
+            assertEquals(month, converter.convert(Month.class, null, "" + month.getValue()),
+                    "convert(Month.class, null, '" + month.getValue() + ")");
+            for (int i = 0; i < month.name().length(); i++) {
+                final String pre = month.name().substring(0, i);
+                for (final String s : Arrays.asList(pre, pre.toLowerCase(), pre + crap)) {
+                    final String msg = "convert(Month.class, null, '" + s + "')";
+                    try {
+                        final Month actual = converter.convert(Month.class, null, s);
+                        assertTrue(i >= 3 && !s.endsWith(crap), msg);
+                        assertEquals(month, actual, msg);
+                    } catch (final IllegalArgumentException e) {
+                        assertTrue(i < 3 || s.endsWith(crap), msg);
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
     public void convertYear() {
         assertEquals(Year.of(2184), converter.convert(Year.class, null, "2184"),"Unexpected value");
         assertEquals(Year.of(2021), converter.convert(Year.class, null, "2021"),"Unexpected value");
@@ -452,6 +476,26 @@ public class ValueConverterTest {
             for (int day = 1; day < month.maxLength(); day++) {
                 final MonthDay exp = MonthDay.of(month, day);
                 assertEquals(exp, converter.convert(MonthDay.class, null, exp.toString()),"Unexpected value");
+            }
+        }
+    }
+
+    @Test
+    public void convertDayOfWeek() {
+        final String crap = "xyzcrap";
+        for (final DayOfWeek day : DayOfWeek.values()) {
+            for (int i = 0; i < day.name().length(); i++) {
+                final String pre = day.name().substring(0, i);
+                for (final String s : Arrays.asList(pre, pre.toLowerCase(), pre + crap)) {
+                    final String msg = "convert(DayOfWeek.class, null, '" + s + "')";
+                    try {
+                        final DayOfWeek actual = converter.convert(DayOfWeek.class, null, s);
+                        assertTrue(i >= 3 && !s.endsWith(crap), msg);
+                        assertEquals(day, actual, msg);
+                    } catch (final IllegalArgumentException e) {
+                        assertTrue(i < 3 || s.endsWith(crap), msg);
+                    }
+                }
             }
         }
     }
@@ -621,6 +665,35 @@ public class ValueConverterTest {
         };
         for (final Timestamp exp : timestamps) {
             assertEquals(exp, converter.convert(Timestamp.class, null, exp.toString()),"Unexpected value");
+        }
+    }
+
+    @Test
+    public void convertTimeUnit() {
+        assertEquals(TimeUnit.NANOSECONDS, converter.convert(TimeUnit.class, null, "ns"), "ns");
+        assertEquals(TimeUnit.MICROSECONDS, converter.convert(TimeUnit.class, null, "us"), "us");
+        assertEquals(TimeUnit.MILLISECONDS, converter.convert(TimeUnit.class, null, "ms"), "ms");
+        assertEquals(TimeUnit.SECONDS, converter.convert(TimeUnit.class, null, "s"), "s");
+        assertEquals(TimeUnit.MINUTES, converter.convert(TimeUnit.class, null, "m"), "m");
+        assertEquals(TimeUnit.HOURS, converter.convert(TimeUnit.class, null, "h"), "h");
+        assertEquals(TimeUnit.DAYS, converter.convert(TimeUnit.class, null, "d"), "d");
+        final List<String> skip = Arrays.asList("s", "m", "h", "d");
+        final String crap = "xyzcrap";
+        for (final TimeUnit unit : TimeUnit.values()) {
+            for (int i = 0; i < unit.name().length(); i++) {
+                final String pre = unit.name().substring(0, i);
+                for (final String s : Arrays.asList(pre, pre.toLowerCase(), pre + crap)) {
+                    if (skip.contains(s)) continue;
+                    final String msg = "convert(TimeUnit.class, null, '" + s + "')";
+                    try {
+                        final TimeUnit actual = converter.convert(TimeUnit.class, null, s);
+                        assertTrue(i >= 3 && !s.endsWith(crap), msg);
+                        assertEquals(unit, actual, msg);
+                    } catch (final IllegalArgumentException e) {
+                        assertTrue(i < 3 || s.endsWith(crap), msg);
+                    }
+                }
+            }
         }
     }
 

@@ -26,7 +26,8 @@ package org.tools4j.spockito.table;
 import java.lang.reflect.Type;
 
 /**
- * Handles the conversion of string values to arbitrary target types.
+ * Handles the conversion of string values to arbitrary target types; supports conversion into generic types such as
+ * {@code List<String>}.
  */
 public interface ValueConverter {
     /**
@@ -40,6 +41,19 @@ public interface ValueConverter {
      * @return the converted value
      */
     <T> T convert(Class<T> type, Type genericType, String value);
+
+    /**
+     * Converts the given string value into the target type.  Use this method for non-generic types, and
+     * {@link #convert(Class, Type, String)} for generic types.
+     *
+     * @param type          the target type, a non-generic type such as {@code String.class}
+     * @param value         the value to convert, may be null
+     * @param <T> the target type parameter
+     * @return the converted value
+     */
+    default <T> T convert(Class<T> type, String value) {
+        return convert(type, type, value);
+    }
 
     static ValueConverter create(final Class<? extends ValueConverter> type) {
         if (SpockitoValueConverter.class.equals(type)) {

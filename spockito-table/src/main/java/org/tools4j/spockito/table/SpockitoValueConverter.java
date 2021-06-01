@@ -26,11 +26,13 @@ package org.tools4j.spockito.table;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.Month;
 import java.time.MonthDay;
 import java.time.OffsetDateTime;
 import java.time.OffsetTime;
@@ -50,6 +52,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -79,7 +82,7 @@ public class SpockitoValueConverter implements ValueConverter {
         if (value == null || "null".equals(value)) {
             return null;
         }
-        ValueConverter converter = converterByTypeOrNull(type);;
+        ValueConverter converter = converterByTypeOrNull(type);
         if (converter == null) {
             converter = converterByPredicateOrNull(type, genericType);
         }
@@ -119,9 +122,11 @@ public class SpockitoValueConverter implements ValueConverter {
         registerConverterFunction(OffsetDateTime.class, Converters.OFFSET_DATE_TIME_CONVERTER);
         registerConverterFunction(ZonedDateTime.class, Converters.ZONED_DATE_TIME_CONVERTER);
         registerConverterFunction(Instant.class, Converters.INSTANT_CONVERTER);
+        registerConverterFunction(Month.class, Converters.MONTH_CONVERTER);
         registerConverterFunction(Year.class, Converters.YEAR_CONVERTER);
         registerConverterFunction(YearMonth.class, Converters.YEAR_MONTH_CONVERTER);
         registerConverterFunction(MonthDay.class, Converters.MONTH_DAY_CONVERTER);
+        registerConverterFunction(DayOfWeek.class, Converters.DAY_OF_WEEK_CONVERTER);
         registerConverterFunction(Duration.class, Converters.DURATION_CONVERTER);
         registerConverterFunction(Period.class, Converters.PERIOD_CONVERTER);
         registerConverterFunction(ZoneOffset.class, Converters.ZONE_OFFSET_CONVERTER);
@@ -131,6 +136,7 @@ public class SpockitoValueConverter implements ValueConverter {
         registerConverterFunction(java.sql.Date.class, Converters.SQL_DATE_CONVERTER);
         registerConverterFunction(java.sql.Time.class, Converters.SQL_TIME_CONVERTER);
         registerConverterFunction(java.sql.Timestamp.class, Converters.SQL_TIMESTAMP_CONVERTER);
+        registerConverterFunction(TimeUnit.class, Converters.TIME_UNIT_CONVERTER);
         registerConverterFunction(Pattern.class, Converters.PATTERN_CONVERTER);
         registerConverterFunction(StringBuilder.class, Converters.STRING_BUILDER_CONVERTER);
         registerConverterFunction(StringBuffer.class, Converters.STRING_BUFFER_CONVERTER);
