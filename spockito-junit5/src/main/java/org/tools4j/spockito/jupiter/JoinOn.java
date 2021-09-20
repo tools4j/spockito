@@ -42,8 +42,8 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 public @interface JoinOn {
     /** @return join fields that are common in the parent and the child table*/
     String[] value() default {};
-    /** @return join fields in the parent table; must have a counter part in {@link #child()}*/
+    /** @return join fields in the parent table; must have a counterpart in {@link #child()}*/
     String[] parent() default {};
-    /** @return join fields in the child table; must have a counter part in {@link #parent()}*/
+    /** @return join fields in the child table; must have a counterpart in {@link #parent()}*/
     String[] child() default {};
 }

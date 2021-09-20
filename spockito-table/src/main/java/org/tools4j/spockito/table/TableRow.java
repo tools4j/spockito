@@ -31,7 +31,8 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 /**
- * Represents a single row of a {@link Table}.
+ * Represents a single row of a {@link Table}; cell values are kept as strings but convenience methods exist to convert
+ * them to a value of any desired type.
  */
 public interface TableRow extends Iterable<String> {
 

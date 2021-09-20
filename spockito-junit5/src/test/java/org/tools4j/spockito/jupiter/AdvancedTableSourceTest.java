@@ -235,7 +235,7 @@ public class AdvancedTableSourceTest {
             "| Peter | Mayer  | 36  |",
             "| Lizzy | Finley | 41  |"
     })
-    @ParameterizedTest(name = "[{index}]: {0}")
+    @ParameterizedTest(name = "[{index}]: {2}")
     public void assertParentChild(final @Row int rowIndex,
                                   final @TableSource({
                                           "| First | Last   | Age |",
@@ -246,7 +246,7 @@ public class AdvancedTableSourceTest {
                                   final @AggregateTableRow Person parent) {
         switch (rowIndex) {
             case 0:
-                assertEquals("Peter", parent.first, "parentfirst");
+                assertEquals("Peter", parent.first, "parent.first");
                 assertEquals("Mayer", parent.last, "parent.last");
                 assertEquals(36, parent.age, "parent.age");
                 assertEquals(2, children.size(), "myChildren.size");

@@ -152,8 +152,8 @@ public final class Converters {
     public static final Function<? super String, java.sql.Date> SQL_DATE_CONVERTER = java.sql.Date::valueOf;
     public static final Function<? super String, Time> SQL_TIME_CONVERTER = Time::valueOf;
     public static final Function<? super String, Timestamp> SQL_TIMESTAMP_CONVERTER = Timestamp::valueOf;
-    public static final Function<? super String, TimeUnit> TIME_UNIT_CONVERTER = timeunitConverter();
-    private static Function<? super String, TimeUnit> timeunitConverter() {
+    public static final Function<? super String, TimeUnit> TIME_UNIT_CONVERTER = timeUnitConverter();
+    private static Function<? super String, TimeUnit> timeUnitConverter() {
         final Map<String, TimeUnit> unitsByName = new HashMap<>();
         unitsByName.put("ns", TimeUnit.NANOSECONDS);
         unitsByName.put("us", TimeUnit.MICROSECONDS);

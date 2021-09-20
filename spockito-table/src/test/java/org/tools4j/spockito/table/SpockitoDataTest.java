@@ -24,8 +24,13 @@
 package org.tools4j.spockito.table;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -148,7 +153,7 @@ public class SpockitoDataTest {
                 carCount++;
             }
 
-            final @TableData({
+            @TableData({
                     "| First | Last   | Age |",
                     "| Peter | Mayer  | 36  |",
                     "| Lizzy | Finley | 41  |"
@@ -199,5 +204,36 @@ public class SpockitoDataTest {
         assertEquals(2, data.personCount, "data.personCount");
         assertEquals(2, data.carCount, "data.carCount");
         assertEquals(2, data.parentChildCount, "data.parentChildCount");
+    }
+
+    @ParameterizedTest
+    @MethodSource
+    public void returnValue(final Car car) {
+        assertNotNull(car);
+        assertNotNull(car.manufacturer);
+        switch (car.manufacturer) {
+            case "Volkswagen":
+                assertEquals("Golf", car.model, "car.model");
+                assertEquals(2021, car.year, "car.year");
+                break;
+            case "BMW":
+                assertEquals("528i", car.model, "car.model");
+                assertEquals(2020, car.year, "car.year");
+                break;
+            default:
+                fail("unexpected manufacturer: " + car.manufacturer);
+        }
+    }
+
+    public static Stream<Arguments> returnValue() {
+        final class CarData extends SpockitoData {
+            @TableData({
+                    "| Manufacturer | Model | Year |",
+                    "| Volkswagen   | Golf  | 2021 |",
+                    "| BMW          | 528i  | 2020 |",
+            })
+            Car[] cars;
+        }
+        return Arrays.stream(new CarData().cars).map(Arguments::of);
     }
 }

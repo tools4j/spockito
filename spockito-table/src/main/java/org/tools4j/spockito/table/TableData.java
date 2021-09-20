@@ -35,7 +35,7 @@ import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
- * Annotations to inject table data into a field, method or method parameter; the table data is define in a
+ * Annotation to inject table data into a field, method or method parameter; the table data is define2 in a
  * structure as follows:
  * <pre>
  * | ColumnA   | ColumnB   | ColumnC   |

@@ -33,7 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class UnescapeTest {
 
     @Test
-    public void shoudUnescape() {
+    public void shouldUnescape() {
         assertEquals(",", Strings.unescape("\\,"));
         assertEquals(";", Strings.unescape("\\;"));
         assertEquals("|", Strings.unescape("\\|"));
@@ -44,13 +44,13 @@ public class UnescapeTest {
     }
 
     @Test
-    public void shoudNotUnescape() {
+    public void shouldNotUnescape() {
         assertEquals("\\blabla", Strings.unescape("\\blabla"));
         assertEquals("\\123", Strings.unescape("\\123"));
     }
 
     @Test
-    public void shoudUnescapeMultiple() {
+    public void shouldUnescapeMultiple() {
         assertEquals("\\,123|456;\\a\\;\\8bla'\\'xxx", Strings.unescape("\\\\,123\\|456\\;\\a\\\\\\;\\8bla\\'\\\\'xxx"));
     }
 }
