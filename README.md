@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/tools4j/spockito.svg?branch=master)](https://travis-ci.org/tools4j/spockito)
 [![Coverage Status](https://coveralls.io/repos/github/tools4j/spockito/badge.svg?branch=master)](https://coveralls.io/github/tools4j/spockito?branch=master)
-[![Maven Central](https://img.shields.io/maven-central/v/org.tools4j/tools4j-spockito.svg)](https://search.maven.org/search?q=spockito)
+[![Maven Central](https://img.shields.io/maven-central/v/org.tools4j/spockito-junit5.svg)](https://search.maven.org/search?q=spockito)
 
 # spockito
 Simple Java library to define data in a table-like manner.  The library also provides a Junit 5 
@@ -96,7 +96,7 @@ Add the following dependency to your maven pom.xml file:
 
 ### Download
 Sources and binaries can be downloaded from maven central:
-* [tools4j-spockito](https://search.maven.org/search?q=spockito) in Maven Central
+* [spockito](https://search.maven.org/search?q=spockito) in Maven Central
 
 ### FAQ
 * [Frequently asked Questions](https://github.com/tools4j/spockito/issues?q=label:question)
