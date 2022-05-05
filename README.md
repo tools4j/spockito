@@ -80,7 +80,7 @@ This and other examples can be found [here](https://github.com/tools4j/spockito/
 #### Run above test in IDE (here: IntelliJ)
 ![spockito-junit5-idea-testrun.png](https://github.com/tools4j/spockito/blob/master/spockito-junit5-idea-testrun.png)
 
-This and other examples can be found [here](https://github.com/tools4j/spockito/spockito-junit5/blob/master/src/test/java/org/tools4j/spockito/jupiter/).
+This and other examples can be found [here](https://github.com/tools4j/spockito/blob/master/spockito-junit5/src/test/java/org/tools4j/spockito/jupiter).
 
 ### Maven
 Add the following dependency to your maven pom.xml file:
