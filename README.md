@@ -66,7 +66,7 @@ public class TableSourceTest {
             "| Pentagon |     5    |    540    |",
             "|----------|----------|-----------|",
     })
-    @ParameterizedTest(name = "{2}: ({1}-2)*180 = {0}")
+    @ParameterizedTest(name = "{2}: ({0}-2)*180 = {1}")
     public void testUnrollAngularSums(@Column("Vertices") int n,
                                       @Column("Angle sum") int degrees,
                                       @Column("Object") String name) {

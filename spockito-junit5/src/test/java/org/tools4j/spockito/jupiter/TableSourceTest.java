@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2017-2021 tools4j.org (Marco Terzer)
+ * Copyright (c) 2017-2022 tools4j.org (Marco Terzer)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -100,7 +100,7 @@ public class TableSourceTest {
             "| Pentagon |     5    |    540    |",
             "|----------|----------|-----------|",
     })
-    @ParameterizedTest(name = "{2}: ({1}-2)*180 = {0}")
+    @ParameterizedTest(name = "{2}: ({0}-2)*180 = {1}")
     public void testUnrollAngularSums(@Column("Vertices") int n,
                                       @Column("Angle sum") int degrees,
                                       @Column("Object") String name) {
