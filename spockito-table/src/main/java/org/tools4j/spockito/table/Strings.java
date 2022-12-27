@@ -54,6 +54,7 @@ enum Strings {
         return s;
     }
 
+    @SuppressWarnings("SameParameterValue")
     static boolean allCharsMatchingAnyOf(final String s, final char ch1, final char ch2) {
         final int len = s.length();
         for (int i = 0; i < len; i++) {

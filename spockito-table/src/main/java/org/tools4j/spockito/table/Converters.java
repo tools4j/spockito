@@ -162,13 +162,13 @@ public final class Converters {
         unitsByName.put("m", TimeUnit.MINUTES);
         unitsByName.put("h", TimeUnit.HOURS);
         unitsByName.put("d", TimeUnit.DAYS);
-        final EnumNamePrefixConverter<TimeUnit> unitsByPRefix = new EnumNamePrefixConverter<>(TimeUnit.class, 3, false);
+        final EnumNamePrefixConverter<TimeUnit> unitsByPrefix = new EnumNamePrefixConverter<>(TimeUnit.class, 3, false);
         return s -> {
             final TimeUnit value = unitsByName.get(s);
             if (value != null) {
                 return value;
             }
-            return unitsByPRefix.apply(s);
+            return unitsByPrefix.apply(s);
         };
     }
 
@@ -344,8 +344,8 @@ public final class Converters {
             }
             final String[] parts = parseListValues(plainValue);
             final List<Object> list = new ArrayList<>(parts.length);
-            for (int i = 0; i < parts.length; i++) {
-                list.add(elementConverter.convert(elementType.rawType(), elementType.genericType(), parts[i].trim()));
+            for (final String part : parts) {
+                list.add(elementConverter.convert(elementType.rawType(), elementType.genericType(), part.trim()));
             }
             return list;
         }
@@ -361,10 +361,8 @@ public final class Converters {
      * Value converter for array target types including primitive arrays.
      */
     public static class ArrayConverter implements ValueConverter {
-        private final ValueConverter elementConverter;
         private final CollectionConverter collectionConverter;
         public ArrayConverter(final ValueConverter elementConverter) {
-            this.elementConverter = requireNonNull(elementConverter);
             this.collectionConverter = new CollectionConverter(elementConverter);
         }
 
@@ -440,24 +438,24 @@ public final class Converters {
             }
             final String[] parts = parseListValues(plainValue);
             final Map<Object, Object> map = new LinkedHashMap<>();
-            for (int i = 0; i < parts.length; i++) {
-                final String[] keyAndValue = parseKeyValue(parts[i].trim());
+            for (final String part : parts) {
+                final String[] keyAndValue = parseKeyValue(part.trim());
                 if (keyAndValue.length != 2) {
-                    throw new IllegalArgumentException("Invalid map key/value pair: " + parts[i]);
+                    throw new IllegalArgumentException("Invalid map key/value pair: " + part);
                 }
                 try {
                     final Object key = elementConverter.convert(keyType.rawType(), keyType.genericType(), keyAndValue[0].trim());
                     final Object val = elementConverter.convert(valueType.rawType(), valueType.genericType(), keyAndValue[1].trim());
                     map.put(key, val);
                 } catch (final Exception e) {
-                    throw new IllegalArgumentException("Conversion to map key/value failed: " + parts[i], e);
+                    throw new IllegalArgumentException("Conversion to map key/value failed: " + part, e);
                 }
             }
             return map;
         }
 
         private static <K extends Enum<K>, V> EnumMap<K, V> enumMap(final Class<K> enumType, final Map<?,V> map) {
-            final EnumMap<K,V> enumMap = new EnumMap(enumType);
+            final EnumMap<K,V> enumMap = new EnumMap<>(enumType);
             map.forEach((k,v) -> enumMap.put(enumType.cast(k), v));
             return enumMap;
         }
@@ -495,7 +493,7 @@ public final class Converters {
             return instance;
         }
 
-        private <T> T newInstance(final Class<T> type, final String value) {
+        private <T> T newInstance(final Class<T> type, final String ignoredValue) {
             try {
                 final Constructor<T> constructor = type.getDeclaredConstructor();
                 constructor.setAccessible(true);
@@ -509,10 +507,10 @@ public final class Converters {
             final String plainValue = Strings.removeStartAndEndChars(value, '{', '}');
             final String[] parts = parseListValues(plainValue);
             final Map<String, String> valueByName = new LinkedHashMap<>();
-            for (int i = 0; i < parts.length; i++) {
-                final String[] nameAndValue = parseKeyValue(parts[i].trim());
+            for (final String part : parts) {
+                final String[] nameAndValue = parseKeyValue(part.trim());
                 if (nameAndValue.length != 2) {
-                    throw new IllegalArgumentException("Invalid name/value pair: " + parts[i]);
+                    throw new IllegalArgumentException("Invalid name/value pair: " + part);
                 }
                 final String name = normalizeFieldName(nameAndValue[0].trim());
                 final String val = nameAndValue[1].trim();

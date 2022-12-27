@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2017-2021 tools4j.org (Marco Terzer)
+ * Copyright (c) 2017-2022 tools4j.org (Marco Terzer)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -39,7 +39,7 @@ public class UnescapeTest {
         assertEquals("|", Strings.unescape("\\|"));
         assertEquals("=", Strings.unescape("\\="));
         assertEquals("\\", Strings.unescape("\\\\"));
-        assertEquals("\'", Strings.unescape("\\'"));
+        assertEquals("'", Strings.unescape("\\'"));
         assertEquals("123|456", Strings.unescape("123\\|456"));
     }
 

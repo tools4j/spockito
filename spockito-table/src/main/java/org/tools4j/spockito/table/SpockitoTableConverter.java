@@ -43,6 +43,7 @@ public class SpockitoTableConverter implements TableConverter {
     private final Type targetType;
     private final ValueConverter valueConverter;
 
+    @SuppressWarnings("unused")
     public SpockitoTableConverter(final Class<?> targetClass, final Type targetType) {
         this(targetClass, targetType, SpockitoValueConverter.DEFAULT_INSTANCE);
     }

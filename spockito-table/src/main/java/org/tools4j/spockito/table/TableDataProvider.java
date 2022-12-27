@@ -39,6 +39,7 @@ public class TableDataProvider implements DataProvider {
     private final Function<? super InjectionContext, ? extends Table> tableFactory;
     private final Function<? super InjectionContext, Class<? extends ValueConverter>> valueConverterTypeLookup;
 
+    @SuppressWarnings("unused") //used by @TableData
     public TableDataProvider() {
         this(TableDataProvider::table, TableDataProvider::valueConverter);
     }

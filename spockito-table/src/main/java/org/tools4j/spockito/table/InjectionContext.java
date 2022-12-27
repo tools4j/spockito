@@ -65,7 +65,7 @@ public interface InjectionContext {
     /**
      * Static factory method for injection context.
      *
-     * @param phase             the injectin phase
+     * @param phase             the injecting phase
      * @param annotatedElement  the annotated element
      * @return a new injection context instance for the provided arguments
      * @throws NullPointerException if any of the arguments is null

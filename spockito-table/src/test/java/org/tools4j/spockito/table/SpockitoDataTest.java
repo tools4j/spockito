@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2017-2021 tools4j.org (Marco Terzer)
+ * Copyright (c) 2017-2022 tools4j.org (Marco Terzer)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -160,35 +160,41 @@ public class SpockitoDataTest {
             })
             void assertParentChild(final TableRow parent,
                                    final @TableData({
-                                           "| First | Last   | Age |",
-                                           "| Nina  | Mayer  |   3 |",
-                                           "| Gary  | Mayer  |   1 |",
-                                           "| Linda | Finley |  10 |",
+                                           "| First Name | Last   | Child Age |",
+                                           "| Nina       | Mayer  |     3     |",
+                                           "| Gary       | Mayer  |     1     |",
+                                           "| Linda      | Finley |    10     |",
                                    }) Table children) {
-                final Table myChildren = children.join(parent).on("Last").apply();
-
-                switch (parent.getRowIndex()) {
-                    case 0:
-                        assertEquals("Peter", parent.get(0), "parent[0]");
-                        assertEquals("Mayer", parent.get(1), "parent[1]");
-                        assertEquals("36", parent.get(2), "parent[2]");
-                        assertEquals(2, myChildren.getRowCount(), "myChildren.count");
-                        assertEquals("Nina", myChildren.getValue(0, 0), "myChildren[0][0]");
-                        assertEquals("3", myChildren.getValue(0, 2), "myChildren[0][2]");
-                        assertEquals("Gary", myChildren.getValue(1, 0), "myChildren[1][0]");
-                        assertEquals("1", myChildren.getValue(1, 2), "myChildren[1][2]");
-                        break;
-                    case 1:
-                        assertEquals("Lizzy", parent.get(0), "parent[0]");
-                        assertEquals("Finley", parent.get(1), "parent[1]");
-                        assertEquals("41", parent.get(2), "parent[2]");
-                        assertEquals(1, myChildren.getRowCount(), "myChildren.count");
-                        assertEquals("Linda", myChildren.getValue(0, 0), "myChildren[0][0]");
-                        assertEquals("10", myChildren.getValue(0, 2), "myChildren[0][2]");
-                        break;
-                    default:
-                        fail("Unexpected row: " + parent.getRowIndex());
-                        break;
+                final Table[] joined = new Table[]{
+                    children.join(parent).onAllCommonColumns().apply(),
+                    children.join(parent).on("Last").apply(),
+                    children.join(parent).on(1, 1).apply()
+                };
+                for (int i = 0; i < joined.length; i++) {
+                    final Table myChildren = joined[i];
+                    switch (parent.getRowIndex()) {
+                        case 0:
+                            assertEquals("Peter", parent.get(0), "parent[0]");
+                            assertEquals("Mayer", parent.get(1), "parent[1]");
+                            assertEquals("36", parent.get(2), "parent[2]");
+                            assertEquals(2, myChildren.getRowCount(), "joined[" + i + "]=myChildren.count");
+                            assertEquals("Nina", myChildren.getValue(0, 0), "myChildren[0][0]");
+                            assertEquals("3", myChildren.getValue(0, 2), "myChildren[0][2]");
+                            assertEquals("Gary", myChildren.getValue(1, 0), "myChildren[1][0]");
+                            assertEquals("1", myChildren.getValue(1, 2), "myChildren[1][2]");
+                            break;
+                        case 1:
+                            assertEquals("Lizzy", parent.get(0), "parent[0]");
+                            assertEquals("Finley", parent.get(1), "parent[1]");
+                            assertEquals("41", parent.get(2), "parent[2]");
+                            assertEquals(1, myChildren.getRowCount(), "myChildren.count");
+                            assertEquals("Linda", myChildren.getValue(0, 0), "myChildren[0][0]");
+                            assertEquals("10", myChildren.getValue(0, 2), "myChildren[0][2]");
+                            break;
+                        default:
+                            fail("Unexpected row: " + parent.getRowIndex());
+                            break;
+                    }
                 }
                 parentChildCount++;
             }

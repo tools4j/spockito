@@ -61,7 +61,7 @@ import java.util.regex.Pattern;
  * Default value converter implementation for Spockito. All supported conversions are defined as a constant in
  * {@link Converters}.
  * <p>
- * Constom value converter implementations may want to extend this class and add additional converters by overriding
+ * Custom value converter implementations may want to extend this class and add additional converters by overriding
  * {@link #initConverterFunctions()}. Converters for single types can be registered via
  * {@link #registerConverterFunction(Class, Function)} and the more generic
  * {@link #registerConverter(BiPredicate, ValueConverter)}.
@@ -162,12 +162,12 @@ public class SpockitoValueConverter implements ValueConverter {
     }
 
     /**
-     * Register a conversion fuction for the specified type. The function is applied for types exactly matching the
+     * Register a conversion function for the specified type. The function is applied for types exactly matching the
      * given type only (but not to supertypes of this type).
      *
      * @param type          the target type
      * @param converter     a function converting from string to target type
-     * @param <T>           the targe parameter
+     * @param <T>           the target parameter
      */
     protected <T> void registerConverterFunction(final Class<T> type, final Function<? super String, ? extends T> converter) {
         convertersByType.put(type, converter);

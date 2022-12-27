@@ -32,7 +32,6 @@ import java.util.function.Predicate;
 import static java.util.Objects.requireNonNull;
 
 public class SpockitoTableJoiner implements TableJoiner {
-
     private final Table child;
     private final TableRow parent;
 

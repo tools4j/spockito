@@ -76,6 +76,10 @@ public interface Table extends Iterable<TableRow> {
         return type.cast(tableConverter.convert(this));
     }
 
+    default List<TableRow> toRowList() {
+        return stream().collect(Collectors.toList());
+    }
+
     default List<String[]> toList() {
         return stream().map(TableRow::toArray).collect(Collectors.toList());
     }

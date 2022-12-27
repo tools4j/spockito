@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2017-2021 tools4j.org (Marco Terzer)
+ * Copyright (c) 2017-2022 tools4j.org (Marco Terzer)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -89,6 +89,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
+import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -143,7 +144,7 @@ public class ValueConverterTest {
     public void convertString() {
         assertEquals("hello world", converter.convert(String.class, String.class, "hello world"),"Expected string unchanged");
         assertEquals("hello world", converter.convert(String.class, String.class, "'hello world'"),"Expected string without quotes");
-        assertEquals("hello world", converter.convert(String.class, String.class, "\'hello world\'"),"Expected string without quotes again");
+        assertEquals("hello world", converter.convert(String.class, String.class, "'hello world'"),"Expected string without quotes again");
         assertEquals("'hello world'", converter.convert(String.class, String.class, "''hello world''"),"Expected string with quotes");
         assertEquals("'hello world", converter.convert(String.class, String.class, "'hello world"),"Expected string with left quotes");
         assertEquals("hello world'", converter.convert(String.class, String.class, "hello world'"),"Expected string with right quotes");
@@ -156,7 +157,7 @@ public class ValueConverterTest {
         assertNotNull(converter.convert(StringBuilder.class, StringBuilder.class, "hello world"), "Expected StringBuilder");
         assertEquals("hello world", converter.convert(StringBuilder.class, StringBuilder.class, "hello world").toString(),"Expected string unchanged");
         assertEquals("hello world", converter.convert(StringBuilder.class, StringBuilder.class, "'hello world'").toString(),"Expected string without quotes");
-        assertEquals("hello world", converter.convert(StringBuilder.class, StringBuilder.class, "\'hello world\'").toString(),"Expected string without quotes again");
+        assertEquals("hello world", converter.convert(StringBuilder.class, StringBuilder.class, "'hello world'").toString(),"Expected string without quotes again");
         assertEquals("'hello world'", converter.convert(StringBuilder.class, StringBuilder.class, "''hello world''").toString(),"Expected string with quotes");
         assertEquals("'hello world", converter.convert(StringBuilder.class, StringBuilder.class, "'hello world").toString(),"Expected string with left quotes");
         assertEquals("hello world'", converter.convert(StringBuilder.class, StringBuilder.class, "hello world'").toString(),"Expected string with right quotes");
@@ -169,7 +170,7 @@ public class ValueConverterTest {
         assertNotNull(converter.convert(StringBuffer.class, StringBuffer.class, "hello world"), "Expected StringBuffer");
         assertEquals("hello world", converter.convert(StringBuffer.class, StringBuffer.class, "hello world").toString(),"Expected string unchanged");
         assertEquals("hello world", converter.convert(StringBuffer.class, StringBuffer.class, "'hello world'").toString(),"Expected string without quotes");
-        assertEquals("hello world", converter.convert(StringBuffer.class, StringBuffer.class, "\'hello world\'").toString(),"Expected string without quotes again");
+        assertEquals("hello world", converter.convert(StringBuffer.class, StringBuffer.class, "'hello world'").toString(),"Expected string without quotes again");
         assertEquals("'hello world'", converter.convert(StringBuffer.class, StringBuffer.class, "''hello world''").toString(),"Expected string with quotes");
         assertEquals("'hello world", converter.convert(StringBuffer.class, StringBuffer.class, "'hello world").toString(),"Expected string with left quotes");
         assertEquals("hello world'", converter.convert(StringBuffer.class, StringBuffer.class, "hello world'").toString(),"Expected string with right quotes");
@@ -201,7 +202,6 @@ public class ValueConverterTest {
     public void convertNumeric() throws Exception {
         final Class<?>[] primitive = new Class<?>[]{byte.class, short.class, int.class, long.class, float.class, double.class};
         final Class<?>[] boxed = new Class<?>[]{Byte.class, Short.class, Integer.class, Long.class, Float.class, Double.class};
-        final Class<?>[] other = new Class<?>[]{BigInteger.class, BigDecimal.class};
         for (int i = 0; i < primitive.length; i++) {
             @SuppressWarnings("unchecked")
             final Class<? extends Number> pType = (Class<? extends Number>)primitive[i];
@@ -275,6 +275,7 @@ public class ValueConverterTest {
     }
 
     @Test
+    @SuppressWarnings("OctalInteger")
     public void convertLocalDate() {
         assertEquals(LocalDate.of(2017, 03, 22), converter.convert(LocalDate.class, null, "2017-03-22"),"Unexpected value");
         final LocalDate[] localDates = new LocalDate[] {
@@ -291,6 +292,7 @@ public class ValueConverterTest {
     }
 
     @Test
+    @SuppressWarnings("OctalInteger")
     public void convertLocalTime() {
         assertEquals(LocalTime.of(17, 15, 31), converter.convert(LocalTime.class, null, "17:15:31"),"Unexpected value");
         assertEquals(LocalTime.of(17, 15, 31, 111000000), converter.convert(LocalTime.class, null, "17:15:31.111"),"Unexpected value");
@@ -308,6 +310,7 @@ public class ValueConverterTest {
     }
 
     @Test
+    @SuppressWarnings("OctalInteger")
     public void convertLocalDateTime() {
         assertEquals(LocalDateTime.of(2017, 03, 22, 17, 15, 31), converter.convert(LocalDateTime.class, null, "2017-03-22T17:15:31"),"Unexpected value");
         assertEquals(LocalDateTime.of(2017, 03, 22, 17, 15, 31, 111000000), converter.convert(LocalDateTime.class, null, "2017-03-22T17:15:31.111"),"Unexpected value");
@@ -325,6 +328,7 @@ public class ValueConverterTest {
     }
 
     @Test
+    @SuppressWarnings("OctalInteger")
     public void convertOffsetTime() {
         assertEquals(OffsetTime.of(17, 15, 31, 0, ZoneOffset.UTC), converter.convert(OffsetTime.class, null, "17:15:31+00:00"),"Unexpected value");
         assertEquals(OffsetTime.of(17, 15, 31, 987654321, ZoneOffset.UTC), converter.convert(OffsetTime.class, null, "17:15:31.987654321+00:00"),"Unexpected value");
@@ -346,6 +350,7 @@ public class ValueConverterTest {
     }
 
     @Test
+    @SuppressWarnings("OctalInteger")
     public void convertOffsetDateTime() {
         assertEquals(OffsetDateTime.of(2017, 03, 22, 17, 15, 31, 0, ZoneOffset.UTC), converter.convert(OffsetDateTime.class, null, "2017-03-22T17:15:31+00:00"),"Unexpected value");
         assertEquals(OffsetDateTime.of(2017, 03, 22, 17, 15, 31, 111000000, ZoneOffset.UTC), converter.convert(OffsetDateTime.class, null, "2017-03-22T17:15:31.111+00:00"),"Unexpected value");
@@ -367,6 +372,7 @@ public class ValueConverterTest {
     }
 
     @Test
+    @SuppressWarnings("OctalInteger")
     public void convertZonedDateTime() {
         assertEquals(ZonedDateTime.of(2017, 03, 22, 17, 15, 31, 0, ZoneOffset.UTC), converter.convert(ZonedDateTime.class, null, "2017-03-22T17:15:31+00:00"),"Unexpected value");
         assertEquals(ZonedDateTime.of(2017, 03, 22, 17, 15, 31, 111000000, ZoneOffset.UTC), converter.convert(ZonedDateTime.class, null, "2017-03-22T17:15:31.111+00:00"),"Unexpected value");
@@ -388,6 +394,7 @@ public class ValueConverterTest {
     }
 
     @Test
+    @SuppressWarnings("OctalInteger")
     public void convertInstant() {
         assertEquals(LocalDateTime.of(2017, 03, 22, 17, 15, 31, 0).toInstant(ZoneOffset.UTC), converter.convert(Instant.class, null, "2017-03-22T17:15:31Z"),"Unexpected value");
         assertEquals(LocalDateTime.of(2017, 03, 22, 17, 15, 31, 111000000).toInstant(ZoneOffset.UTC), converter.convert(Instant.class, null, "2017-03-22T17:15:31.111Z"),"Unexpected value");
@@ -592,6 +599,7 @@ public class ValueConverterTest {
     }
 
     @Test
+    @SuppressWarnings("OctalInteger")
     public void convertDate() {
         final DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
         assertEquals(Date.from(LocalDateTime.of(2017, 03, 22, 17, 15, 31, 0).atZone(ZoneId.systemDefault()).toInstant()),
@@ -616,6 +624,7 @@ public class ValueConverterTest {
     }
 
     @Test
+    @SuppressWarnings("OctalInteger")
     public void convertSqlDate() {
         assertEquals(java.sql.Date.valueOf(LocalDate.of(2017, 03, 22)),
                 converter.convert(java.sql.Date.class, null, "2017-03-22"), "Unexpected value");
@@ -633,6 +642,7 @@ public class ValueConverterTest {
     }
 
     @Test
+    @SuppressWarnings("OctalInteger")
     public void convertSqlTime() {
         //NOTE: no millisecond support!
         assertEquals(Time.valueOf(LocalTime.of(17, 15, 31, 0)), converter.convert(Time.class, null, "17:15:31"),"Unexpected value");
@@ -650,6 +660,7 @@ public class ValueConverterTest {
     }
 
     @Test
+    @SuppressWarnings("OctalInteger")
     public void convertSqlTimestamp() {
         assertEquals(Timestamp.valueOf(LocalDateTime.of(2017, 03, 22, 17, 15, 31, 0)),
                 converter.convert(Timestamp.class, null, "2017-03-22 17:15:31"));
@@ -720,12 +731,13 @@ public class ValueConverterTest {
 
     @Test
     public void convertOptional() throws Exception {
+        @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
         final class Optionals {
-            Optional<String> emptyString = Optional.empty();
-            Optional<String> nonEmptyString = Optional.of("trumpet");
-            Optional<String> nonEmptyString2 = Optional.of("empty");
-            Optional<Integer> emptyInteger = Optional.empty();
-            Optional<Integer> nonEmptyInteger = Optional.of(42);
+            final Optional<String> emptyString = Optional.empty();
+            final Optional<String> nonEmptyString = Optional.of("trumpet");
+            final Optional<String> nonEmptyString2 = Optional.of("empty");
+            final Optional<Integer> emptyInteger = Optional.empty();
+            final Optional<Integer> nonEmptyInteger = Optional.of(42);
         }
         final Optionals optionals = new Optionals();
 
@@ -787,8 +799,8 @@ public class ValueConverterTest {
             @SuppressWarnings("unchecked")
             final List<String>[] stringListArray = (List<String>[])new List<?>[] {
                     Arrays.asList("one", "two"),
-                    Arrays.asList("three"),
-                    Arrays.asList("four")
+                    singletonList("three"),
+                    singletonList("four")
             };
         }
         assertArrayEquals(
@@ -804,8 +816,8 @@ public class ValueConverterTest {
     public void convertCollection() throws Exception {
         final class CollectionHolder {
             final Collection<Integer> collection = Arrays.asList(1, 2, 3, 4);
-            final List<Integer> list= Arrays.asList(1, 2, 3, 4);
-            final List<Integer> emptyList = Arrays.asList();
+            final List<Integer> list = Arrays.asList(1, 2, 3, 4);
+            final List<Integer> emptyList = Collections.emptyList();
             final ArrayList<Integer> arrayList = new ArrayList<>(Arrays.asList(1, 2, 3, 4));
             final Vector<Integer> vector = new Vector<>(Arrays.asList(1, 2, 3, 4));
             final Set<Integer> set = new LinkedHashSet<>(Arrays.asList(1, 2, 3, 4));
@@ -929,7 +941,7 @@ public class ValueConverterTest {
             final ConcurrentNavigableMap<Integer, String> concurrentNavigableMap = new ConcurrentSkipListMap<>(map(1, "one", 2, "two", 3, "three"));
             final EnumMap<TestEnum, String> enumMap = new EnumMap<>(map(TestEnum.CONST_A, "a", TestEnum.CONST_B, "b", TestEnum.CONST_C, "c"));
             final EnumMap<TestEnum, String> emptyEnumMap = new EnumMap<>(TestEnum.class);
-            final Map<Integer, List<String>> listMap = map(1, Arrays.asList("one", "two"), 3, Arrays.asList("three"), 4, Arrays.asList("four"));
+            final Map<Integer, List<String>> listMap = map(1, Arrays.asList("one", "two"), 3, singletonList("three"), 4, singletonList("four"));
             final Properties properties = new Properties();{
                 properties.putAll(map("propA", "a", "propB", "b", "propC", "c"));
             }
@@ -1003,7 +1015,7 @@ public class ValueConverterTest {
     }
 
     private static <K,V> Map<K,V> map(final K key1, final V val1, final K key2, final V val2, final K key3, final V val3) {
-        final Map<K, V> map = new HashMap<K, V>();
+        final Map<K, V> map = new HashMap<>();
         map.put(key1, val1);
         map.put(key2, val2);
         map.put(key3, val3);
@@ -1014,9 +1026,7 @@ public class ValueConverterTest {
         assertEquals(exp.getClass(), act.getClass(), msg + "[type]");
         assertEquals(exp.size(), act.size(), msg + "[size]");
         final AtomicInteger index = new AtomicInteger();
-        exp.forEach(e -> {
-            assertEquals(e, act.poll(), msg + "[" + index.getAndIncrement() + "]");
-        });
+        exp.forEach(e -> assertEquals(e, act.poll(), msg + "[" + index.getAndIncrement() + "]"));
     }
 
     private static Number toNumber(final Class<?> primitiveType, final Number value) {
