@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2017-2021 tools4j.org (Marco Terzer)
+ * Copyright (c) 2017-2022 tools4j.org (Marco Terzer)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -82,10 +82,7 @@ public class SpockitoValueConverter implements ValueConverter {
         if (value == null || "null".equals(value)) {
             return null;
         }
-        ValueConverter converter = converterByTypeOrNull(type);
-        if (converter == null) {
-            converter = converterByPredicateOrNull(type, genericType);
-        }
+        final ValueConverter converter = valueConverterFor(type, genericType);
         if (converter == null) {
             throw new IllegalArgumentException("No value converter is defined for type " + typeName(type, genericType));
         }
@@ -94,6 +91,20 @@ public class SpockitoValueConverter implements ValueConverter {
         } catch (final Exception e) {
             throw new IllegalArgumentException("Conversion to " + typeName(type, genericType) + " failed for value: " + value, e);
         }
+    }
+
+    @Override
+    public boolean isMultiValueType(final Class<?> type, final Type genericType) {
+        final ValueConverter converter = valueConverterFor(type, genericType);
+        return converter != null && converter.isMultiValueType(type, genericType);
+    }
+
+    private ValueConverter valueConverterFor(final Class<?> type, final Type genericType) {
+        final ValueConverter converter = converterByTypeOrNull(type);
+        if (converter != null) {
+            return converter;
+        }
+        return converterByPredicateOrNull(type, genericType);
     }
 
     /**

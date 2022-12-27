@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2017-2021 tools4j.org (Marco Terzer)
+ * Copyright (c) 2017-2022 tools4j.org (Marco Terzer)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -472,6 +472,11 @@ public final class Converters {
         private final ValueConverter elementConverter;
         public BeanConverter(final ValueConverter elementConverter) {
             this.elementConverter = requireNonNull(elementConverter);
+        }
+
+        @Override
+        public boolean isMultiValueType(final Class<?> type, final Type genericType) {
+            return true;
         }
 
         @Override

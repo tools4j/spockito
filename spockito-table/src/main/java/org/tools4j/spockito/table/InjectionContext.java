@@ -35,7 +35,7 @@ import static org.tools4j.spockito.table.SpockitoAnnotations.annotationDirectOrM
  */
 public interface InjectionContext {
     /**
-     * THe phase during which the injection occurs.
+     * The phase during which the injection occurs.
      */
     enum Phase {
         /**

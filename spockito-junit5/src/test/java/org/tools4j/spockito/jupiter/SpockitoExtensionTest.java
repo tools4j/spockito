@@ -23,24 +23,40 @@
  */
 package org.tools4j.spockito.jupiter;
 
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.tools4j.spockito.table.TableRow;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.tools4j.spockito.table.Column;
+import org.tools4j.spockito.table.Row;
 
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.stream.Stream;
+
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpockitoExtension.class)
-@Disabled
 public class SpockitoExtensionTest {
 
     public static class DataRow {
-        Operation operation;
-        char sign;
-        int operand1;
-        int operand2;
-        int result;
-        int neutralOperand;
+        public Operation operation;
+        public char sign;
+        public int operand1;
+        public int operand2;
+        public int result;
+        public int neutralOperand;
+
+        @Override
+        public String toString() {
+            return operation.name();
+        }
     }
 
     @TableSource({
@@ -51,15 +67,85 @@ public class SpockitoExtensionTest {
             "| Multiply  |   *  |       24 |        5 |    120 |              1 |",
             "| Divide    |   /  |       24 |        3 |      8 |              1 |"
     })
-    private TableRow[] testData;
+    private static DataRow[] staticTestData;
 
-    @ParameterizedTest(name = "[{index}]: {2} {1} {3} = {4}")
-    public void testOperation(Operation operation, char sign, int operand1, int operand2, int result) {
-        assertEquals(result, operation.evaluate(operand1, operand2), "Result is wrong!");
+    @TableSource({
+            "| Operation |",
+            "|-----------|",
+            "| Add       |",
+            "| Subtract  |",
+            "| Multiply  |",
+            "| Divide    |"
+    })
+    private Operation[] operation;
+
+    @Test
+    public void testCoversAllOperations() {
+        final Operation[] constants = Operation.values();
+        assertArrayEquals(constants, operation);
+        assertEquals(staticTestData.length, operation.length);
+        assertArrayEquals(Arrays.stream(staticTestData).map(row -> row.operation).toArray(), operation);
     }
 
-    @ParameterizedTest(name = "[{index}]: {2} {1} {3} = {2}")
-    public void testNeutralOperand(Operation operation, char sign, int operand1, int neutralOperand) {
-        assertEquals(operand1, operation.evaluate(operand1, neutralOperand), "Result with neutral operand is wrong!");
+    @ParameterizedTest(name = "[{index}]: {0}")
+    @MethodSource("staticTestData")
+    public void testOperation(DataRow data) {
+        assertEquals(data.result, data.operation.evaluate(data.operand1, data.operand2),
+                "" + data.operand1 + data.sign + data.operand2);
+    }
+
+    @ParameterizedTest(name = "[{index}]: {0}")
+    @MethodSource("staticTestData")
+    public void testNeutralOperand(DataRow data) {
+        assertEquals(data.operand1, data.operation.evaluate(data.operand1, data.neutralOperand),
+                "" + data.operand1 + data.sign + data.neutralOperand);
+        assertEquals(data.operand2, data.operation.evaluate(data.operand2, data.neutralOperand),
+                "" + data.operand2 + data.sign + data.neutralOperand);
+    }
+
+    @ParameterizedTest(name = "[{index}]: {1}")
+    @TableSource({
+            "| Value |",
+            "| Row 1 |",
+            "| Row 2 |"
+    })
+    public void independentTableSourceTest(final @Row int rowIndex, @Column("Value") final String value) {
+        assertTrue(value.startsWith("Row"));
+        assertEquals("Row " + (rowIndex + 1), value);
+    }
+
+    @TableSource({
+            "| Name  | Age |",
+            "| Harry |  12 |",
+            "| Maya  |  14 |"
+    })
+    public static void staticInject(final String name, final int age) {
+        nameToAge.put(name, age);
+    }
+    private static final Map<String, Integer> nameToAge = new LinkedHashMap<>();
+
+    @AfterAll
+    static void validateNameToAge() {
+        assertEquals(2, nameToAge.size());
+    }
+
+    @TableSource({
+            "| Object    | Vertices |",
+            "| Triangle  |    3     |",
+            "| Square    |    4     |",
+            "| Rectangle |    4     |"
+    })
+    public void instanceInject(final String object, final int vertices) {
+        vertexSum += vertices;
+    }
+    private int vertexSum;
+
+    @AfterEach
+    void validateVertexSum() {
+        assertEquals(11, vertexSum);
+    }
+
+    static Stream<Arguments> staticTestData() {
+        return Arrays.stream(staticTestData).map(Arguments::of);
     }
 }

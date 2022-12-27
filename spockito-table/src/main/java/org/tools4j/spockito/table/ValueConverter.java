@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2017-2021 tools4j.org (Marco Terzer)
+ * Copyright (c) 2017-2022 tools4j.org (Marco Terzer)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,6 +24,8 @@
 package org.tools4j.spockito.table;
 
 import java.lang.reflect.Type;
+import java.util.Collection;
+import java.util.Map;
 
 /**
  * Handles the conversion of string values to arbitrary target types; supports conversion into generic types such as
@@ -51,8 +53,21 @@ public interface ValueConverter {
      * @param <T> the target type parameter
      * @return the converted value
      */
-    default <T> T convert(Class<T> type, String value) {
+    default <T> T convert(final Class<T> type, final String value) {
         return convert(type, type, value);
+    }
+
+    /**
+     * Returns true if the given type supports multi-value conversion, such as maps, collections or arrays.
+     *
+     * @param type          the target type in raw form, for instance {@code int.class}, {@code List.class} etc.
+     * @param genericType   the generic target type, same as type for non-generic types; generic type examples are
+     *                      {@code List<String>}, {@code Map<String, Integer>} etc.
+     * @return  true if multi-value conversion is supported by this converter; default implementation returns true for
+     *          collection types, map types and arrays
+     */
+    default boolean isMultiValueType(final Class<?> type, final Type genericType) {
+        return type.isArray() || Collection.class.isAssignableFrom(type) || Map.class.isAssignableFrom(type);
     }
 
     static ValueConverter create(final Class<? extends ValueConverter> type) {

@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2017-2021 tools4j.org (Marco Terzer)
+ * Copyright (c) 2017-2022 tools4j.org (Marco Terzer)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,9 +29,12 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * Contains static methods to initialise instances with annotated members.
@@ -46,8 +49,20 @@ public enum SpockitoAnnotations {
      * @param instance the instance to initialise
      */
     public static void initData(final Object instance) {
+        requireNonNull(instance);
         initDataFields(instance);
         invokeDataMethods(instance);
+    }
+
+    /**
+     * Initialises static fields and invokes static methods of the provided class that are annotated with
+     * {@linkplain Data @Data} providers.
+     *
+     * @param clazz the class to initialise
+     */
+    public static void initStaticData(final Class<?> clazz) {
+        initDataFields(null, clazz);
+        invokeDataMethods(null, clazz);
     }
 
     /**
@@ -108,7 +123,7 @@ public enum SpockitoAnnotations {
         }
         for (final Field field : clazz.getDeclaredFields()) {
             final Data data = annotationDirectOrMeta(field, Data.class);
-            if (data != null) {
+            if (data != null && (instance == null) == (Modifier.isStatic(field.getModifiers()))) {
                 initDataField(instance, field, data);
             }
         }
@@ -121,7 +136,7 @@ public enum SpockitoAnnotations {
         }
         for (final Method method : clazz.getDeclaredMethods()) {
             final Data data = annotationDirectOrMeta(method, Data.class);
-            if (data != null) {
+            if (data != null && (instance == null) == (Modifier.isStatic(method.getModifiers()))) {
                 invokeDataMethod(instance, method, data);
             }
         }

@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2017-2021 tools4j.org (Marco Terzer)
+ * Copyright (c) 2017-2022 tools4j.org (Marco Terzer)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,18 +23,24 @@
  */
 package org.tools4j.spockito.jupiter;
 
+import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.TestInstancePostProcessor;
 import org.tools4j.spockito.table.SpockitoAnnotations;
 
 /**
  * Test extension to initialise {@linkplain org.tools4j.spockito.table.DataProvider data providers} such as fields
- * annotated with {@link org.tools4j.spockito.table.Data @Data} or {@link TableSource}.
+ * annotated with {@link org.tools4j.spockito.table.Data @Data} or {@link TableSource @TableSource}.
  *
- * <p>This is identical to calling {@code SpockitoAnnotations.initData(testInstance)} in a
- * {@linkplain org.junit.jupiter.api.BeforeEach @BeforeEach} method.
+ * @see SpockitoAnnotations#initData(Object)
+ * @see SpockitoAnnotations#initStaticData(Class)
  */
-public class SpockitoExtension implements TestInstancePostProcessor {
+public class SpockitoExtension implements BeforeAllCallback, TestInstancePostProcessor {
+
+    @Override
+    public void beforeAll(final ExtensionContext context) {
+        SpockitoAnnotations.initStaticData(context.getRequiredTestClass());
+    }
 
     @Override
     public void postProcessTestInstance(final Object testInstance, final ExtensionContext context) {

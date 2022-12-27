@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2017-2021 tools4j.org (Marco Terzer)
+ * Copyright (c) 2017-2022 tools4j.org (Marco Terzer)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -138,8 +138,11 @@ public class SpockitoTableRow implements TableRow {
     }
 
     @Override
-    public <T> T to(final Class<T> type, Type genericType, final ValueConverter valueConverter) {
-        return valueConverter.convert(type, genericType, toMap().toString());
+    public <T> T to(final Class<T> type, final Type genericType, final ValueConverter valueConverter) {
+        if (values.size() < 1 || valueConverter.isMultiValueType(type, genericType)) {
+            return valueConverter.convert(type, genericType, toMap().toString());
+        }
+        return valueConverter.convert(type, genericType, get(0));
     }
 
     @Override
