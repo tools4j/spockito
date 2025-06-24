@@ -10,7 +10,7 @@ can be used to automatically propagate fields in a test class with table data.
 
 We also support parameterized test data in table format for Junit 4 tests through the classic
 [Spockito](https://github.com/tools4j/spockito/blob/master/spockito-junit4/src/main/java/org/tools4j/spockito/Spockito.java)
-test runner (see [here](https://github.com/tools4j/spockito/blob/master/README-JUNIT4.md) for more information and 
+test runner (see [here](https://github.com/tools4j/spockito/blob/master/spockito-junit4/README.md) for more information and 
 examples for spockito with Junit 4).
  
 ### Parameterized tests with @TableSource
