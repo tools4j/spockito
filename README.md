@@ -1,5 +1,5 @@
 [![Continuous Integration](https://github.com/tools4j/spockito/workflows/Continuous%20Integration/badge.svg)](https://github.com/tools4j/spockito/actions?query=workflow%3A%22Continuous+Integration%22)
-[![Maven Central](https://img.shields.io/maven-central/v/org.tools4j/spockito-junit5.svg)](https://maven.org/search?q=a:spockito-*)
+[![Maven Central](https://img.shields.io/maven-central/v/org.tools4j/spockito-junit5.svg)](https://maven.org/search?q=spockito)
 [![Javadocs](http://www.javadoc.io/badge/org.tools4j/spockito-junit5.svg)](http://www.javadoc.io/doc/org.tools4j/spockito-junit5)
 # spockito
 Simple Java library to define data in a table-like manner.  The library also provides a Junit 5 
